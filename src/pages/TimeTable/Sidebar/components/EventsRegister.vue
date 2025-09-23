@@ -1,0 +1,3 @@
+<template>
+  EventsRegister
+</template>
