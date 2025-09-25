@@ -36,9 +36,134 @@ export const getCourses = () => {
 // 학년 등 필터링 적용 예정
 export const getClassrooms = () => {
   const classrooms = [
-    { classroom_id: "101", building: "창조관", room_number: "302" },
-    { classroom_id: "102", building: "창조관", room_number: "404" },
-    { classroom_id: "201", building: "창조관", room_number: "404-1" },
+    { classroom_id: "101", label: "창조관-302" },
+    { classroom_id: "102", label: "창조관-404" },
+    { classroom_id: "201", label: "창조관-404-1" },
   ];
   return classrooms;
+}
+
+export const getTimetable = () => {
+  const timetable = {
+    MON: {
+        1: null,
+        2: null,
+        3: null,
+        4: null,
+        5: null,
+        6: null,
+        7: null,
+        8: null,
+        9: null,
+        10: null,
+        11: null,
+        12: null
+    },
+    TUE: {
+        1: null,
+        2: null,
+        3: null,
+        4: null,
+        5: null,
+        6: null,
+        7: null,
+        8: null,
+        9: null,
+        10: null,
+        11: null,
+        12: null
+    },
+    WED: {
+        1: null,
+        2: {
+            course_id: "C001",
+            title: "인공지능 개론",
+            room: "본관-101",
+            professor: "이교수",
+            level: null,
+            event: null
+        },
+        3: {
+            course_id: "C001",
+            title: "인공지능 개론",
+            room: "본관-101",
+            professor: "이교수",
+            level: null,
+            event: null
+        },
+        4: {
+            course_id: "C008",
+            title: "TOPIK 4급 한국어 특강",
+            room: "실습동-202",
+            professor: "박교수",
+            level: "TOPIC 4급",
+            event: null
+        },
+        5: {
+            course_id: "C006",
+            title: "네트워크",
+            room: "실습동-201",
+            professor: "이교수",
+            level: null,
+            event: null
+        },
+        6: null,
+        7: null,
+        8: null,
+        9: null,
+        10: null,
+        11: null,
+        12: null
+    },
+    THU: {
+        1: null,
+        2: null,
+        3: null,
+        4: null,
+        5: null,
+        6: null,
+        7: null,
+        8: null,
+        9: null,
+        10: null,
+        11: {
+            course_id: "C008",
+            title: "TOPIK 4급 한국어 특강",
+            room: "실습동-202",
+            professor: "박교수",
+            level: "TOPIC 4급",
+            event: null
+        },
+        12: null
+    },
+    FRI: {
+        1: null,
+        2: null,
+        3: null,
+        4: null,
+        5: null,
+        6: null,
+        7: null,
+        8: {
+            course_id: "C006",
+            title: "네트워크",
+            room: "실습동-201",
+            professor: "이교수",
+            level: null,
+            event: null
+        },
+        9: {
+            course_id: "C006",
+            title: "네트워크",
+            room: "실습동-201",
+            professor: "이교수",
+            level: null,
+            event: null
+        },
+        10: null,
+        11: null,
+        12: null
+    }
+  }
+  return timetable;
 }
