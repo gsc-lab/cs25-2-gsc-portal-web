@@ -85,7 +85,7 @@ const handleSubmit = () => {
     <label for="classroom">장소 : </label>
     <select id="classroom" v-model="postTimetableData.room">
       <option v-for="classroom in classrooms" :value="classroom.classroom_id">
-        {{ classroom.building }} {{ classroom.room_number }}
+        {{ classroom.label }}
       </option>
       <!-- 특강이면 데이터에 없는 장소 등록 가능-->
       <option v-if="postTimetableData.target == 'special'" value="">기타</option>

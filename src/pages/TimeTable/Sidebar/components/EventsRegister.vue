@@ -101,7 +101,7 @@ const handleSubmit = () => {
   <div v-if="postSpecialData.event === 'MAKEUP'">
     <label for="classroom">장소 : </label>
     <select id="classroom" v-model="postSpecialData.classroom">
-      <option v-for="classroom in classrooms" :value="classroom.classroom_id">{{ classroom.building }} {{ classroom.room_number }}</option>
+      <option v-for="classroom in classrooms" :value="classroom.classroom_id">{{ classroom.label }}</option>
       <option value="">기타</option>
     </select>
     <div v-if="postSpecialData.classroom == ''">

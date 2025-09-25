@@ -14,7 +14,7 @@ const selectedUsers = ref([]);
 
 // 학생 id를 받고 selectedUsers에 저장
 const handleSelect = (id) => {
-  const selectedUser = users.filter((user) => user.id == id);
+  const selectedUser = users.filter((user) => user.user_id == id);
   // console.log("selected", selectedUser[0]);
   // console.log(selectedUsers.value);
   selectedUsers.value.push(selectedUser[0]);
@@ -22,7 +22,7 @@ const handleSelect = (id) => {
 
 // 학생 선택 취소
 const handleDelete = (id) => {
-  selectedUsers.value = selectedUsers.value.filter((user) => user.id != id);
+  selectedUsers.value = selectedUsers.value.filter((user) => user.user_id != id);
   // console.log(selectedUsers.value);
 }
 
@@ -90,7 +90,7 @@ const handleSubmit = () => {
   <ul>
     <li v-for="user in selectedUsers" :key="user.user_id">
       - {{ user.name }} : {{ setTarget(user.grade_id) }}
-      <button @click="handleDelete(user.id)">취소</button>
+      <button @click="handleDelete(user.user_id)">취소</button>
     </li>
   </ul>
 

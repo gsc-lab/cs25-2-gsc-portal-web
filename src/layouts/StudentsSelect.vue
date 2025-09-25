@@ -2,7 +2,7 @@
 import { ref, computed } from "vue";
 import { setTarget } from "@/api/Data";
 
-// users = [{id: int, grade_id: int, name: string}, {}...]
+// users = [{user_id: string, grade_id: string, name: string}, {}...]
 const props = defineProps({
   users: {
     type: Array,
@@ -33,7 +33,7 @@ const selectUser = (user) => {
   isOpen.value = false;
   searchQuery.value = "";
   // 부모에 id값 반환
-  emit("select:user", user.id);
+  emit("select:user", user.user_id);
 };
 
 </script>
@@ -56,7 +56,7 @@ const selectUser = (user) => {
       <ul>
         <li
           v-for="user in filteredUsers"
-          :key="user.id"
+          :key="user.user_id"
           @click="selectUser(user)"
         >
           {{ user.name }} : {{ setTarget(user.grade_id) }}
