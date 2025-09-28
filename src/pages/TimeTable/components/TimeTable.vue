@@ -2,6 +2,7 @@
 import { getTimetable } from '@/api/Data';
 import { ref } from 'vue';
 
+const selectGrade = ref("1");
 const timetableData = getTimetable();
 // 초기화
 const isSelecting = ref(false);
@@ -21,7 +22,7 @@ const day = (enDay) => {
 // 선택 시작
 function startSelection(day, hour, val) {
   isSelecting.value = true;
-  selectionData.value.push({ day, hour, val });
+  selectionData.value.push({ grade: selectGrade.value, day, hour, val });
   // console.log(selectionData.value);
 }
 
@@ -42,7 +43,7 @@ function updateSelection(day, hour, val) {
     if ((selectionData.value.filter((data) =>
       data.hour == hour || data.day != day ||
       data.val?.course_id != val?.course_id)).length <= 0) {
-      selectionData.value.push({ day, hour, val });
+      selectionData.value.push({ grade: selectGrade.value, day, hour, val });
     }
   }
 }
@@ -63,6 +64,13 @@ function endSelection() {
   <div style="background-color: cornflowerblue;">
     TimeTable
 
+    <div>
+      <select v-model="selectGrade">
+        <option value="1">1학년</option>
+        <option value="2">2학년</option>
+        <option value="3">3학년</option>
+      </select>
+    </div>
 
   <table style="border-collapse: collapse; width: 100%;">
     <thead>
