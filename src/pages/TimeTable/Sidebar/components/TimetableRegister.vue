@@ -1,37 +1,80 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { getCourses, getClassrooms } from '@/api/Data';
+import { useTimetableStore } from '@/stores/timetable';
 
-// 받은 값
-const getTarget = "1";
+const store = useTimetableStore();
+const timetableData = ref();
 
 // 초기화
 const days = ["월", "화", "수", "목", "금"];
-const enDays = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+const enDays = ["MON", "TUE", "WED", "THU", "FRI"];
 const courses = getCourses();
 const classrooms = getClassrooms();
 const classroomName = ref("");
+const selectRoom = ref();
+const startTime = ref()
+const endTime = ref()
 
 // 선택이 있으면 적용 ?? null
-const selectDay = "Mon"
-const startTime = "1";
-const endTime = "3";
+const lengthHour = () => {
+  const len = timetableData.value.length
+  console.log(len);
+  if (timetableData.value?.[0].hour > timetableData.value?.[len - 1].hour) {
+    startTime.value = timetableData.value?.[len - 1].hour
+    endTime.value = timetableData.value?.[0].hour
+  } else {
+    startTime.value = timetableData.value?.[0].hour
+    endTime.value = timetableData.value?.[len - 1].hour
+  }
+  console.log();
+}
+
+const setRoomName = () => {
+  const room = classrooms.filter((room) => room.label == timetableData.value?.[0].val?.room)
+  console.log("room", room[0]);
+  selectRoom.value = room[0]
+}
 
 // 값 저장
 const postTimetableData = ref({
-  target: getTarget,
-  course_id: courses[0].course_id,
-  day: selectDay,
-  room: classrooms[0].classroom_id,
-  time: {start: startTime, end: endTime}
-});
+  target: null,
+  course_id: null,
+  day: null,
+  room: null,
+  startTime: null,
+  endTime: null
+})
 
 // target 바뀌면 해당 과목 필터링
 watch(
   () => postTimetableData.value.target,
   (target) => {
     console.log("postTimetableData.target", target);
-})
+  })
+
+// selectTT를 감시하고 timetableData 갱신
+watch(() => store.selectTT, (newVal) => {
+  if (newVal?.[0]?.[0]) {
+    console.log("정상값:", newVal[0][0])
+    timetableData.value = newVal[0];
+    lengthHour()
+    setRoomName()
+    console.log(selectRoom.value);
+
+    // 값 세팅
+    postTimetableData.value = {
+      target: timetableData.value[0].grade,
+      course_id: timetableData.value[0].val?.course_id ?? null,
+      day: timetableData.value[0].day,
+      room: selectRoom.value?.classroom_id ?? null,
+      startTime: startTime.value,
+      endTime: endTime.value
+    }
+  } else {
+    console.log("아직 데이터 없음")
+  }
+}, { immediate: true })
 
 
 // 저장버튼 누른 후 실행
@@ -84,7 +127,7 @@ const handleSubmit = () => {
   <div>
     <label for="classroom">장소 : </label>
     <select id="classroom" v-model="postTimetableData.room">
-      <option v-for="classroom in classrooms" :value="classroom.classroom_id">
+      <option v-for="classroom in classrooms" :key="classroom.label" :value="classroom.classroom_id">
         {{ classroom.label }}
       </option>
       <!-- 특강이면 데이터에 없는 장소 등록 가능-->
@@ -99,11 +142,11 @@ const handleSubmit = () => {
   <!-- 교시 -->
   <div>
     <label for="time">교시 : </label>
-    <select id="time" v-model="postTimetableData.time.start">
+    <select id="time" v-model="postTimetableData.startTime">
       <option v-for="startT in 12" :value="String(startT)">{{ startT }}</option>
     </select>
     ~
-    <select id="time" v-model="postTimetableData.time.end">
+    <select id="time" v-model="postTimetableData.endTime">
       <option v-for="endT in 12" :value="String(endT)">{{ endT }}</option>
     </select>
     교시

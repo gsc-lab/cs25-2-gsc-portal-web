@@ -1,5 +1,20 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch, computed } from 'vue'
+import { useTimetableStore } from '@/stores/timetable';
+
+const store = useTimetableStore();
+const timetableData = ref()
+
+const targetData = ref("");
+const fetchTarget = () => {
+  if (timetableData?.value[0][0].val?.event) {
+    targetData.value = timetableData.value[0][0].val.event
+  } else {
+    targetData.value = timetableData.value[0][0].grade
+  }
+  console.log(timetableData.value)
+  console.log("targetData", targetData.value);
+}
 
 // 값 저장
 const postCourseData = ref({
@@ -7,7 +22,26 @@ const postCourseData = ref({
   course: null,
   professor: null,
   section: null
-});
+})
+
+// selectTT를 감시하고 timetableData 갱신
+watch(() => store.selectTT, (newVal) => {
+  if (newVal?.[0]?.[0]) {
+    console.log("정상값:", newVal[0][0])
+    timetableData.value = newVal;
+    fetchTarget()
+
+    // 값 세팅
+    postCourseData.value = {
+      target: targetData.value,
+      course: newVal[0][0].val?.title ?? null,
+      professor: newVal[0][0].val?.professor ?? null,
+      section: null
+    }
+  } else {
+    console.log("아직 데이터 없음")
+  }
+}, { immediate: true })
 
 // 저장버튼 누른 후 실행
 const handleSubmit = (() => {
