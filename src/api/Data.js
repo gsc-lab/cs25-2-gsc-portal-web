@@ -25,10 +25,9 @@ export const setTarget = (getTarget) => {
 
 export const getCourses = () => {
   const courses = [
-    { course_id: "1", courseTitle: "딥러닝", type: "정규", grade_id: "2"},
-    { course_id: "2", courseTitle: "데이터구조", grade_id: "1" },
-    { course_id: "3", courseTitle: "일본어",   },
-    { course_id: "4", courseTitle: "켑스톤" },
+    { course_id: "C001", courseTitle: "인공지능 개론", grade_id: "1"},
+    { course_id: "C008", courseTitle: "TOPIK 4급 한국어 특강", grade_id: "1" },
+    { course_id: "C006", courseTitle: "네트워크",   },
   ];
   return courses;
 };
@@ -36,9 +35,9 @@ export const getCourses = () => {
 // 학년 등 필터링 적용 예정
 export const getClassrooms = () => {
   const classrooms = [
-    { classroom_id: "101", label: "창조관-302" },
-    { classroom_id: "102", label: "창조관-404" },
-    { classroom_id: "201", label: "창조관-404-1" },
+    { classroom_id: "101", label: "본관-101" },
+    { classroom_id: "102", label: "실습동-202" },
+    { classroom_id: "201", label: "실습동-201" },
   ];
   return classrooms;
 }
