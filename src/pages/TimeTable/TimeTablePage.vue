@@ -4,12 +4,13 @@ import TimeTable from './components/TimeTable.vue';
 import Sidebar from './Sidebar/Sidebar.vue';
 import { ref } from 'vue'
 import { useTimetableStore } from '@/stores/timetable'
+import { getTimetable } from '@/api/timetableApi';
 
 // 사이드바 상태
 const sidebarIsOpen = ref(false);
 const store = useTimetableStore()
-
-
+// const tt = await getTimetable()
+// console.log("tt", tt);
 const setData = (data) => {
   store.addSchedule(data);
   // console.log("저장 완료:", store.selectTT);

@@ -1,9 +1,15 @@
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch } from 'vue'
 import { useTimetableStore } from '@/stores/timetable';
+import { useProfessorStore } from '@/stores/auth';
+import { postCourse } from '@/api/timetableApi';
 
-const store = useTimetableStore();
+const TTstore = useTimetableStore();
+const PFstore = useProfessorStore();
+
 const timetableData = ref()
+const professors = PFstore.professors
+console.log("professors", professors);
 
 const targetData = ref("");
 const fetchTarget = () => {
@@ -20,12 +26,12 @@ const fetchTarget = () => {
 const postCourseData = ref({
   target: null,
   course: null,
-  professor: null,
+  professor_id: null,
   section: null
 })
 
 // selectTT를 감시하고 timetableData 갱신
-watch(() => store.selectTT, (newVal) => {
+watch(() => TTstore.selectTT, (newVal) => {
   if (newVal?.[0]?.[0]) {
     console.log("정상값:", newVal[0][0])
     timetableData.value = newVal;
@@ -34,8 +40,8 @@ watch(() => store.selectTT, (newVal) => {
     // 값 세팅
     postCourseData.value = {
       target: targetData.value,
-      course: newVal[0][0].val?.title ?? null,
-      professor: newVal[0][0].val?.professor ?? null,
+      course: newVal[0][0].schedule?.title ?? null,
+      professor_id: newVal[0][0].schedule?.professor ?? null,
       section: null
     }
   } else {
@@ -44,8 +50,9 @@ watch(() => store.selectTT, (newVal) => {
 }, { immediate: true })
 
 // 저장버튼 누른 후 실행
-const handleSubmit = (() => {
+const handleSubmit = (async () => {
   console.log(postCourseData.value);
+  await postCourse(postCourseData.value)
 })
 
 </script>
@@ -78,7 +85,9 @@ const handleSubmit = (() => {
   <!-- 교수명 입력 -->
   <div>
     <label for="professor">교수명 : </label>
-    <input id="professor" v-model="postCourseData.professor">
+    <select id="professor" v-model="postCourseData.professor_id">
+      <option v-for="professor in professors" :value="professor.user_id">{{ professor.name }}</option>
+    </select>
   </div>
 
   <!-- 학기 입력 -->
