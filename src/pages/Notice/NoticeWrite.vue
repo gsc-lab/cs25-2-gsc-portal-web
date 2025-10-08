@@ -1,117 +1,121 @@
 <template>
   <h1>공지사항 작성</h1>
   <div class="notice-container">
-
     <div class="title-container">
       <div class="col-title">
         <label for="title">제목: </label>
       </div>
       <div class="title-important">
-        <input type="checkbox" class="isImportant" id="isImportant" v-model="isImportant" />
+        <input type="checkbox" class="isImportant" id="isImportant" v-model="noticeInfo.isImportant" />
         <label for="isImportant">중요</label>
       </div>
       <div class="title-input">
-        <input type="text" class="notice-id" id="title" v-model="title" placeholder="제목을 입력하세요!">
+        <input type="text" class="notice-id" id="title" v-model="noticeInfo.title" placeholder="제목을 입력하세요!">
       </div>
     </div>
     <div class="target-container">
       <label for="target">대상: </label>
       <div class="target-grade">
         학년
-        <select>
+        <select v-model="noticeInfo.target_grade_id">
           <option v-for="grade in targets.grade" :key="grade"> {{ grade }}</option>
         </select>
       </div>
       <div class="target-level">
-        레벨
-        <select>
-          <option v-for="level in targets.level" :key="level">{{ level }}</option>
+        <label for="level">레벨</label>
+        <select v-model="noticeInfo.target_level_id">
+          <option v-for="level in targets.level" :key="level" :value="level">{{ level }}</option>
         </select>
       </div>
       <div class="target-language">
-        언어
-        <select>
-          <option v-for="language_id in targets.language_id" :key="language_id"> {{ language_id }}</option>
+        <label for="language_id">언어</label>
+        <select v-model="noticeInfo.target_language_id">
+          <option v-for="language_id in targets.language_id" :key="language_id" :value="language_id"> {{ language_id }}
+          </option>
         </select>
       </div>
       <div>
-        과목
-        <select v-model="course_id">
-          <option v-for="course_id in course_id" :key="course_id">{{ course_id.course_title }}</option>
+        <label for="course">과목</label>
+        <select v-model="noticeInfo.course_id">
+          <option v-for="course in courses" :key="course.course_title" :value="course.course_title">{{
+            course.course_title
+          }}
+          </option>
         </select>
       </div>
     </div>
     <div class="content-container">
-      내용
-      <textarea>내용을 입력하시오</textarea>
+      <label for="content">내용</label>
+      <textarea v-model="noticeInfo.content"></textarea>
     </div>
     <div>
       {{ noticeInfo }}
     </div>
+    <div class="fileUpload">
+      <label for="files">파일 첨부</label>
+      <NoticeFileUpload v-model="noticeInfo.noticeFile" />
+    </div>
+
+    <button class="submit-btn" @click="submitNotice">작성하기</button>
   </div>
-
-
-
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
+import axios from 'axios';
 import { getCourse_id } from '@/api/apiNotice';
+import NoticeFileUpload from './NoticeFileUpload.vue'
 
-// 제목
-const title = ref('');
-// 중요공지 확인
-const isImportant = ref(false);
-// 내용
-const content = ref('')
-// 과목 선택 / 전체 공지일 경우 공백
-// 어떤 수업의 대한 공지사항인지 선택.
-const course_id = getCourse_id();
+const courses = ref([]);
 
-console.log(course_id)
+onMounted(async () => {
+  courses.value = await getCourse_id();
+})
+console.log(courses)
 // 타겟
 const targets = reactive({
-  grade: ['1학년', '2학년', '3학년'],
+  grade: ['전체', '1학년', '2학년', '3학년'],
   level: ['N1', 'N2', 'N3', "TOPIK 4", "TOPIK 6"],
   language_id: ['JP', 'KO']
 });
 
-const noticeFile = ref([]);
 
 const noticeInfo = reactive({
-  title: title.value,
-  content: content.value,
-  course_id: course_id.value,
-  targets: targets.value,
-  noticeFile: noticeFile.value,
+  title: '',
+  isImportant: false,
+  content: '',
+  course_id: '',
+  target_grade_id: '전체',
+  target_level_id: 'N1',
+  target_language_id: 'JP',
+  noticeFile: [],
 })
 
-console.log(targets.grade[0])
-console.log(noticeInfo)
+const submitNotice = async () => {
+  const formData = new FormData();
+  formData.append("title", noticeInfo.title);
+  formData.append("isImportant", noticeInfo.isImportant);
+  formData.append("content", noticeInfo.content);
+  formData.append("course_id", noticeInfo.course_id);
+  formData.append("target_grade_id", noticeInfo.target_grade_id);
+  formData.append("target_level_id", noticeInfo.target_level_id);
+  formData.append("target_language_id", noticeInfo.target_language_id);
 
+  noticeInfo.noticeFile.forEach((file) => {
+    formData.append("files", file);
+  });
 
-const courseList = ref([
-  {
-    course_id: "1",
-    title: "인공지능 개론",
-    course_id: "정규"
-  },
-  {
-    course_id: "2",
-    title: "데이터 구조",
-    course_id: "정규"
-  },
-  {
-    course_id: "3",
-    title: "일본어 문법",
-    course_id: "정규"
-  },
-  {
-    course_id: "4",
-    title: "일본어 회화",
-    course_id: "정규"
-  },
-])
+  try {
+    const response = await axios.post(import.meta.env.VITE_API_URL + "/notices", formData, {
+      headers: { "content-Type": "multipart/form-data" },
+    });
+    alert("공지사항 등록 완료");
+    console.log(response.data);
+  } catch (err) {
+    console.error("공지사항 등록 실패", err)
+    alert("등록 중 오류 발생")
+  }
+}
 
 
 </script>
@@ -126,6 +130,15 @@ const courseList = ref([
   border: 1px solid #d3e2f5;
   border-radius: 10px;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+}
+
+.fileUpload {
+  background-color: blue;
+  display: flex;
+}
+
+.submit-btn {
+  background-color: red;
 }
 
 h1 {
