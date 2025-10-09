@@ -2,10 +2,15 @@
   <section class="notice-board">
     <div class="grade-filter">
       <button v-for="filter in filters" :key="filter" :class="['filter', { active: selectedFilter === filter }]"
-        @click="HandleFilter(filter)"> {{ filter }}</button>
-      <input class="notice-search" v-model="NoticeSearch" type="text" placeholder="검색어를 입력하세요" />
+        @click="HandleFilter(filter)">
+        <p v-if="filter === ''">전체</p>
+        <p v-else>{{ filter + "학년" }}</p>
+      </button>
+      <input class="notice-search" v-model="noticeSearch" type="text" placeholder="검색어를 입력하세요" />
       <select>
-        <option>asd</option>
+        <option>제목</option>
+        <option>작성자</option>
+        <option>제목 + 작성자</option>
       </select>
       <button class="notice-search-btn" @click="titleFilter()">검색</button>
     </div>
@@ -21,14 +26,16 @@
 
     <!-- 공지사항 리스트 -->
     <div v-for="notice in filterNotices" :key="notice.notice_id">
-      <div class="notice-item" v-if="selectedFilter === '전체' || notice.targets[0].grade_id === selectedFilter"
+      <div class="notice-item" v-if="selectedFilter === '' || notice.targets?.[0]?.grade_id === selectedFilter"
         @click="HandleClick(notice.notice_id)">
         <div class="col-num">{{ notice.notice_id }}</div>
         <div class="col-title">{{ notice.title }}</div>
         <div class="col-content">{{ notice.content }}</div>
-        <div class="col-target">{{ notice.targets[0].grade_id }}</div>
-        <div class="col-author">{{ notice.author_name }}</div>
-        <div class="col-date">{{ notice.created_at }}</div>
+        <div class="col-target">
+          <p>{{ notice.targets[0]?.grade_id ? notice.targets[0].grade_id + "학년" : "전체" }}</p>
+        </div>
+        <div class="col-author">{{ notice.author?.name }}</div>
+        <div class="col-date">{{ formatDate(notice.created_at) }}</div>
       </div>
     </div>
   </section>
@@ -36,36 +43,60 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { getNotice } from '@/api/apiNotice';
 import router from '@/router';
 
-const Notices = ref([]);
-const NoticeSearch = ref('');
-const Search = ref('')
-const selectedFilter = ref('전체');
-const filters = ref(['전체', 'G1', 'G2', 'G3']);
+const notices = ref([]);
+const noticeSearch = ref('');
+const search = ref('')
+const selectedFilter = ref('');
+const filters = ref(['', '1', '2', '3']);
 
-console.log(Notices)
-console.log(NoticeSearch)
+onMounted(async () => {
+  const res = await getNotice();
+  notices.value = res;
+  console.log("1~10번 공지:", notices.value);
 
-Notices.value = getNotice();
+  // notices.value = notices.value.filter(
+  //   (n) => n.notice_id >= 1 && n.notice_id <= 10
+  // );
+
+  // console.log("1~10번 공지:", notices.value);
+});
+
+function formatDate(isoString) {
+  if (!isoString) return '';
+  const date = new Date(isoString);
+  return date.toLocaleDateString("ko-KR", {
+    timeZone: 'Asia/seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  })
+}
+
+console.log(formatDate)
+
 
 const filterNotices = computed(() => {
-  return Notices.value.filter((notice) => {
-    const matchFilter = selectedFilter.value === '전체' ||
-      notice.targets[0].grade_id === selectedFilter.value;
+  return notices.value.filter((notice) => {
+    const matchFilter = selectedFilter.value === '' ||
+      notice.targets?.[0]?.grade_id === selectedFilter.value;
 
-    const matchSearch = !NoticeSearch.value ||
-      notice.title.includes(Search.value) ||
-      notice.content.includes(Search.value);
+    const matchSearch = !noticeSearch.value ||
+      notice.title.includes(search.value) ||
+      notice.content.includes(search.value);
 
     return matchFilter && matchSearch;
   })
 })
 
 const titleFilter = () => {
-  Search.value = NoticeSearch.value;
+  search.value = noticeSearch.value;
 }
 
 
@@ -76,7 +107,7 @@ const HandleFilter = (value) => {
 
 const HandleClick = (notice_id) => {
   console.log(notice_id)
-  router.push({ path: `/notice/${notice_id}` })
+  router.push({ path: `/noticeView/${notice_id}` })
 }
 
 
@@ -137,7 +168,7 @@ const HandleClick = (notice_id) => {
 
 .notice-board {
   width: 100%;
-  max-width: 1000px;
+  max-width: 75%;
   border: 3px solid #ccc;
   border-radius: 6px;
   overflow: hidden;
@@ -148,7 +179,7 @@ const HandleClick = (notice_id) => {
 .notice-header,
 .notice-item {
   display: grid;
-  grid-template-columns: 80px 120px 1fr 100px 100px 120px;
+  grid-template-columns: 80px 150px 1fr 100px 100px 120px;
   align-items: center;
   padding: 10px;
   cursor: pointer;
