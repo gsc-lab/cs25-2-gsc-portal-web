@@ -1,147 +1,222 @@
 <template>
-  <h1>공지사항 작성</h1>
-  <div class="notice-container">
-    <div class="title-container">
-      <div class="col-title">
-        <label for="title">제목: </label>
-      </div>
-      <div class="title-important">
-        <input type="checkbox" class="isImportant" id="isImportant" v-model="noticeInfo.isImportant" />
-        <label for="isImportant">중요</label>
-      </div>
-      <div class="title-input">
-        <input type="text" class="notice-id" id="title" v-model="noticeInfo.title" placeholder="제목을 입력하세요!">
-      </div>
-    </div>
-    <div class="target-container">
-      <label for="target">대상: </label>
-      <div class="target-grade">
-        학년
-        <select v-model="noticeInfo.target_grade_id">
-          <option v-for="grade in targets.grade" :key="grade"> {{ grade }}</option>
-        </select>
-      </div>
-      <div class="target-level">
-        <label for="level">레벨</label>
-        <select v-model="noticeInfo.target_level_id">
-          <option v-for="level in targets.level" :key="level" :value="level">{{ level }}</option>
-        </select>
-      </div>
-      <div class="target-language">
-        <label for="language_id">언어</label>
-        <select v-model="noticeInfo.target_language_id">
-          <option v-for="language_id in targets.language_id" :key="language_id" :value="language_id"> {{ language_id }}
-          </option>
-        </select>
-      </div>
-      <div>
-        <label for="course">과목</label>
-        <select v-model="noticeInfo.course_id">
-          <option v-for="course in courses" :key="course.course_title" :value="course.course_title">{{
-            course.course_title
-          }}
-          </option>
-        </select>
-      </div>
-    </div>
-    <div class="content-container">
-      <label for="content">내용</label>
-      <textarea v-model="noticeInfo.content"></textarea>
-    </div>
-    <div>
-      {{ noticeInfo }}
-    </div>
-    <div class="fileUpload">
-      <label for="files">파일 첨부</label>
-      <NoticeFileUpload v-model="noticeInfo.noticeFile" />
+  <div class="notice-detail">
+    <!-- 헤더 -->
+    <div class="notice-detail-header">
+      <span>공지사항 작성</span>
     </div>
 
-    <button class="submit-btn" @click="submitNotice">작성하기</button>
+    <!-- 제목 / 작성일 -->
+    <div class="notice-detail-section">
+      <div>제목</div>
+      <input type="text" />
+      <div>학년</div>
+      <select v-model="gradeCheck">
+        <option v-for="grade in grades" :key="grade.grade_id" :value="grade.grade_id">
+          {{ grade.grade_id === '전체' ? grade.grade_id : grade.grade_id + '학년' }}
+        </option>
+      </select>
+    </div>
+
+    <!-- 작성자 / 조회수 -->
+    <div class="notice-detail-section">
+      <div>작성자</div>
+      <input type="text" value="">
+      <div>과목</div>
+      <select v-if="filterCourse.length">
+        <option v-for="course in filterCourse" :key="course.course_id" :value="course.course_id">{{ course.title }}
+        </option>
+      </select>
+    </div>
+
+    <!-- 첨부파일 -->
+    <div class="notice-detail-files">
+      <span>첨부파일</span>
+      <input type="file">
+    </div>
+
+    <!-- 내용 -->
+    <div class="notice-detail-content">
+    </div>
+
+    <!-- 하단 버튼 -->
+    <div class="notice-detail-footer">
+      <button class="register-btn">등록하기</button>
+      <button class="back-btn">뒤로</button>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
-import axios from 'axios';
-import { getCourse_id } from '@/api/apiNotice';
-import NoticeFileUpload from './NoticeFileUpload.vue'
+import { getCourse, gradeList } from '@/api/apiNotice';
+import { computed, onMounted, ref } from 'vue';
 
-const courses = ref([]);
+
+const courses = ref([])
+const grades = ref([])
+const gradeCheck = ref("전체");
+
+const filterCourse = computed(() => {
+  if (gradeCheck.value === '전체') return courses.value
+  return courses.value.filter(c => c.grade_id === gradeCheck.value)
+})
 
 onMounted(async () => {
-  courses.value = await getCourse_id();
-})
-console.log(courses)
-// 타겟
-const targets = reactive({
-  grade: ['전체', '1학년', '2학년', '3학년'],
-  level: ['N1', 'N2', 'N3', "TOPIK 4", "TOPIK 6"],
-  language_id: ['JP', 'KO']
-});
-
-
-const noticeInfo = reactive({
-  title: '',
-  isImportant: false,
-  content: '',
-  course_id: '',
-  target_grade_id: '전체',
-  target_level_id: 'N1',
-  target_language_id: 'JP',
-  noticeFile: [],
-})
-
-const submitNotice = async () => {
-  const formData = new FormData();
-  formData.append("title", noticeInfo.title);
-  formData.append("isImportant", noticeInfo.isImportant);
-  formData.append("content", noticeInfo.content);
-  formData.append("course_id", noticeInfo.course_id);
-  formData.append("target_grade_id", noticeInfo.target_grade_id);
-  formData.append("target_level_id", noticeInfo.target_level_id);
-  formData.append("target_language_id", noticeInfo.target_language_id);
-
-  noticeInfo.noticeFile.forEach((file) => {
-    formData.append("files", file);
-  });
-
   try {
-    const response = await axios.post(import.meta.env.VITE_API_URL + "/notices", formData, {
-      headers: { "content-Type": "multipart/form-data" },
-    });
-    alert("공지사항 등록 완료");
-    console.log(response.data);
-  } catch (err) {
-    console.error("공지사항 등록 실패", err)
-    alert("등록 중 오류 발생")
-  }
-}
+    courses.value = await getCourse();
 
+    grades.value = gradeList();
+    console.log(courses.value)
+  } catch (err) {
+    console.error("데이터 로드 실패", err)
+  }
+})
+
+console.log(courses)
 
 </script>
 
 <style>
-.notice-container {
-  width: 80%;
-  height: auto;
-  padding: 25px;
-  background-color: aquamarine;
-  margin: 80px auto;
-  border: 1px solid #d3e2f5;
-  border-radius: 10px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+.notice-detail {
+  width: 100%;
+  max-width: 1000px;
+  margin: 60px auto;
+  border: 3px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  overflow: hidden;
+  font-size: 15px;
+  color: #333;
 }
 
-.fileUpload {
-  background-color: blue;
+/* 🔹 헤더 타이틀 영역 */
+.notice-detail-header {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #e6f2ff;
+  border-bottom: 2px solid #ccc;
+  padding: 12px 20px;
+  font-size: 20px;
+  font-weight: bold;
 }
 
-.submit-btn {
-  background-color: red;
+.notice-detail-header button {
+  background-color: lightcoral;
+  color: #fff;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
 }
 
-h1 {
-  font-size: 50px;
+.notice-detail-header button:hover {
+  background-color: #e65b5b;
+}
+
+/* 🔸 항목 블록 공통 스타일 */
+.notice-detail-section {
+  display: grid;
+  grid-template-columns: 100px 1fr 120px 250px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border-bottom: 1px solid #ccc;
+  background-color: #fffafc;
+}
+
+/* 블록 내의 항목명 스타일 */
+.notice-detail-section>div:first-child,
+.notice-detail-section>div:nth-child(3) {
+  font-weight: bold;
+  text-align: center;
+  color: #444;
+}
+
+/* 블록 내의 값 스타일 */
+.notice-detail-section>div:nth-child(2),
+.notice-detail-section>div:nth-child(4) {
+  text-align: center;
+}
+
+/* 🔸 첨부파일 섹션 (1행 전용) */
+.notice-detail-files {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  border-bottom: 1px solid #ccc;
+  background-color: #fffafc;
+}
+
+.notice-detail-files span {
+  font-weight: bold;
+  text-align: center;
+  margin-right: 12px;
+}
+
+.notice-detail-files a {
+  color: #0077cc;
+  text-decoration: none;
+}
+
+.notice-detail-files a:hover {
+  text-decoration: underline;
+}
+
+/* 🧾 본문 영역 */
+.notice-detail-content {
+  padding: 20px;
+  min-height: 250px;
+  background-color: #f9f9f9;
+  border-top: 2px solid #ddd;
+  border-bottom: 2px solid #ddd;
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+/* 🔙 버튼 영역 */
+.notice-detail-footer {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+  background-color: #fefefe;
+}
+
+.notice-detail-footer button {
+  width: 120px;
+  height: 36px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.notice-detail-footer .back-btn {
+  background-color: lightcoral;
+  color: white;
+}
+
+.notice-detail-footer .back-btn:hover {
+  background-color: #e65b5b;
+}
+
+.notice-detail-footer .register-btn {
+  background-color: lightskyblue;
+  color: white;
+}
+
+.notice-detail-footer .register-btn:hover {
+  background-color: #0077cc;
+}
+
+.notice-detail-footer .confirm-btn {
+  background-color: #b0e0e6;
+}
+
+.notice-detail-footer .confirm-btn:hover {
+  background-color: #9cd3dc;
 }
 </style>
