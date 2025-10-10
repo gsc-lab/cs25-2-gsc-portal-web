@@ -5,22 +5,40 @@
       <span>공지사항 작성</span>
     </div>
 
-    <!-- 제목 / 작성일 -->
-    <div class="notice-detail-section">
+    <!-- 제목 -->
+    <div class="notice-detail-section-title">
       <div>제목</div>
-      <input type="text" />
-      <div>학년</div>
+      <div>중요</div>
+      <input type="checkbox" v-model="isImportant" />
+      <input type="text" value="공지사항 제목" />
+    </div>
+
+    <div class="notice-detail-section-author">
+      <div>작성자</div>
+      <!-- 로그인 정보 확인 후 이름 자동 입력 기능 구현 -->
+      <input type="text" value="공지사항 작성자">
+    </div>
+
+    <!-- 작성자 -->
+    <div class="notice-detail-section-select">
+      <div>대상</div>
       <select v-model="gradeCheck">
         <option v-for="grade in grades" :key="grade.grade_id" :value="grade.grade_id">
           {{ grade.grade_id === '전체' ? grade.grade_id : grade.grade_id + '학년' }}
         </option>
       </select>
     </div>
-
-    <!-- 작성자 / 조회수 -->
-    <div class="notice-detail-section">
-      <div>작성자</div>
-      <input type="text" value="">
+    <!-- 과목 유형 선택 -->
+    <div class="notice-detail-section-select">
+      <div>과목유형</div>
+      <select v-model="courseTypeCheck">
+        <option v-for="courseT in courseType" :key="courseT" :value="courseT.course_type">
+          {{ courseT.course_type === 'regular' ? '정규' : '특강' }}
+        </option>
+      </select>
+    </div>
+    <!-- 과목 유형에 따른 과목 필터링 -->
+    <div class="notice-detail-section-select">
       <div>과목</div>
       <select v-if="filterCourse.length">
         <option v-for="course in filterCourse" :key="course.course_id" :value="course.course_id">{{ course.title }}
@@ -47,24 +65,32 @@
 </template>
 
 <script setup>
-import { getCourse, gradeList } from '@/api/apiNotice';
+import { course_type, getCourse, gradeList } from '@/api/apiNotice';
 import { computed, onMounted, ref } from 'vue';
 
 
 const courses = ref([])
 const grades = ref([])
-const gradeCheck = ref("전체");
+const isImportant = ref(false);
+const gradeCheck = ref('전체');
+const courseType = ref([]) // 과목 타입 저장 배열 : 'regular' , 'special'
+const courseTypeCheck = ref('regular') // select 태그에서 선택시 변경 : 기본값 regular
 
 const filterCourse = computed(() => {
-  if (gradeCheck.value === '전체') return courses.value
-  return courses.value.filter(c => c.grade_id === gradeCheck.value)
+  // if (gradeCheck.value === '전체') return courses.value
+  if (gradeCheck.value === '전체') {
+    // 대상 (grade) 이 전체일 경우 과목 명에 따라 courses에 담기는 데이터를 구분
+    return courses.value.filter(c => c.course_type === courseTypeCheck.value)
+  } else {
+    return courses.value.filter(c => c.grade_id === gradeCheck.value && c.course_type === courseTypeCheck.value)
+  }
 })
 
 onMounted(async () => {
   try {
     courses.value = await getCourse();
-
     grades.value = gradeList();
+    courseType.value = course_type()
     console.log(courses.value)
   } catch (err) {
     console.error("데이터 로드 실패", err)
@@ -116,14 +142,37 @@ console.log(courses)
 }
 
 /* 🔸 항목 블록 공통 스타일 */
-.notice-detail-section {
+.notice-detail-section-title {
   display: grid;
-  grid-template-columns: 100px 1fr 120px 250px;
+  grid-template-columns: 80px 50px 30px 1fr;
   align-items: center;
+  text-align: center;
   gap: 10px;
   padding: 10px 20px;
   border-bottom: 1px solid #ccc;
-  background-color: #fffafc;
+  background-color: #9cd3dc;
+}
+
+.notice-detail-section-author {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border-bottom: 1px solid #ccc;
+  background-color: #9cd3dc;
+}
+
+.notice-detail-section-select {
+  display: grid;
+  grid-template-columns: 80px 200px 100px 200px;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border-bottom: 1px solid #ccc;
+  background-color: #9cd3dc;
 }
 
 /* 블록 내의 항목명 스타일 */
