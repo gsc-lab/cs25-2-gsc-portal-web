@@ -7,16 +7,27 @@ export const useProfessorStore = defineStore('professors', {
     professors: []
   }),
   actions: {
+    // ----------------------- professors -----------------------
+    // [ set ] : professors 세팅
     async setProfessors() {
       this.professors = await getProfessors();
-      console.log("store: set", this.professors);
     },
-    searchProfessorsId(name) {
+    // [ get ] : professors조회
+    async getProfessors() {
       if (this.professors.length <= 0) {
-        this.setProfessors()
+        await this.setProfessors()
+      }
+      console.log(this.professors);
+      return this.professors
+    },
+
+    // [ search ] : name -> user_id
+    async searchProfessorsId(name) {
+      if (this.professors.length <= 0) {
+        await this.setProfessors()
       }
       const prfRow = this.professors.filter((prf) => prf.name == name)
-      // console.log("store", name, prfRow);
+      // console.log("store", prfRow[0].user_id);
       return prfRow[0].user_id
     },
   }

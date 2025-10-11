@@ -1,60 +1,53 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useTimetableStore } from '@/stores/timetable';
 import { useProfessorStore } from '@/stores/auth';
 import { postCourse } from '@/api/timetableApi';
 
-const TTstore = useTimetableStore();
-const PFstore = useProfessorStore();
-
-const timetableData = ref()
-const professors = PFstore.professors
-console.log("professors", professors);
-
-const targetData = ref("");
-const fetchTarget = () => {
-  if (timetableData?.value[0][0].val?.event) {
-    targetData.value = timetableData.value[0][0].val.event
-  } else {
-    targetData.value = timetableData.value[0][0].grade
-  }
-  console.log(timetableData.value)
-  console.log("targetData", targetData.value);
-}
+const Tstore = useTimetableStore();
+const Pstore = useProfessorStore();
+const professors = ref()            // 교수 명단
+onMounted(async () => {
+  professors.value = await Pstore.getProfessors()
+  console.log("professors", professors.value);
+})
 
 // 값 저장
 const postCourseData = ref({
   target: null,
+  course_id: null,
   course: null,
   professor_id: null,
   section: null
 })
 
+// ================================= 데이터 초기화 =================================
 // selectTT를 감시하고 timetableData 갱신
-watch(() => TTstore.selectTT, (newVal) => {
-  if (newVal?.[0]?.[0]) {
-    console.log("정상값:", newVal[0][0])
-    timetableData.value = newVal;
-    fetchTarget()
+watch(() => Tstore.selectTT, (timetableData) => {
+  if (timetableData) {
+    console.log("정상값:", timetableData.schedule?.professor)
 
     // 값 세팅
     postCourseData.value = {
-      target: targetData.value,
-      course: newVal[0][0].schedule?.title ?? null,
-      professor_id: newVal[0][0].schedule?.professor ?? null,
-      section: null
+      target: timetableData.target,
+      course_id: timetableData.schedule?.course_id ?? null,
+      course: timetableData.schedule?.title ?? null,
+      professor_id: timetableData.schedule?.professor_id ?? null,
     }
   } else {
     console.log("아직 데이터 없음")
   }
 }, { immediate: true })
 
+
+// ================================= Submit =================================
 // 저장버튼 누른 후 실행
 const handleSubmit = (async () => {
   console.log(postCourseData.value);
   await postCourse(postCourseData.value)
+  await Tstore.setCourses()
 })
-
+// ===================================================================================
 </script>
 
 <template>

@@ -1,85 +1,55 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
-import { getClassrooms } from '@/api/classroomApi';
+import { useClassroomStore } from '@/stores/classroom';
 import { useTimetableStore } from '@/stores/timetable';
-import { postTimetable, getCourses } from '@/api/timetableApi';
+import { postTimetable,} from '@/api/timetableApi';
 
-const store = useTimetableStore();
-const timetableData = ref();
-const classrooms = ref();
-const courses = ref();
+const Tstore = useTimetableStore();    // 시간표 store
+const Cstore = useClassroomStore();    // 장소 store
+const courses = ref();                 // 필터링 과목
+const classrooms = ref(null)           // 원본 교실
+// const classes = ref()                // 분반 클래스 목록
+onMounted(async () => {
+  classrooms.value = await Cstore.getClassroom()      // 원본 교실 정의
+  // classes.value = await getLevels()
+  console.log("originCourses", originCourses.value);
+})
+
 
 // 초기화
 const days = ["월", "화", "수", "목", "금"];
 const enDays = ["MON", "TUE", "WED", "THU", "FRI"];
-onMounted(async () => {
-  courses.value = await getCourses();
-  classrooms.value = await getClassrooms();
-  console.log("test");
-})
-const classroomName = ref("");
-const selectRoom = ref();
-const startTime = ref()
-const endTime = ref()
+
+const spClassName = ref("");     // 분반 반이름
+const classroomName = ref("");   // 교실 이름
+
 
 // 값 저장
 const postTimetableData = ref({
   target: null,
   room_id: null,
   course_id: null,
+  spClass_id: null,
   day: null,
   startTime: null,
   endTime: null
 })
+
 // ================================= 데이터 초기화 =================================
-// 시간 저장
-// 작은 값 : startTime ,  큰 값 : endTime
-const lengthHour = () => {
-  const len = timetableData.value.length
-  console.log("time", len);
-  if (timetableData.value?.[0].hour > timetableData.value?.[len - 1].hour) {
-    startTime.value = timetableData.value?.[len - 1].hour
-    endTime.value = timetableData.value?.[0].hour
-  } else {
-    startTime.value = timetableData.value?.[0].hour
-    endTime.value = timetableData.value?.[len - 1].hour
-  }
-}
-
-const setRoomName = () => {
-  const room = classrooms.value.filter((room) => room.label == timetableData.value?.[0].schedule?.room)
-  console.log("room", room);
-  selectRoom.value = room[0]
-}
-
-
-// target 바뀌면 해당 과목 필터링
-watch(
-  () => postTimetableData.value.target,
-  (target) => {
-    console.log("postTimetableData.target", target);
-  })
-
 // selectTT를 감시하고 timetableData 갱신
-watch(() => store.selectTT, (newVal) => {
-  if (newVal?.[0]?.[0]) {
-    console.log("정상값:", newVal[0][0])
-    timetableData.value = newVal[0];
-    lengthHour()
-
-    if (timetableData.value?.[0].schedule) {
-      setRoomName()
-    }
-    console.log("selectRoom", selectRoom.value);
+watch(() => Tstore.selectTT, async (timetableData) => {
+  if (timetableData) {
+    console.log("-------------------------");
+    console.log("정상값:", timetableData)
 
     // 값 세팅
     postTimetableData.value = {
-      target: timetableData.value[0].grade,
-      room_id: selectRoom.value?.classroom_id ?? null,
-      course_id: timetableData.value[0].schedule?.course_id ?? null,
-      day: timetableData.value[0].day,
-      startTime: startTime.value,
-      endTime: endTime.value
+      target: timetableData.target,
+      room_id: timetableData.schedule?.room_id ?? null,
+      course_id: timetableData.schedule?.course_id ?? null,
+      day: timetableData.day,
+      startTime: timetableData.startTime,
+      endTime: timetableData.endTime
     }
   } else {
     console.log("아직 데이터 없음")
@@ -87,6 +57,18 @@ watch(() => store.selectTT, (newVal) => {
 }, { immediate: true })
 
 
+// ================================= target 감시 =================================
+// target 바뀌면 해당 과목 필터링
+watch(
+  () => postTimetableData.value.target,
+  async (target) => {
+    courses.value = await Tstore.courseFilter(target)
+    if (target == 'special') {
+      // target에 맞게 classes 정의
+    }
+  }, { immediate: true })
+
+// ================================= Submit =================================
 // 저장버튼 누른 후 실행
 const handleSubmit = async () => {
   if (postTimetableData.value.room_id == "") {
@@ -94,10 +76,13 @@ const handleSubmit = async () => {
   }
   console.log("등록", postTimetableData.value);
   await postTimetable(postTimetableData.value)
+  await Tstore.setTimetable();
 }
+// ===================================================================================
 </script>
 
 <template>
+  <!-- --------------------------------------------------------------------------- -->
   TimetableRegister
 
   <!-- Grade 등 선택 -->
@@ -124,6 +109,21 @@ const handleSubmit = async () => {
     <select id="course" v-model="postTimetableData.course_id">
       <option v-for="course in courses" :value="course.course_id">{{ course.title }}</option>
     </select>
+  </div>
+
+  <!-- 특강이면 그룹 저장 / 없으면 등록 -->
+  <div v-if="postTimetableData.target == 'special'">
+    <label for="">반 : </label>
+    <select id="" v-model="postTimetableData.spClass_id">
+      <!-- <option v-for="c in classes" :key="c.class_id" :value="c.class_id">
+        {{ c.name }}
+      </option> -->
+      <option value="">기타</option>
+    </select>
+    <div v-if="postTimetableData.spClass_id == ''" >
+      <label for="spClassName">반 이름 입력 : </label>
+      <input  id="spClassName" v-model="spClassName">
+    </div>
   </div>
 
   <!-- 요일 -->

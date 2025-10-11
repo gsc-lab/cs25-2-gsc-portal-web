@@ -78,7 +78,7 @@ export const getCourses = async () => {
 // 시간표 정보 조회
 //
 // ---------------------------------------------------------------
-export const getTimetable = async () => {
+export const getAdminTimetable = async (today) => {
   try {
     const res = await api.get(`/timetables/admin`, {
       params: {
@@ -87,6 +87,20 @@ export const getTimetable = async () => {
     })
     console.log("시간표 정보 조회", res.data);
     return res.data;
+  } catch (e) {
+    errorMsg(e);
+  }
+}
+
+// ---------------------------------------------------------------
+// 휴보강 이력 조회
+//
+// ---------------------------------------------------------------
+export const getEvent = async () => {
+  try {
+    const res = await api.get(`/timetables/events`)
+    console.log("휴보강 이력", res.data);
+    return res.data.result;
   } catch (e) {
     errorMsg(e);
   }
@@ -107,6 +121,27 @@ export const getTimetable = async () => {
 export const getCancelSchedule = async (grade) => {
   try{
     const res = await api.get(`/modal/subjects/holidays?grade_id=${grade}`)
+    return res.data;
+  } catch (e) {
+    errorMsg(e);
+  }
+}
+
+// ---------------------------------------------------------------
+// 휴강 정보 조회
+/* {
+    "event_id": "E001",
+    "event_date": "2025-04-15",
+    "course_title": "인공지능 개론",
+    "grade_id": "2",
+    "period": "1",
+    "start_time": "09:00:00",
+    "end_time": "09:50:00"
+  },*/
+// ---------------------------------------------------------------
+export const getLevels = async () => {
+  try{
+    const res = await api.get(`/modal/levels`)
     return res.data;
   } catch (e) {
     errorMsg(e);

@@ -1,17 +1,31 @@
 <script setup>
 import StudentsSelect from '@/layouts/StudentsSelect.vue';
 import { getUsers, setTarget } from '@/api/Data';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
+import { useTimetableStore } from '@/stores/timetable';
+
+const Tstore = useTimetableStore();          // 시간표 store
 
 // 초기화
-const selectType = ref("default");
+const selectType = ref("default");         // 기본(default) / 날짜 지정(pick)
 const days = ["월", "화", "수", "목", "금"];
-const enDays = ["Mon", "Tue", "Wed", "Thu", "Fri"];
-// api정보 가져오기
-const users = getUsers();
-// 선택 학생 정보 저장
-const selectedUsers = ref([]);
+const enDays = ["MON", "TUE", "WED", "THU", "FRI"];
 
+// api
+const users = getUsers();                 // 학생 명단
+const selectedUsers = ref([]);            // 선택 학생 정보 저장
+
+// 값 저장
+const postFukaData = ref({
+  date: null,
+  day: null,
+  room: "정보관 403",
+  startTime: null,
+  endTime: null,
+  students: selectedUsers._rawValue
+})
+
+// ================================= 학생 선택 =================================
 // 학생 id를 받고 selectedUsers에 저장
 const handleSelect = (id) => {
   const selectedUser = users.filter((user) => user.user_id == id);
@@ -26,14 +40,26 @@ const handleDelete = (id) => {
   // console.log(selectedUsers.value);
 }
 
-// 값 저장
-const postFukaData = ref({
-  day: null,
-  room: "정보관 403",
-  time: { start: null, end: null },
-  students: selectedUsers._rawValue
-})
+// ================================= store 감시 =================================
+// selectTT를 감시하고 timetableData 갱신
+watch(() => Tstore.selectTT, (timetableData) => {
+  if (timetableData) {
+    console.log("-------------------------");
+    console.log("정상값:", timetableData)
 
+    // 값 세팅
+    postFukaData.value = {
+      date: timetableData.date,
+      day: timetableData.day,
+      startTime: timetableData.startTime,
+      endTime: timetableData.endTime
+    }
+  } else {
+    console.log("아직 데이터 없음")
+  }
+}, { immediate: true })
+
+// ================================= 등록 =================================
 // 저장버튼 누른 후 실행
 const handleSubmit = () => {
   console.log(postFukaData.value);
@@ -61,7 +87,7 @@ const handleSubmit = () => {
   </div>
   <div v-else>
     <label for="date">날짜 : </label>
-    <input type="date" id="date" v-model="postFukaData.day">
+    <input type="date" id="date" v-model="postFukaData.date">
   </div>
 
   <!-- 장소 -->
@@ -73,11 +99,11 @@ const handleSubmit = () => {
   <!-- 교시 -->
   <div>
     <label for="time">교시 : </label>
-    <select id="time" v-model="postFukaData.time.start">
+    <select id="time" v-model="postFukaData.startTime">
       <option v-for="startT in 12" :value="String(startT)">{{ startT }}</option>
     </select>
     ~
-    <select id="time" v-model="postFukaData.time.end">
+    <select id="time" v-model="postFukaData.endTime">
       <option v-for="endT in 12" :value="String(endT)">{{ endT }}</option>
     </select>
     교시

@@ -1,30 +1,25 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
-import { getClassrooms } from '@/api/classroomApi';
-import { getCancelSchedule, getCourses, postEvent } from '@/api/timetableApi';
+import { getCancelSchedule, postEvent } from '@/api/timetableApi';
 import { useTimetableStore } from '@/stores/timetable';
+import { useClassroomStore } from '@/stores/classroom';
 
-const store = useTimetableStore();          // 시간표 store
-const timetableData = ref();                // 사용자가 선택한 셀 내용 임시 저장
-const classrooms = ref();
-const courses = ref();
+const Tstore = useTimetableStore();    // 시간표 store
+const Cstore = useClassroomStore();    // 장소 store
 
-// api에서 정보 가져오기
+const courses = ref();                 // target필터링 과목들
+const classrooms = ref(null)           // 장소
 onMounted(async () => {
-  classrooms.value = await getClassrooms(); // 교실 리스트 -> { classroom_id: "101", label: "본관-101" }
-  courses.value = await getCourses();       // 과목 리스트 -> { course_id: "C001", courseTitle: "인공지능 개론", grade_id: "1"}
-  console.log("classrooms:", classrooms.value);
-  console.log("courses:", courses.value);
-});
+  classrooms.value = await Cstore.getClassroom()
+})
 
 
 // 장소 입력시 저장
-const classroomName = ref("");             // 기타의 교실 이름
-const startTime = ref()                    // 시작교시
-const endTime = ref()                      // 종료 교시
-const canceledSchedule = ref(null);        // [보강] 휴강의 스케줄
-const selectMakeup = ref([]);              // [보강] 등록할 휴강 스케줄 (schedule_id)
-const cancelMap = ref(null);                   // [보강] 과목 필터링 후 휴강 스케줄
+const classroomName = ref("");          // 기타의 교실 이름
+const canceledSchedule = ref(null);     // [보강] 휴강의 스케줄
+const selectMakeup = ref([]);           // [보강] 등록할 휴강 스케줄 (event_id)
+const cancelMap = ref([]);              // [보강] 과목 필터링 후 휴강 스케줄
+
 
 // 값 저장
 const postSpecialData = ref({
@@ -36,71 +31,23 @@ const postSpecialData = ref({
   endTime: null,
   classroom_label: null
 })
-
-// ================================= 휴 보강 =================================
-// 휴강인지 채크 보강이면 휴강의 스케줄 조회 -> true/false
-const isCANCEL = async () => {
-  console.log("schedule::", timetableData.value?.[0].schedule?.course_id);
-  if (timetableData.value?.[0].schedule?.course_id) {
-    return true
-  }
-  // 해당 학년의 휴강 스케줄 조회
-  console.log("학년", timetableData.value[0].grade);
-  canceledSchedule.value = await getCancelSchedule(3);
-  cancelMap.value = { ...canceledSchedule.value }
-  console.log("canceledSchedule.value", canceledSchedule.value);
-  return false
-}
-
-// 과목을 선택하면 해당 휴강 스케줄 반영
-const handleCourseSelect = (e) => {
-  if (postSpecialData.event === 'CANCEL') return
-  console.log("newCourse", e.target.value);
-  const row =  canceledSchedule.value.filter((cancel) => cancel.course_title == e.target.value)
-    console.log(row);
-  cancelMap.value = row
-}
-
 // ================================= 데이터 초기화 =================================
-// 시간 저장
-// 작은 값 : startTime ,  큰 값 : endTime
-const lengthHour = () => {
-  const len = timetableData.value.length
-  if (timetableData.value?.[0].hour > timetableData.value?.[len - 1].hour) {
-    startTime.value = timetableData.value?.[len - 1].hour
-    endTime.value = timetableData.value?.[0].hour
-  } else {
-    startTime.value = timetableData.value?.[0].hour
-    endTime.value = timetableData.value?.[len - 1].hour
-  }
-}
-
-// 장소 이름 저장
-const setRoomName = () => {
-  if(!timetableData.value?.[0]?.schedule?.room) return
-  const room = classrooms.value.filter((room) => room.label == timetableData.value?.[0]?.schedule?.room)
-  // console.log("room", room[0]);
-  return room[0]
-}
-
 // selectTT를 감시하고 timetableData 갱신
-watch(() => store.selectTT, async (newVal) => {
-  if (newVal?.[0]?.[0]) {
-    console.log("정상값:", newVal[0][0])
-    timetableData.value = newVal[0];    // 선택 된 데이터 대입
-    lengthHour()                        // 교시 설정
-    const selectRoom = setRoomName()    // 장소 조회 { classroom_id: "101", label: "본관-101" }
+watch(() => Tstore.selectTT, async (timetableData) => {
+  if (timetableData) {
+    console.log("정상값:", timetableData)
 
-    const cancel = await isCANCEL();    // 휴강인지 조회 (true/false) / 보강이면 휴강 스케줄 세팅
-    console.log("cancelMap", cancelMap);
+    courses.value = await Tstore.courseFilter(timetableData.target)
+    console.log("courses", courses.value);
     // 값 세팅
     postSpecialData.value = {
-      target: timetableData.value[0].grade,
-      event: cancel ? "CANCEL" : "MAKEUP",
-      course_id: timetableData.value[0].schedule?.course_id ?? null,
-      startTime: startTime.value,
-      endTime: endTime.value,
-      classroom_label: selectRoom?.label ?? null,
+      target: timetableData.target,
+      event: timetableData.schedule ? "CANCEL" : "MAKEUP",
+      course_id: timetableData.schedule?.course_id ?? null,
+      date: timetableData.date,
+      startTime: timetableData.startTime,
+      endTime: timetableData.endTime,
+      classroom_label: timetableData.label ?? null,
     }
   } else {
     console.log("아직 데이터 없음")
@@ -108,21 +55,35 @@ watch(() => store.selectTT, async (newVal) => {
 }, { immediate: true })
 
 
+// ================================= target 감시 =================================
+// 보강일 때 학년을 선택하면 해당학년의 휴강정보 조회
+watch(() => postSpecialData.value.target, async (newTarget) => {
+  // 학년의 과목 조회
+  courses.value = await Tstore.courseFilter(newTarget)
+  if (postSpecialData.value.event === 'MAKEUP') {
+    // 해당 학년의 휴강 스케줄 조회
+    canceledSchedule.value = await getCancelSchedule(newTarget);
+    cancelMap.value = { ...canceledSchedule.value }
+    console.log("canceledSchedule.value", canceledSchedule.value);
+  }
+})
 
-// ================================= post =================================
+// ==================================  post  ==================================
 // 저장버튼 누른 후 실행
-const handleSubmit = () => {
-  // 기타면 classroomName대입
+const handleSubmit = async () => {
+  // 기타면 classroomName 대입
   if (postSpecialData.value.classroom_label == "") {
     postSpecialData.value.classroom_label = classroomName.value;
   }
   if (postSpecialData.value.event == "MAKEUP") {
+    // selectMakeup 대입
     postSpecialData.value.course_id = selectMakeup.value
   }
-  console.log(postSpecialData.value);
-  postEvent(postSpecialData.value)
+  // console.log(postSpecialData.value);
+  await postEvent(postSpecialData.value)
+  await Tstore.setTimeTable();
 }
-
+// ==========================================================================================
 </script>
 
 
@@ -161,20 +122,12 @@ const handleSubmit = () => {
     <input type="date" id="date" v-model="postSpecialData.date">
   </div>
 
-  <!-- 과목
+
+  <!-- -------------------------------------- 과목 설정 ---------------------------------------------
     CANCEL : course_id
-    MAKEUP : schedule_id  (handleCourseSelect() -> e.target.value = course.title)
+    MAKEUP : event_id  selectMakeup에 저장
   -->
-  <div>
-    <label for="course">과목 : </label>
-    <select id="course" v-model="postSpecialData.course_id" @change="handleCourseSelect">
-      <option v-for="course in courses"
-        :value="postSpecialData.event == 'CANCEL' ? course.course_id : course.title">
-        {{ course.title }}
-      </option>
-    </select>
-  </div>
-  <!-- 보강 등록시 휴강과목 선택 -->
+  <!-- --------------  보강 --------------- -->
   <div v-if="postSpecialData.event === 'MAKEUP' ">
     <p>휴강과목 :</p>
     <div v-if="Object.keys(cancelMap).length > 0">
@@ -188,6 +141,17 @@ const handleSubmit = () => {
       <p>해당 과목의 휴강 이력이 없음</p>
     </div>
   </div>
+  <!-- --------------  휴강 --------------- -->
+  <div v-else>
+    <label for="course">과목 : </label>
+    <select id="course" v-model="postSpecialData.course_id">
+      <option v-for="course in courses"
+        :value="course.course_id">
+        {{ course.title }}
+      </option>
+    </select>
+  </div>
+  <!-- -------------------------------------------------------------------------------------- -->
 
   <!-- 교시 (post: int형)-->
   <div>
