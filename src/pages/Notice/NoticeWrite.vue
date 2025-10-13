@@ -3,25 +3,49 @@
     <!-- 헤더 -->
     <div class="notice-detail-header">
       <span>공지사항 작성</span>
+      <button @click="modalOpen = true">공지사항 알림 대상 설정</button>
+      <!-- 공지사항 알림 대상 모달 생성 -->
+      <teleport to="body">
+        <div v-if="modalOpen" class="modal">
+          <p>대상 설정 모달</p>
+          <button>전체</button>
+          <button>1학년</button>
+          <button>2학년</button>
+          <button>3학년</button>
+          <div>
+            <div>
+              <input type="checkbox" />
+              <span>사용자 이름 1</span>
+            </div>
+            <div>
+              <input type="checkbox" />
+              <span>사용자 이름 2</span>
+            </div>
+
+          </div>
+          <button @click="modalOpen = false">닫기</button>
+        </div>
+      </teleport>
     </div>
 
     <!-- 제목 -->
     <div class="notice-detail-section-title">
       <div>제목</div>
       <div>중요</div>
-      <input type="checkbox" v-model="isImportant" />
-      <input type="text" value="공지사항 제목" />
-    </div>
-
-    <div class="notice-detail-section-author">
-      <div>작성자</div>
-      <!-- 로그인 정보 확인 후 이름 자동 입력 기능 구현 -->
-      <input type="text" value="공지사항 작성자">
+      <input type="checkbox" v-model="isImportant" @click="handleImportant" />
+      <input type="text" value="공지사항 제목" v-model="title" />
     </div>
 
     <!-- 작성자 -->
+    <div class="notice-detail-section-author">
+      <div>작성자</div>
+      <!-- 로그인 정보 확인 후 이름 자동 입력 기능 구현 -->
+      <input type="text" value="공지사항 작성자" v-model="author" />
+    </div>
+
+    <!-- 학년 -->
     <div class="notice-detail-section-select">
-      <div>대상</div>
+      <div>학년</div>
       <select v-model="gradeCheck">
         <option v-for="grade in grades" :key="grade.grade_id" :value="grade.grade_id">
           {{ grade.grade_id === '전체' ? grade.grade_id : grade.grade_id + '학년' }}
@@ -33,14 +57,14 @@
       <div>과목유형</div>
       <select v-model="courseTypeCheck">
         <option v-for="courseT in courseType" :key="courseT" :value="courseT.course_type">
-          {{ courseT.course_type === 'regular' ? '정규' : '특강' }}
+          {{ courseT.course_type === 'regular' ? '정규' : courseT.course_type === 'special' ? '특강' : '전체' }}
         </option>
       </select>
     </div>
-    <!-- 과목 유형에 따른 과목 필터링 -->
+    <!-- 학년, 과목 유형에 따른 과목 필터링 -->
     <div class="notice-detail-section-select">
       <div>과목</div>
-      <select v-if="filterCourse.length">
+      <select v-if="filterCourse.length" v-model="course_title">
         <option v-for="course in filterCourse" :key="course.course_id" :value="course.course_id">{{ course.title }}
         </option>
       </select>
@@ -49,32 +73,66 @@
     <!-- 첨부파일 -->
     <div class="notice-detail-files">
       <span>첨부파일</span>
-      <input type="file">
+      <input type="file" multiple @change="handleFiles" />
+      <ul>
+        <li v-for="(file, index) in files" :key="index">
+          {{ file.name }} ( {{ (file.size / 1024).toFixed(1) }} KB)
+          <button @click="removeFile(index)">삭제</button>
+        </li>
+      </ul>
     </div>
 
     <!-- 내용 -->
     <div class="notice-detail-content">
+      <textarea value="내용을 입력하세요" v-model="content"></textarea>
     </div>
 
-    <!-- 하단 버튼 -->
+    <!-- 등록, 뒤로 버튼 -->
     <div class="notice-detail-footer">
-      <button class="register-btn">등록하기</button>
+      <button class="register-btn" @click="submitNotice">등록하기</button>
       <button class="back-btn">뒤로</button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { course_type, getCourse, gradeList } from '@/api/apiNotice';
+import { course_type, createNoticeFile, getCourse, gradeList } from '@/api/apiNotice';
+import router from '@/router';
 import { computed, onMounted, ref } from 'vue';
 
+const title = ref('') // 제목
+const isImportant = ref(false); // 중요
+const author = ref('') // 작성자
+const gradeCheck = ref('전체'); // 학년 선택
+const courseTypeCheck = ref('general') // select 태그에서 선택시 변경 : 기본값 regular
+const course_title = ref('') // 과목 명
+const files = ref([]) // 파일 배열
+const content = ref('') // 내용
 
-const courses = ref([])
-const grades = ref([])
-const isImportant = ref(false);
-const gradeCheck = ref('전체');
+const courses = ref([]) // 과목 선택 배열
+const grades = ref([]) // 학년 저장 배열
 const courseType = ref([]) // 과목 타입 저장 배열 : 'regular' , 'special'
-const courseTypeCheck = ref('regular') // select 태그에서 선택시 변경 : 기본값 regular
+
+const modalOpen = ref(false);
+
+// const users = ref([]);
+
+onMounted(async () => {
+  try {
+    courses.value = await getCourse();
+    grades.value = gradeList();
+    courseType.value = course_type()
+    // users.value = getAllUser();
+    console.log("과목 목록", courses.value)
+    // console.log("학생 정보", users.value)
+  } catch (err) {
+    console.error("데이터 로드 실패", err)
+  }
+})
+
+const handleImportant = () => {
+  isImportant.value = true
+}
 
 const filterCourse = computed(() => {
   // if (gradeCheck.value === '전체') return courses.value
@@ -86,18 +144,51 @@ const filterCourse = computed(() => {
   }
 })
 
-onMounted(async () => {
-  try {
-    courses.value = await getCourse();
-    grades.value = gradeList();
-    courseType.value = course_type()
-    console.log(courses.value)
-  } catch (err) {
-    console.error("데이터 로드 실패", err)
-  }
-})
+const selectedCourse = computed(() =>
+  courses.value.find((c) => c.course_id === course_title.value)
+)
 
-console.log(courses)
+const handleFiles = (event) => {
+  const selected = event.target.files;
+  files.value = [...files.value, ...selected]
+}
+
+const removeFile = (index) => {
+  files.value.splice(index, 1)
+}
+
+// 공지사항 등록 ( API POST 요청 )
+const submitNotice = async () => {
+  if (title.value === '' || content.value === '') {
+    alert('제목 및 내용을 입력해주세요')
+    return
+  }
+  const noticeData = {
+    title: title.value,
+    author: author.value,
+    // 타켓이 없을 경우 빈 객체로 전달해야 함 !
+    targets: [
+      {
+        grade_id: gradeCheck.value,
+        class_id: null,
+        language_id: null,
+      }
+    ],
+    course_title: course_title.value,
+    course_id: selectedCourse.value?.course_id,
+    course_type: selectedCourse.value?.course_type || courseTypeCheck.value,
+    content: content.value,
+  }
+
+  try {
+    await createNoticeFile(noticeData, files.value);
+    alert('공지사항이 업로드 되었습니다.')
+    router.push({ path: '/notice' })
+  } catch (err) {
+    console.err(err);
+    alert('업로드 중 오류가 발생했습니다.')
+  }
+}
 
 </script>
 
@@ -216,12 +307,21 @@ console.log(courses)
 /* 🧾 본문 영역 */
 .notice-detail-content {
   padding: 20px;
+  height: 200px;
   min-height: 250px;
   background-color: #f9f9f9;
   border-top: 2px solid #ddd;
   border-bottom: 2px solid #ddd;
   line-height: 1.7;
   font-size: 15px;
+}
+
+textarea {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  font-size: 20px;
 }
 
 /* 🔙 버튼 영역 */
@@ -267,5 +367,15 @@ console.log(courses)
 
 .notice-detail-footer .confirm-btn:hover {
   background-color: #9cd3dc;
+}
+
+.modal {
+  position: fixed;
+  background-color: lightgreen;
+  z-index: 999;
+  top: 20%;
+  left: 30%;
+  width: 800px;
+  margin-left: -150px;
 }
 </style>
