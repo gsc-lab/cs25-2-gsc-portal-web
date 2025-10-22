@@ -3,7 +3,8 @@
     <!-- 헤더 -->
     <div class="notice-detail-header">
       <span>공지사항 상세보기</span>
-      <button>수정</button>
+      <button @click="HandleClick(notice.notice_id)">수정</button>
+      <button @click="HandleDelete">삭제</button>
     </div>
 
     <!-- 제목 / 작성일 -->
@@ -14,7 +15,7 @@
       <div>{{ formatDate }}</div>
     </div>
 
-    <!-- 작성자 / 조회수 -->
+    <!-- 작성자 / 과목 -->
     <div class="notice-detail-section">
       <div>작성자</div>
       <div>{{ notice?.author?.name }}</div>
@@ -25,7 +26,13 @@
     <!-- 첨부파일 -->
     <div class="notice-detail-files">
       <span>첨부파일</span>
-      <div>asdasd</div>
+      <ul v-if="notice?.attachments?.length">
+        <li v-for="file in notice.attachments" :key="file.file_id">
+          <a href="#" @click.prevent.stop="fileDownLoad(file.file_id, file.file_name)">
+            {{ fixFileName(file.file_name) }}
+          </a>
+        </li>
+      </ul>
     </div>
 
     <!-- 내용 -->
@@ -35,15 +42,16 @@
 
     <!-- 하단 버튼 -->
     <div class="notice-detail-footer">
-      <button class="back-btn">뒤로</button>
+      <button class="back-btn" @click="backPage">뒤로</button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { getNoticeView } from '@/api/apiNotice';
+import { getFileDownLoad, getNoticeView } from '@/api/apiNotice';
 import { useRoute } from 'vue-router';
+import router from '@/router';
 
 const route = useRoute();
 const notice = ref(null);
@@ -73,6 +81,49 @@ const formatDate = computed(() => {
     second: '2-digit',
   })
 })
+
+const fixFileName = (str) => {
+  try {
+    return decodeURIComponent(escape(str))
+  } catch {
+    return str
+  }
+}
+
+const HandleClick = (notice_id) => {
+  console.log(notice_id)
+  router.push({ path: `/noticeEdit/${notice_id}` })
+}
+
+const fileDownLoad = async (file_id, rawName = 'download') => {
+  try {
+
+    const blob = await getFileDownLoad(file_id)
+    const contentType = blob.type || 'application/octet-stream'
+
+    let filename = fixFileName(rawName)
+    if (filename.endsWith('.htm')) {
+      filename = filename.replace(/\.htm/i, '.pdf')
+    }
+
+    const url = URL.createObjectURL(new Blob([blob], { type: contentType }))
+
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+
+  } catch (err) {
+    console.error('파일 다운로드 실패', err)
+  }
+}
+
+const backPage = () => {
+  router.back()
+}
 
 </script>
 
