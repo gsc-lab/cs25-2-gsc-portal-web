@@ -1,25 +1,75 @@
 <template>
   <section class="notice-board">
     <div class="grade-filter">
-      <button v-for="filter in filters" :key="filter" :class="['filter', { active: gradeSelectedFilter === filter }]"
-        @click="HandleFilter(filter)">
+      <button
+        v-for="filter in filters"
+        :key="filter"
+        :class="['filter', { active: gradeSelectedFilter === filter }]"
+        @click="gradeSelectedFilter = filter"
+      >
         <p v-if="filter === ''">전체</p>
         <p v-else>{{ filter + "학년" }}</p>
       </button>
-      <input class="notice-search" v-model="noticeSearch" type="text" placeholder="검색어를 입력하세요" />
-      <select>
-        <option>전체</option>
-        <option>제목</option>
-        <option>작성자</option>
-        <option>제목 + 작성자</option>
-      </select>
-      <select v-model="courseTypeCheck">
-        <option v-for="courseT in courseType" :key="courseT" :value="courseT.course_type">
-          {{ courseT.course_type === 'regular' ? '정규' : courseT.course_type === 'special' ? '특강' : courseT.course_type
-            === 'korean' ? '한국어' : '전체' }}
-        </option>
-      </select>
-      <button class="notice-search-btn" @click="titleFilter()">검색</button>
+      <input
+        class="notice-search"
+        v-model="noticeSearch"
+        type="text"
+        placeholder="검색어를 입력하세요"
+      />
+      <button
+        class="detail-filter"
+        @click="detailOpen = !detailOpen"
+      >
+        상세 필터링 설정
+      </button>
+    </div>
+    <!-- 수업 유형 선택 -->
+    <div
+      v-if="detailOpen"
+      class="detail-list"
+    >
+      <div
+        v-for="course in courseType"
+        :key="course.course_type"
+        class="filter-item"
+      >
+        <input
+          type="radio"
+          :id="`course-${course.course_type}`"
+          :value="course.course_type"
+          v-model="courseTypeCheck"
+        />
+        <label :for="`course-${course.course_type}`">
+          {{ course.course_type === 'general' ? '전체' : course.course_type === 'regular' ? '정규' : course.course_type === 'special' ? '특강' : '한국어'}}
+        </label>
+      </div>
+    </div>
+    <!-- 학년 별 과목 -->
+    <div
+      v-if="detailOpen && gradeSelectedFilter !== ''"
+      class="detail-list"
+    >
+      <template
+        v-for="course in courses"
+        :key="course.course_id"
+      >
+        <div
+          v-if="gradeSelectedFilter === course.grade_id && course.title && course.title.trim() !== '' && course.course_type === courseTypeCheck"
+          class="filter-item"
+        >
+          <div v-if="gradeSelectedFilter === course.grade_id">
+            <input
+              type="radio"
+              :id="`${course.course_id}`"
+              :value="course.course_id"
+              v-model="courseTypeCheck"
+            />
+            <label :for="course.course_id">
+              {{ course.title }}
+            </label>
+          </div>
+        </div>
+      </template>
     </div>
     <!-- 상단 헤더 -->
     <div class="notice-header">
@@ -32,10 +82,15 @@
     </div>
 
     <!-- 공지사항 리스트 -->
-    <div v-for="notice in filterNotices" :key="notice.notice_id">
-      <div class="notice-item"
+    <div
+      v-for="notice in filterNotices"
+      :key="notice.notice_id"
+    >
+      <div
+        class="notice-item"
         v-if="gradeSelectedFilter === '' || notice.targets?.[0]?.grade_id === gradeSelectedFilter"
-        @click="HandleClick(notice.notice_id)">
+        @click="HandleNoticeClick(notice.notice_id)"
+      >
         <div class="col-num">{{ notice.notice_id }}</div>
         <div class="col-title">{{ notice.title }}</div>
         <div class="col-content">{{ notice.content }}</div>
@@ -50,137 +105,104 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { course_type, getCourse, getNotice } from '@/api/apiNotice';
-import router from '@/router';
+import { computed, onMounted, ref } from "vue";
+import { course_type, getCourse, getNotice } from "@/api/apiNotice";
+import router from "@/router";
 
-const notices = ref([]); // 공지사항 저장 배열
-const noticeSearch = ref(''); // 검색어 입력값 저장
-const search = ref('') // 입력 버튼 클릭시 검색어 입력값 저장
-const filters = ref(['', '1', '2', '3']); // 전체, 학년 선택
-const gradeSelectedFilter = ref(''); // 학년선택된 값
-const courseType = ref([]); // 과목 타입 저장 (regular, special)
-const courseTypeCheck = ref('general'); // select 에서 선택시 변경 : 기본값 : 전제
+// ==========================================================
 
-const courses = ref([])
+const notices = ref([]);                  // 공지사항 저장 배열
+const noticeSearch = ref("");             // 검색어 입력값 저장
+const search = ref("");                   // 입력 버튼 클릭시 검색어 입력값 저장
+const filters = ref(["", "1", "2", "3"]); // 전체, 학년 선택
+const gradeSelectedFilter = ref("");      // 학년선택된 값
+const courseType = ref([]);               // 과목 타입 저장 (regular, special)
+const courseTypeCheck = ref("general");   // 선택된 과목 타입
+const courses = ref([]);                  // 모든 과목 데이터
+
+const detailOpen = ref(false)
+
+// ==========================================================
 
 onMounted(async () => {
-  // const res = await getNotice();
-  // notices.value = res;
-  // 공지사항 API 요청
-  const notice = await getNotice();
+  const notice = await getNotice(); // 공지사항 API 요청
+  const course = await getCourse(); // 과목 API 요청
+  courseType.value = course_type(); // 과목 타입 API 요청
 
-  const course = await getCourse();
-
-  // 과목 타입 API 요청
-  courseType.value = course_type();
-
-  courses.value = course
-
-  notices.value = notice.notices
+  courses.value = course;
+  notices.value = notice.notices;
 
   console.log("1~10번 공지:", notices.value);
-  console.log("과목 정보: ", courses.value)
-
-  // notices.value = notices.value.filter(
-  //   (n) => n.notice_id >= 1 && n.notice_id <= 10
-  // );
-
-  // console.log("1~10번 공지:", notices.value);
+  console.log("과목 정보: ", courses.value);
 });
 
+// ==========================작성날짜================================
+
 function formatDate(isoString) {
-  if (!isoString) return '';
+  if (!isoString) return "";
   const date = new Date(isoString);
   return date.toLocaleDateString("ko-KR", {
-    timeZone: 'Asia/seoul',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  })
+    timeZone: "Asia/seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 }
 
-// 필터링 로직 구현
 const filterNotices = computed(() => {
   // 학년 선택 필터링을 기준으로 공지사항 조회
   return notices.value.filter((notice) => {
-    const matchFilter = gradeSelectedFilter.value === '' ||
-      notice.targets?.[0]?.grade_id === gradeSelectedFilter.value
+    let gradeMatch = false
+    // 공지사항 course_id 가 있다! -> courses를 타고 grade_id 확인
+
+    if (notice.course_id) {
+      const course = courses.value.find((course) => {
+        course.course_id === notice.course_id
+      })
+      if (gradeSelectedFilter.value === '') {
+        gradeMatch = false
+      } else {
+        gradeMatch = course?.grade_id === gradeSelectedFilter.value
+      }
+
+    } else {
+      if (gradeSelectedFilter.value === '') {
+        gradeMatch =
+          notice.targets.length === 0 ||
+          notice.targets.some((target) => target.grade_id === null)
+      } else {
+        gradeMatch = notice.targets.some((target) => target.grade_id === gradeSelectedFilter.value)
+      }
+    }
+
+    return gradeMatch
+
+
+
+
+
+
+    // 공지사항 course_id 가 없다! -> targets 의 grade_id 값을 확인
 
     // 검색어 x : 모든 공지, 검색어 o 제목, 내용에 단어가 포함된 공지만 보여준다.
-    const matchSearch = !noticeSearch.value ||
-      notice.title.includes(search.value) ||
-      notice.content.includes(search.value);
+    // const matchSearch =
+    //   !noticeSearch.value ||
+    //   notice.title.includes(search.value) ||
+    //   notice.content.includes(search.value);
 
-    const courseTypeFilter = notice.course_type === courseTypeCheck.value;
+    // const courseTypeFilter = notice.course_type === courseTypeCheck.value;
 
-    return matchFilter && matchSearch && courseTypeFilter;
-  })
-})
+    // return allMatchFilter && grade1MatchFilter && matchSearch && courseTypeFilter;
+  });
+});
 
-// 공지사항에 course_id 가 존재하는 항목만 필터링
-// const IsCourse_idFilter = computed(() => {
-//   // course_id 가 있는 공지사항만 남기고
-//   return notices.value
-//   // notice에 course 정보를 병합
-//     .filter((notice) => !!notice.course_id)
-//     .map((notice) => {
-//       const matchCourse = courses.value.find((course) => course.course_id === notice.course_id)
-
-//       if (matchCourse) {
-//         return {
-//           ...notice,
-//           course_title: matchCourse.title,
-//           course_type: matchCourse.course_type,
-//           course_grade: matchCourse.grade_id
-//         }
-//       }
-//       return null
-//     })
-//     .filter((n) => n !== null)
-// })
-// const filterNoticeCourse = computed(() => {
-//   return notices.value.filter((notice) => {
-
-//     if (notice.course_id) {
-//       return courses.value.some(
-//         (course) => course.course_id === notice.course_id)
-//     }
-
-//     if (notice.targets && notice.targets.length > 0) {
-//       return notice.targets.some((target) => {
-//         return (
-//           target.grade_id !== null ||
-//           target.class_id !== null ||
-//           target.language_id !== null
-
-//         )
-//       })
-//     }
-
-//     return false
-//   })
-// })
-
-
-const titleFilter = () => {
-  search.value = noticeSearch.value;
-}
-
-// 선택된 학년의 값을 저장
-const HandleFilter = (value) => {
-  gradeSelectedFilter.value = value
-  console.log(gradeSelectedFilter.value)
-}
-
-const HandleClick = (notice_id) => {
-  console.log(notice_id)
-  router.push({ path: `/noticeView/${notice_id}` })
-}
-
+const HandleNoticeClick = (notice_id) => {
+  console.log(notice_id);
+  router.push({ path: `/noticeView/${notice_id}` });
+};
 </script>
 
 <style>
@@ -215,7 +237,6 @@ const HandleClick = (notice_id) => {
   border-radius: 2px;
 }
 
-
 .grade-filter .filter {
   padding: 6px 20px;
   border: none;
@@ -224,7 +245,6 @@ const HandleClick = (notice_id) => {
   cursor: pointer;
   font-weight: bold;
   transition: background 0.2s;
-
 }
 
 .grade-filter .filter:hover {
@@ -236,9 +256,20 @@ const HandleClick = (notice_id) => {
   color: #000;
 }
 
+.detail-filter {
+  padding: 6px 20px;
+  border: none;
+  border-radius: 6px;
+  background-color: rgb(255, 213, 0);
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+  margin-left: auto;
+}
+
 .notice-board {
   width: 100%;
-  max-width: 75%;
+  max-width: 1500px;
   border: 3px solid #ccc;
   border-radius: 6px;
   overflow: hidden;
@@ -280,5 +311,39 @@ const HandleClick = (notice_id) => {
 
 .notice-item .title a:hover {
   text-decoration: underline;
+}
+
+.detail-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 14px 24px;
+  background: linear-gradient(135deg, #d5e3f0, #b0c2d5);
+  font-weight: 600;
+  padding: 12px 18px;
+  border-radius: 10px;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.15);
+}
+
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  background-color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: background 0.2s, transform 0.15s;
+  cursor: pointer;
+}
+
+.filter-item:hover {
+  background-color: #f2f8ff;
+  transform: scale(1.02);
+}
+
+.filter-item input[type="radio"] {
+  accent-color: #5b7cc4;
 }
 </style>
