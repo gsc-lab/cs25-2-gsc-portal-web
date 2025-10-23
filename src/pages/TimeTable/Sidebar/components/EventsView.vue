@@ -1,5 +1,5 @@
 <script setup>
-import { getEvent } from '@/api/timetableApi';
+import { getEvent, delEvent } from '@/api/timetableApi';
 import { ref, onMounted, watch } from 'vue'
 
 const eventList = ref(null);        // 휴보강 정보
@@ -14,15 +14,21 @@ onMounted(async () => {
 
 // ================================= target 감시 =================================
 watch(() => target.value, async (newTarget) => {
-  console.log("eventList.value", eventList.value);
   if (eventList.value == null) {
     eventList.value = await getEvent();
   }
-  if(newTarget == "0") events.value = eventList.value
+  if(newTarget == "0") return events.value = eventList.value
   events.value = eventList.value.filter((course) => course.grade_id == newTarget)
   }, { immediate: true })
 
 // =================================================================================================
+
+// 삭제
+const handleDel = async (idx) => {
+  console.log(idx);
+  const res = await delEvent(idx)
+  console.log(res);
+}
 </script>
 
 <template>
@@ -48,25 +54,29 @@ watch(() => target.value, async (newTarget) => {
     <label for="korean">한국어</label>
   </div>
 
-  <table v-if="events != null">
+  <table v-if="events != null" style="border-collapse: collapse;">
     <thead>
       <tr>
-        <th>학년</th>
-        <th>휴/보</th>
-        <th>과목</th>
-        <th>날짜</th>
-        <th>시작 시간</th>
-        <th>종료 시간</th>
+        <th style="border: 1px solid #000; padding: 10px;">학년</th>
+        <th style="border: 1px solid #000; padding: 10px;">휴/보</th>
+        <th style="border: 1px solid #000; padding: 10px;">과목</th>
+        <th style="border: 1px solid #000; padding: 10px;">날짜</th>
+        <th style="border: 1px solid #000; padding: 10px;">시작 시간</th>
+        <th style="border: 1px solid #000; padding: 10px;">종료 시간</th>
+        <th style="border: 1px solid #000; padding: 10px;">삭제</th>
       </tr>
     </thead>
     <tbody>
-      <tr v-for="event in events">
-        <td>{{ event.grade_name }}</td>
-        <td>{{ event.event_status == "CANCEL" ? "휴강" : "보강" }}</td>
-        <td>{{ event.course_title }}</td>
-        <td>{{ event.event_date }}</td>
-        <td>{{ event.start_time }}</td>
-        <td>{{ event.end_time }}</td>
+      <tr v-for="event, idx in events">
+        <td style="border: 1px solid #000; padding: 10px; user-select: none;">{{ event.grade_name }}</td>
+        <td style="border: 1px solid #000; padding: 10px; user-select: none;">{{ event.event_status == "CANCEL" ? "휴강" : "보강" }}</td>
+        <td style="border: 1px solid #000; padding: 10px; user-select: none;">{{ event.course_title }}</td>
+        <td style="border: 1px solid #000; padding: 10px; user-select: none;">{{ event.event_date }}</td>
+        <td style="border: 1px solid #000; padding: 10px; user-select: none;">{{ event.start_time }}</td>
+        <td style="border: 1px solid #000; padding: 10px; user-select: none;">{{ event.end_time }}</td>
+        <td style="border: 1px solid #000; padding: 10px; user-select: none;">
+          <button @click="handleDel(idx)">삭제</button>
+        </td>
       </tr>
     </tbody>
   </table>

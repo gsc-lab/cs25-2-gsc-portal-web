@@ -147,3 +147,27 @@ export const getLevels = async () => {
     errorMsg(e);
   }
 }
+
+// ========================== DEL ===============================
+// ---------------------------------------------------------------
+// 과목 삭제
+// ---------------------------------------------------------------
+export const delCourse = async (course_id) => {
+  try{
+    const res = await api.del(`/timetables/courses/${course_id}`)
+    return res.data;
+  } catch (e) {
+    errorMsg(e);
+  }
+}
+// ---------------------------------------------------------------
+// 휴보강 삭제
+// ---------------------------------------------------------------
+export const delEvent = async (id) => {
+  try{
+    const res = await api.del(`/timetables/events/${id}`)
+    return res.data;
+  } catch (e) {
+    errorMsg(e);
+  }
+}
