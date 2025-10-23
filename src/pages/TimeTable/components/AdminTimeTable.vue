@@ -166,9 +166,9 @@ function endSelection() {
               style="border: 1px solid #000; padding: 10px; user-select: none;"
             >
             <!-- 과목 / 교수 / 장소 -->
-              <p>{{timetableData?.[String(g)][d][String(hour)][0]?.title}}</p>
-              <p>{{timetableData?.[String(g)][d][String(hour)][0]?.professor}}</p>
-              <p>{{timetableData?.[String(g)][d][String(hour)][0]?.room}}</p>
+              <p>{{timetableData?.[String(g)]?.[d][String(hour)][0]?.title}}</p>
+              <p>{{timetableData?.[String(g)]?.[d][String(hour)][0]?.professor}}</p>
+              <p>{{timetableData?.[String(g)]?.[d][String(hour)][0]?.room}}</p>
             </td>
           </template>
         </tr>

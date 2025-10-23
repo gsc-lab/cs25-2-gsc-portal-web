@@ -81,7 +81,7 @@ const handleSubmit = async () => {
   }
   // console.log(postSpecialData.value);
   await postEvent(postSpecialData.value)
-  await Tstore.setTimeTable();
+  await Tstore.setTimetable()
 }
 // ==========================================================================================
 </script>
@@ -133,7 +133,7 @@ const handleSubmit = async () => {
     <div v-if="Object.keys(cancelMap).length > 0">
       <div v-for="course in cancelMap" :key="course.event_id">
         <input type="checkbox"  :value="course.event_id" v-model="selectMakeup"/>
-        <label for="course">{{ course.course_title }}:  {{ course.event_date }}, {{ course.period }}교시</label>
+        <label for="course">{{ course.course_title }}:  {{ course.event_date }}, {{ course.start_time }}교시</label>
       </div>
     </div>
     <!-- 휴강 과목 없음 -->
