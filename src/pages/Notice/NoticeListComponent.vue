@@ -47,12 +47,11 @@
       </div>
     </div>
   </section>
-
 </template>
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { course_type, getNotice } from '@/api/apiNotice';
+import { course_type, getCourse, getNotice } from '@/api/apiNotice';
 import router from '@/router';
 
 const notices = ref([]); // 공지사항 저장 배열
@@ -63,15 +62,25 @@ const gradeSelectedFilter = ref(''); // 학년선택된 값
 const courseType = ref([]); // 과목 타입 저장 (regular, special)
 const courseTypeCheck = ref('general'); // select 에서 선택시 변경 : 기본값 : 전제
 
+const courses = ref([])
+
 onMounted(async () => {
   // const res = await getNotice();
   // notices.value = res;
   // 공지사항 API 요청
   const notice = await getNotice();
 
+  const course = await getCourse();
+
+  // 과목 타입 API 요청
   courseType.value = course_type();
-  notices.value = notice
+
+  courses.value = course
+
+  notices.value = notice.notices
+
   console.log("1~10번 공지:", notices.value);
+  console.log("과목 정보: ", courses.value)
 
   // notices.value = notices.value.filter(
   //   (n) => n.notice_id >= 1 && n.notice_id <= 10
@@ -94,14 +103,12 @@ function formatDate(isoString) {
   })
 }
 
-console.log(formatDate)
-
 // 필터링 로직 구현
 const filterNotices = computed(() => {
   // 학년 선택 필터링을 기준으로 공지사항 조회
   return notices.value.filter((notice) => {
     const matchFilter = gradeSelectedFilter.value === '' ||
-      notice.targets?.[0]?.grade_id === gradeSelectedFilter.value;
+      notice.targets?.[0]?.grade_id === gradeSelectedFilter.value
 
     // 검색어 x : 모든 공지, 검색어 o 제목, 내용에 단어가 포함된 공지만 보여준다.
     const matchSearch = !noticeSearch.value ||
@@ -113,6 +120,51 @@ const filterNotices = computed(() => {
     return matchFilter && matchSearch && courseTypeFilter;
   })
 })
+
+// 공지사항에 course_id 가 존재하는 항목만 필터링
+// const IsCourse_idFilter = computed(() => {
+//   // course_id 가 있는 공지사항만 남기고
+//   return notices.value
+//   // notice에 course 정보를 병합
+//     .filter((notice) => !!notice.course_id)
+//     .map((notice) => {
+//       const matchCourse = courses.value.find((course) => course.course_id === notice.course_id)
+
+//       if (matchCourse) {
+//         return {
+//           ...notice,
+//           course_title: matchCourse.title,
+//           course_type: matchCourse.course_type,
+//           course_grade: matchCourse.grade_id
+//         }
+//       }
+//       return null
+//     })
+//     .filter((n) => n !== null)
+// })
+// const filterNoticeCourse = computed(() => {
+//   return notices.value.filter((notice) => {
+
+//     if (notice.course_id) {
+//       return courses.value.some(
+//         (course) => course.course_id === notice.course_id)
+//     }
+
+//     if (notice.targets && notice.targets.length > 0) {
+//       return notice.targets.some((target) => {
+//         return (
+//           target.grade_id !== null ||
+//           target.class_id !== null ||
+//           target.language_id !== null
+
+//         )
+//       })
+//     }
+
+//     return false
+//   })
+// })
+
 
 const titleFilter = () => {
   search.value = noticeSearch.value;
@@ -128,7 +180,6 @@ const HandleClick = (notice_id) => {
   console.log(notice_id)
   router.push({ path: `/noticeView/${notice_id}` })
 }
-
 
 </script>
 
