@@ -1,21 +1,33 @@
 <script setup>
-import {ref, watch} from 'vue'
+import {ref, watch, onMounted} from 'vue'
 import { getClassroomsInfo, getReservation } from '@/api/classroomApi';
 import ReservationTable from './components/ReservationTable.vue';
+import { useClassroomStore } from '@/stores/classroom';
+import { time } from '@/util/time';
 
+const CRstore = useClassroomStore()
 const classrooms = ref(null)
 const selectCR = ref(null);
 const selectRes = ref(null);
 
+const setSelectRes = async (classroom_id) => {
+  selectRes.value = await getReservation(classroom_id)
+}
 
-watch(() => selectCR, async (newCRid) => {
-  if (classrooms.value == null) {
-    classrooms.value = await getClassroomsInfo();
-    selectCR.value = classrooms.value[0].classroom_id
-    selectRes.value = await getReservation(selectCR.value);
+onMounted(async () => {
+  classrooms.value = await CRstore.getClassroomInfo()
+  selectCR.value = classrooms.value[0].classroom_id
+  setSelectRes(selectCR.value)
+})
+
+watch(
+  () => selectCR.value,
+  async (newCRid, oldCRid) => {
+    if (newCRid && newCRid !== oldCRid) {
+      await setSelectRes(newCRid)
+    }
   }
-
-}, { immediate: true })
+)
 </script>
 
 <template >
