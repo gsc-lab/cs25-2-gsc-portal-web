@@ -2,7 +2,7 @@
   <section class="notice-board">
     <div class="grade-filter">
       <button
-        v-for="filter in filters"
+        v-for="filter in gradeFilters"
         :key="filter"
         :class="['filter', { active: gradeSelectedFilter === filter }]"
         @click="gradeSelectedFilter = filter"
@@ -25,28 +25,29 @@
     </div>
     <!-- 수업 유형 선택 -->
     <div
-      v-if="detailOpen"
+      v-if="detailOpen && gradeSelectedFilter !== ''"
       class="detail-list"
     >
-      <div
+      <template
         v-for="course in courseType"
         :key="course.course_type"
-        class="filter-item"
       >
-        <input
-          type="radio"
-          :id="`course-${course.course_type}`"
-          :value="course.course_type"
-          v-model="courseTypeCheck"
-        />
-        <label :for="`course-${course.course_type}`">
-          {{ course.course_type === 'general' ? '전체' : course.course_type === 'regular' ? '정규' : course.course_type === 'special' ? '특강' : '한국어'}}
-        </label>
-      </div>
+        <div class="filter-item">
+          <input
+            type="radio"
+            :id="`course-${course.course_type}`"
+            :value="course.course_type"
+            v-model="courseTypeCheck"
+          />
+          <label :for="`course-${course.course_type}`">
+            {{ course.course_type === 'general' ? '전체' : course.course_type === 'regular' ? '정규' : course.course_type === 'special' ? '특강' : '한국어'}}
+          </label>
+        </div>
+      </template>
     </div>
     <!-- 학년 별 과목 -->
     <div
-      v-if="detailOpen && gradeSelectedFilter !== ''"
+      v-if="detailOpen && gradeSelectedFilter !== '' && courseTypeCheck !== 'general'"
       class="detail-list"
     >
       <template
@@ -62,7 +63,7 @@
               type="radio"
               :id="`${course.course_id}`"
               :value="course.course_id"
-              v-model="courseTypeCheck"
+              v-model="courseSelectCheck"
             />
             <label :for="course.course_id">
               {{ course.title }}
@@ -86,16 +87,25 @@
       v-for="notice in filterNotices"
       :key="notice.notice_id"
     >
+      <!-- course_id가 없을 때 타켓의 학년과 선택된 학년일치, course_id 가 있을 때 그 과목의 grade_id 값과 일치-->
       <div
         class="notice-item"
-        v-if="gradeSelectedFilter === '' || notice.targets?.[0]?.grade_id === gradeSelectedFilter"
         @click="HandleNoticeClick(notice.notice_id)"
       >
         <div class="col-num">{{ notice.notice_id }}</div>
         <div class="col-title">{{ notice.title }}</div>
         <div class="col-content">{{ notice.content }}</div>
-        <div class="col-target">
+        <div
+          v-if="notice.course_id"
+          class="col-target"
+        >
+        </div>
+        <div
+          v-else
+          class="col-target"
+        >
           <p>{{ notice.targets[0]?.grade_id ? notice.targets[0].grade_id + "학년" : "전체" }}</p>
+          <!-- <p>{{ notice.targets[0]?.grade_id ? notice.targets[0].grade_id + "학년" : "전체" }}</p> -->
         </div>
         <div class="col-author">{{ notice.author?.name }}</div>
         <div class="col-date">{{ formatDate(notice.created_at) }}</div>
@@ -105,32 +115,33 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { course_type, getCourse, getNotice } from "@/api/apiNotice";
 import router from "@/router";
 
-// ==========================================================
+// ============================================================================
 
-const notices = ref([]);                  // 공지사항 저장 배열
-const noticeSearch = ref("");             // 검색어 입력값 저장
-const search = ref("");                   // 입력 버튼 클릭시 검색어 입력값 저장
-const filters = ref(["", "1", "2", "3"]); // 전체, 학년 선택
-const gradeSelectedFilter = ref("");      // 학년선택된 값
-const courseType = ref([]);               // 과목 타입 저장 (regular, special)
-const courseTypeCheck = ref("general");   // 선택된 과목 타입
-const courses = ref([]);                  // 모든 과목 데이터
+const notices = ref([]);                       // 공지사항 저장 배열
+const noticeSearch = ref("");                  // 검색어 입력값 저장
+const search = ref("");                        // 입력 버튼 클릭시 검색어 입력값 저장
+const gradeFilters = ref(["", "1", "2", "3"]); // 전체, 학년 선택
+const gradeSelectedFilter = ref("");           // 학년선택된 값
+const courseType = ref([]);                    // 과목 타입 저장 (regular, special)
+const courseTypeCheck = ref("general");        // 선택된 과목타입
+const courseSelectCheck = ref('')              // 선택된 과목
+const courses = ref([]);                       // 모든 과목 데이터
 
 const detailOpen = ref(false)
 
-// ==========================================================
+// =============================================================================
 
 onMounted(async () => {
-  const notice = await getNotice(); // 공지사항 API 요청
-  const course = await getCourse(); // 과목 API 요청
-  courseType.value = course_type(); // 과목 타입 API 요청
+  const notice = await getNotice();           //  공지사항 API 요청
+  const course = await getCourse();           //  과목 API 요청
+  courseType.value = course_type();           //  과목 타입 API 요청
 
-  courses.value = course;
-  notices.value = notice.notices;
+  courses.value = course;                     //
+  notices.value = notice.notices;             //
 
   console.log("1~10번 공지:", notices.value);
   console.log("과목 정보: ", courses.value);
@@ -153,52 +164,60 @@ function formatDate(isoString) {
 }
 
 const filterNotices = computed(() => {
-  // 학년 선택 필터링을 기준으로 공지사항 조회
   return notices.value.filter((notice) => {
-    let gradeMatch = false
-    // 공지사항 course_id 가 있다! -> courses를 타고 grade_id 확인
 
+    // 학년 기준 필터링
+    let gradeMatch = false
+    // 공지사항의 과목타입( course_id )이 있을 경우 (courses에 course_id 값과 공지사항 course_id)
     if (notice.course_id) {
-      const course = courses.value.find((course) => {
-        course.course_id === notice.course_id
-      })
-      if (gradeSelectedFilter.value === '') {
-        gradeMatch = false
+      const course = courses.value.find((course) => course.course_id === notice.course_id)
+      if (gradeSelectedFilter.value === '' && !course) {
+        gradeMatch = true
       } else {
         gradeMatch = course?.grade_id === gradeSelectedFilter.value
       }
-
+    // 공지사항의 과목타입이 없을 경우 ( targets 값으로 확인)
     } else {
       if (gradeSelectedFilter.value === '') {
-        gradeMatch =
-          notice.targets.length === 0 ||
-          notice.targets.some((target) => target.grade_id === null)
+        gradeMatch = notice.targets.length === 0 || notice.targets.some((target) => target.grade_id === null)
       } else {
         gradeMatch = notice.targets.some((target) => target.grade_id === gradeSelectedFilter.value)
       }
     }
 
-    return gradeMatch
+    // 과목 타입 기준 필터링
+    let courseTypeMatch = false
+    if (courseTypeCheck.value === 'general') {
+      courseTypeMatch = true
+    } else {
+      if (notice.course_id) {
+        const course = courses.value.find((course) => course.course_id === notice.course_id)
+        courseTypeMatch = course?.course_type === courseTypeCheck.value
+      } else {
+        courseTypeMatch = true
+      }
+    }
 
+    // 과목 기준 필터링
+    let courseSelectMatch = false
+    if (!courseSelectCheck.value) {
+      courseSelectMatch = true
+    } else {
+      courseSelectMatch = notice.course_id === courseSelectCheck.value
+    }
 
+    return gradeMatch && courseTypeMatch && courseSelectMatch
 
-
-
-
-    // 공지사항 course_id 가 없다! -> targets 의 grade_id 값을 확인
-
-    // 검색어 x : 모든 공지, 검색어 o 제목, 내용에 단어가 포함된 공지만 보여준다.
-    // const matchSearch =
-    //   !noticeSearch.value ||
-    //   notice.title.includes(search.value) ||
-    //   notice.content.includes(search.value);
-
-    // const courseTypeFilter = notice.course_type === courseTypeCheck.value;
-
-    // return allMatchFilter && grade1MatchFilter && matchSearch && courseTypeFilter;
   });
 });
 
+watch(courseTypeCheck, (newVal, oldVal) => {
+  if(newVal !== oldVal) {
+    courseSelectCheck.value = ''
+  }
+})
+
+// 선택 공지사항으로 이동
 const HandleNoticeClick = (notice_id) => {
   console.log(notice_id);
   router.push({ path: `/noticeView/${notice_id}` });
