@@ -43,15 +43,6 @@ export const patchNotice = async (noticeId, data, newFiles = []) => {
       formData.append("files", file);
     }
   }
-
-
-  // if (removeFiles && removeFiles.length > 0) {
-  //   formData.append(
-  //     "remove_file_ids",
-  //     JSON.stringify(removeFiles.map(f => f.file_id))
-  //   );
-  // }
-
   const res = await apiClient.patch(`/notices/${noticeId}`, formData, {
     headers: {
       "Content-Type": "multipart/form-data"
@@ -84,6 +75,11 @@ export const postNotice = async (data, files) => {
     }
   })
   return response.data;
+}
+
+export const getAllUser = async () => {
+  const users = await apiClient.get('/admin/students');
+  return users.data
 }
 
 
