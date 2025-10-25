@@ -56,3 +56,25 @@ export const getReservation = async (classroom_id) => {
     errorMsg(e);
   }
 }
+
+
+
+
+// ========================== POST ===============================
+// ---------------------------------------------------------------
+// 강의실 예약 등록
+// ---------------------------------------------------------------
+export const postReservation = async (reservationData) => {
+  try{
+    const res = await api.post(`/classrooms/${reservationData.classroom_id}/reservations`, {
+      // user_id: '2423001',// reservationData.name,
+      reserve_date: reservationData.reserve_date,
+      start_time: reservationData.start_time,
+      end_time: reservationData.end_time
+    })
+    // console.log(res.data);
+    return res.data;
+  } catch (e) {
+    errorMsg(e);
+  }
+}
