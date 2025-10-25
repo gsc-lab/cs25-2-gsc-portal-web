@@ -1,27 +1,26 @@
 <script setup>
-import { ref } from 'vue'
+import {ref, watch} from 'vue'
+import { useClassroomStore } from '@/stores/classroom'
 import {time} from '@/util/time'
+const CRstore = useClassroomStore()
+const selectRes = ref(null)  // 선택한 강의실 예약 데이터 (배열순: 일->토  / 날짜순: 월->일 )
 
-const selectRes = defineModel()
-const val = ref(null)
-
-const day = (enDay) => {
-  if (enDay == "SUN") return "일요일"
-  else if (enDay == "MON") return "월요일"
-  else if (enDay == "TUE") return "화요일"
-  else if (enDay == "WED") return "수요일"
-  else if (enDay == "THU") return "목요일"
-  else if (enDay == "FRI") return "금요일"
-  else if (enDay == "SAT") return "토요일"
-}
+// selectResSchedule 감시
+watch(() => CRstore.selectResSchedule,
+  async (newCR, oldCR) => {
+    if (newCR && newCR !== oldCR) {
+      selectRes.value = await CRstore.selectResSchedule
+    }
+  }, { immediate: true }
+)
 
 const filterRes = (res, t) => {
   // console.log("res", typeof(res));
   // 객체가 없거나 내용이 없으면 반환
-   if(!res || Object.keys(res).length == 0) return ""
+  if(!res || Object.keys(res).length == 0) return ""
   // console.log("res", res);
-  // 해당 요일의 예약의 시간과 임자값의 시간이 일치하는 항목 찾기
-  const result = Object.keys(res).filter((r) => res[r].start == t)
+  // 임자값시간이 해당 요일의 예약의 시간 범위안에 있는 항목 찾기
+  const result = Object.keys(res).filter((r) => res[r].start <= t && res[r].end > t)
   // 없으면 반환
   if (result.length == 0) return ""
   else {
@@ -37,13 +36,13 @@ const filterRes = (res, t) => {
     <thead>
       <tr>
         <th style="border: 1px solid #000; padding: 10px;"></th>
-        <th v-for="(_, idx) in selectRes" style="border: 1px solid #000; padding: 10px;">{{ day(idx) }}</th>
+        <th v-for="d in ['월', '화', '수', '목', '금', '토', '일']" style="border: 1px solid #000; padding: 10px;">{{ d }}요일</th>
       </tr>
     </thead>
     <tbody>
-      <tr v-for="t in 24">
+      <tr v-for="(_, t) in 24">
         <td style="border: 1px solid #000; padding: 10px;">{{time(t)}}</td>
-        <template v-for="d in ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']" :key="d">
+        <template v-for="d in ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT','SUN']" :key="d">
             <td style="border: 1px solid #000; padding: 10px;">
               <p>
                 {{filterRes(selectRes?.[d], time(t))}}
