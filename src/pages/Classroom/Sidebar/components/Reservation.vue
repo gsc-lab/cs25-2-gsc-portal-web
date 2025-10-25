@@ -20,6 +20,11 @@ const postData = ref({
 onMounted(async () => {
   classrooms.value = await CRstore.getClassroomInfo()
   postData.value.classroom_id = await CRstore.getSelectCR()
+  if (CRstore.selectReTime.length > 0) {
+    postData.value.reserve_date = CRstore.selectReTime[0]
+    postData.value.start_time = CRstore.selectReTime[1]
+    postData.value.end_time = CRstore.selectReTime[2]
+  }
   postData.value.name = username
 })
 
@@ -31,10 +36,21 @@ watch(() => CRstore.selectCR,
     }
   }
 )
+// 시간 감시
+watch(() => CRstore.selectReTime,
+  async (newTime, oldTime) => {
+    if (newTime && newTime !== oldTime) {
+      postData.value.reserve_date = CRstore.selectReTime[0]
+      postData.value.start_time = CRstore.selectReTime[1]
+      postData.value.end_time = CRstore.selectReTime[2]
+    }
+  }
+)
 // ==================  Submit  ==================
 const handleSubmit = async () => {
   console.log("등록");
   await postReservation(postData.value)
+  CRstore.setSelectResSchedule(postData.value.classroom_id)
 }
 </script>
 <template>

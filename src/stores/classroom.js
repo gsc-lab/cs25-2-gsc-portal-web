@@ -8,7 +8,9 @@ export const useClassroomStore = defineStore('classroom', {
 
     classroomsInfo: {},    // 강의실 데이터
     selectCR: null,       // 지금 선택 중인 classroom_id
-    selectResSchedule: {}  // 해당 classroom_id의 예약 현환
+    selectResSchedule: {},  // 해당 classroom_id의 예약 현환
+
+    selectReTime: []       // 선택한 일시 ["날짜", start_time, end_time]
   }),
   actions: {
     // ----------------------- classrooms -----------------------
@@ -92,6 +94,18 @@ export const useClassroomStore = defineStore('classroom', {
       await this.setSelectResSchedule(this.selectCR)
       return this.selectResSchedule
     },
+
+    // ----------------------- selectReTime -----------------------
+    // [ set ] : selectReTime 세팅 ["날짜", start_time, end_time]
+    async setSelectReTime(selectReTime) {
+      this.selectReTime = selectReTime
+      console.log("store: selectReTime", this.selectReTime);
+    },
+    //  [ get ] : selectReTime 조회
+    async getSelectReTime() {
+      return this.selectReTime
+    },
+
 
   }
 })

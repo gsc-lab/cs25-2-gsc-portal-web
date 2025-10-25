@@ -42,6 +42,6 @@ watch(() => selectCR.value,
     <Sidebar v-if="isOpen" />
 
     <!-- 예약 표 (초기화 후 렌더링) -->
-    <ReservationTable v-if="selectCR" />
+    <ReservationTable v-if="selectCR" v-model="isOpen"/>
   </div>
 </template>
