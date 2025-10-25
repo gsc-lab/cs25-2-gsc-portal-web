@@ -1,5 +1,6 @@
 <template>
   <section class="notice-board">
+    <!-- 공지사항 필터링 (전체, 1학년, 2학년, 3학년) -->
     <div class="grade-filter">
       <button
         v-for="filter in gradeFilters"
@@ -23,7 +24,8 @@
         상세 필터링 설정
       </button>
     </div>
-    <!-- 수업 유형 선택 -->
+    <!-- 상세 필터링 ( 과목 유형, 과목 선택 )-->
+    >
     <div
       v-if="detailOpen && gradeSelectedFilter !== ''"
       class="detail-list"
@@ -98,14 +100,12 @@
         <div
           v-if="notice.course_id"
           class="col-target"
-        >
-        </div>
+        ></div>
         <div
           v-else
           class="col-target"
         >
           <p>{{ notice.targets[0]?.grade_id ? notice.targets[0].grade_id + "학년" : "전체" }}</p>
-          <!-- <p>{{ notice.targets[0]?.grade_id ? notice.targets[0].grade_id + "학년" : "전체" }}</p> -->
         </div>
         <div class="col-author">{{ notice.author?.name }}</div>
         <div class="col-date">{{ formatDate(notice.created_at) }}</div>
@@ -123,7 +123,7 @@ import router from "@/router";
 
 const notices = ref([]);                       // 공지사항 저장 배열
 const noticeSearch = ref("");                  // 검색어 입력값 저장
-const search = ref("");                        // 입력 버튼 클릭시 검색어 입력값 저장
+// const search = ref("");                        // 입력 버튼 클릭시 검색어 입력값 저장
 const gradeFilters = ref(["", "1", "2", "3"]); // 전체, 학년 선택
 const gradeSelectedFilter = ref("");           // 학년선택된 값
 const courseType = ref([]);                    // 과목 타입 저장 (regular, special)
