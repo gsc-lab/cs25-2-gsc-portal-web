@@ -125,7 +125,7 @@ function endSelection() {
 </script>
 
 <template>
-  <div style="background-color: cornflowerblue;">
+  <div style="background-color:aliceblue;">
     TimeTable
 
     <div>
@@ -140,13 +140,13 @@ function endSelection() {
       <!-- 요일 -->
       <tr>
         <th style="border: 1px solid #000; padding: 10px;"></th>
-        <th v-for="(_, idx) in timetableData?.['1']" colspan="3" style=" border: 1px solid #000; padding: 10px;">{{day(idx)}}</th>
+        <th v-for="(_, idx) in timetableData?.['1']" colspan="5" style=" border: 1px solid #000; padding: 10px;">{{day(idx)}}</th>
       </tr>
       <!-- 학년 * 5 -->
       <tr>
         <th style="border: 1px solid #000; padding: 10px;"></th>
         <template v-for="_ in 5">
-          <th v-for="g in 3" style="border: 1px solid #000; padding: 10px;">{{setTarget(String(g))}}</th>
+          <th v-for="g in ['1', '2', '3', 'special', 'korean']" style="border: 1px solid #000; padding: 10px;">{{setTarget(String(g))}}</th>
         </template>
       </tr>
       </thead>
@@ -159,16 +159,17 @@ function endSelection() {
           <!-- day -->
           <template v-for="(d, idx) in ['MON', 'TUE', 'WED', 'THU', 'FRI']" :key="idx">
             <!-- 학년 -->
-            <td v-for="g in 3":key="g"
+            <td v-for="g in ['1', '2', '3', 'special', 'korean']":key="g"
               @mousedown="startSelection(g, idx+1, d, hour, timetableData?.[String(g)][d][String(hour)][0])"
               @mouseover="updateSelection(g, d, hour, timetableData?.[String(g)][d][String(hour)][0])"
               @mouseup="endSelection"
               style="border: 1px solid #000; padding: 10px; user-select: none;"
             >
             <!-- 과목 / 교수 / 장소 -->
-              <p>{{timetableData?.[String(g)]?.[d][String(hour)][0]?.title}}</p>
-              <p>{{timetableData?.[String(g)]?.[d][String(hour)][0]?.professor}}</p>
-              <p>{{timetableData?.[String(g)]?.[d][String(hour)][0]?.room}}</p>
+             <!-- {{g}} -->
+              <p>{{timetableData?.[g]?.[d][String(hour)][0]?.title}}</p>
+              <p>{{timetableData?.[g]?.[d][String(hour)][0]?.professor}}</p>
+              <p>{{timetableData?.[g]?.[d][String(hour)][0]?.room}}</p>
             </td>
           </template>
         </tr>
