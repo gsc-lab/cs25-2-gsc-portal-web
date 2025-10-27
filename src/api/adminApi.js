@@ -50,3 +50,52 @@ export const getUserInfo = async () => {
     errorMsg(e);
   }
 }
+
+
+// ========================== POST ===============================
+// ---------------------------------------------------------------
+// 승인 / 거절 등록
+// ---------------------------------------------------------------
+export const postApproval = async (user_id, action) => {
+  try{
+    const res = await api.post(`/admin/users`, {
+      user_id: user_id,
+      action: action
+    })
+    console.log(res.data);
+    return res.data;
+  } catch (e) {
+    errorMsg(e);
+  }
+}
+
+// ---------------------------------------------------------------
+// Email 등록
+// ---------------------------------------------------------------
+export const postEmail = async (email, reason) => {
+  try{
+    const res = await api.post(`/admin/email`, {
+      email: email,
+      reason: reason
+    })
+    console.log(res.data);
+    return res.data;
+  } catch (e) {
+    errorMsg(e);
+  }
+}
+
+
+// ========================== DELETE ===============================
+// ---------------------------------------------------------------
+// Email 삭제
+// ---------------------------------------------------------------
+export const delEmail = async (id) => {
+  try{
+    const res = await api.delete(`/admin/email/${id}`)
+    console.log(res.data);
+    return res.data;
+  } catch (e) {
+    errorMsg(e);
+  }
+}
