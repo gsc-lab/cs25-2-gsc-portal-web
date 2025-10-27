@@ -1,111 +1,112 @@
 import { defineStore } from "pinia";
-import {
-  getNotice,
-  getNoticeView,
-  postNotice,
-  patchNotice,
-  deleteNotice
-} from '@/api/apiNotice'
+import { ref, computed } from 'vue';
+import { getNotice } from '@/api/apiNotice'
 
-export const useNoticeStore = defineStore('Notice', {
-  state: () => ({
-    noticeList: [], // 전체 공지사항
-    noticeOne: null, // 단일 공지사항
-    isLoading: false,
-    error: null
-  }),
+export const useNoticeStore = defineStore('Notice', () => {
 
-  actions: {
-    // 전체 공지사항 조회
-    async fetchNoticeList() {
-      this.isLoading = true
-      this.error = null
-      try {
-        const response = await getNotice();
-        this.noticeList = response.notices
-      } catch (err) {
-        this.error = "전체 공지사항을 불러오는데 실패했습니다."
-        console.error(err)
-      } finally {
-        this.isLoading = false
-      }
-    },
+  // 전체 공지사항 정보
+  const noticeList = ref([])
+  // 전체 과목 정보
+  const courses = ref([])
 
-    // 단일 공지사항 조회
-    async fetchNoticeOne(noticeId) {
-      this.isLoading = true
-      this.error = null
+  // 상태 확인, 에러메시지 저장
+  const isLoading = ref(false)
+  const error = ref('')
 
-      try {
-        const response = await getNoticeView(noticeId)
-        this.noticeOne = response
-      } catch (err) {
-        this.error = `${noticeId} 공지사항을 불러오는데 실패했습니다.`
-        console.error(err)
-      } finally {
-        this.isLoading = false
-      }
-    },
+  // 필터링 시 필요 조건 항목
+  const gradeSelect = ref("")
+  const courseTypeSelect = ref("general")
+  const courseSelect = ref("")
 
-    async createNotice(data, files) {
-      this.isLoading = true
-      this.error = null
+  // 전체 공지사항 조회
+  async function fetchNotice() {
+    isLoading.value = true
 
-      try {
-        const newNotice = await postNotice(data, files)
-
-        this.noticeList.unshift(newNotice);
-      } catch (err) {
-        this.error = "공지사항 등록에 실패했습니다."
-        console.error(err)
-      } finally {
-        this.isLoading = false
-      }
-    },
-
-    async updateNotice(noticeId, data, newFiles) {
-      this.isLoading = true
-      this.error = null
-
-      try {
-        const updateNotice = await patchNotice(noticeId, data, newFiles)
-
-        const index = this.noticeList.findIndex(item => item.notice_id === noticeId)
-        if (index !== -1) {
-          this.noticeList[index] = updateNotice
-        }
-
-        if (this.noticeOne && this.noticeOne.notice_id === noticeId) {
-          this.noticeOne = updateNotice
-        }
-      } catch (err) {
-        console.log(err)
-        throw new Error(`${noticeId}의 공지사항 수정에 실패했습니다.`)
-      } finally {
-        this.isLoading = false
-      }
-    },
-
-    async deleteNotie(noticeId) {
-      this.isLoading = true
-
-      try {
-        await deleteNotice(noticeId)
-
-        this.noticeList.filter(item => item.notice_id !== noticeId)
-      } catch (err) {
-        console.log(err)
-        throw new Error(`${noticeId}의 공지사항 삭제에 실패했습니다.`)
-      } finally {
-        this.isLoading = false
-      }
-    },
-
-    // 학년 별 필터링
-
-    // 과목별
-
-
-
+    try {
+      const response = await getNotice()
+      noticeList.value = response.notices
+    } catch (err) {
+      error.value = err
+      console.error("전체 공지사항을 조회 실패", err)
+    } finally {
+      isLoading.value = false
+    }
   }
+
+  // apiCourse에서 요청받은 과목 정보 가져오기
+  function setCourse(course_list) {
+    courses.value = course_list
+  }
+
+  // 전체 과목 정보에서 course_id를 키값으로 하여 빠르게 접근 가능
+  const courseMap = computed(() => {
+    const map = new Map()
+    for (const course of courses.value) {
+      map.set(course.course_id, course)
+    }
+    return map
+  })
+
+  const filterNotices = computed(() => {
+    return noticeList.value.filter((notice) => {
+      const course = courseMap.value.get(notice.course_id)
+
+      // 학년별 필터링 확인
+      let gradeCheck = false
+      // 과목 id 가 존재할 경우
+      if (notice.course_id) {
+        // course의 학년정보가 선택 학년과 동일할 경우 gradeCheck 는 True
+        gradeCheck = course?.grade_id === gradeSelect.value
+      } else {
+        // 특정 학년에 대한 전체 공지사항은 공지사항의 targets에 grade_id 가 null 이 아니거나 빈객체 가 아닐경우 True
+        const allGardeTarget = notice.targets.length !== 0 || notice.targets.some((target) => target.grade_id !== null)
+        // notice.targets 의 배열길이가 0 이 아니거나 target.grade_id 가 null이 아닐경우
+        if (allGardeTarget) {
+          // 
+          gradeCheck = notice.targets.some((target) => target.grade_id === gradeSelect.value)
+        } else {
+          gradeCheck = gradeSelect.value === ''
+        }
+      }
+
+      // 과목별 필터링 확인
+
+      let courseTypeCheck = false
+      if (courseTypeSelect.value === 'general') {
+        courseTypeCheck = true
+      } else if (notice.course_id) {
+        courseTypeCheck = course?.course_type === courseTypeSelect.value
+      } else {
+        courseTypeCheck = false
+      }
+
+      let courseSelectCheck = false
+      if (courseSelect.value === '') {
+        courseSelectCheck = true
+      } else {
+        courseSelectCheck = notice.course_id === courseSelect.value;
+      }
+
+      return gradeCheck && courseTypeCheck && courseSelectCheck
+    })
+  })
+
+
+
+
+  // 학년 별 필터링
+
+  // 과목별
+  return {
+    noticeList,
+    courses,
+    courseMap,
+    gradeSelect,
+    courseTypeSelect,
+    courseSelect,
+    fetchNotice,
+    setCourse,
+    filterNotices,
+  }
+
 })
