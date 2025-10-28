@@ -1,7 +1,8 @@
 <template>
-  <AppLayout />
+  <MainHeader />
+  <router-view />
 </template>
 
 <script setup>
-import AppLayout from '@/layouts/AppLayout.vue'
+import MainHeader from './layouts/MainHeader.vue'
 </script>
