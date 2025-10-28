@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="background-color: lightgreen; padding: 20px;">
     <form @submit.prevent="submitForm">
         <div>
             <label >학기</label>
@@ -44,7 +44,10 @@
             <button type="button" @click="addGradeRoom">추가</button>
         </div>
 
-        <button type="submit" @click="submitForm">등록</button>
+        <div style="margin-top: 20px;">
+          <button type="submit">등록</button>
+          <button type="button" @click="goBack" style="margin-left: 10px;">취소</button>
+        </div>
 
     </form>
   </div>
@@ -86,7 +89,11 @@ function addGradeRoom() {
 async function submitForm() {
     console.log('제출 데이터', formData.value)
     await craeteCleaningRoster(formData.value)
-    router.push({ name: 'cleaningRoster' })
+    router.back()
+}
+
+function goBack() {
+  router.back();
 }
 
 async function fetchData() {
