@@ -62,14 +62,14 @@ export const useNoticeStore = defineStore('Notice', () => {
         const allGardeTarget = notice.targets.length !== 0 || notice.targets.some((target) => target.grade_id !== null)
         // notice.targets 의 배열길이가 0 이 아니거나 target.grade_id 가 null이 아닐경우
         if (allGardeTarget) {
-          // 
+          //
           gradeCheck = notice.targets.some((target) => target.grade_id === gradeSelect.value)
         } else {
           gradeCheck = gradeSelect.value === ''
         }
       }
 
-      // 과목별 필터링 확인
+      // 과목별 타입 필터링 확인
 
       let courseTypeCheck = false
       if (courseTypeSelect.value === 'general') {
@@ -80,6 +80,7 @@ export const useNoticeStore = defineStore('Notice', () => {
         courseTypeCheck = false
       }
 
+      // 과목 선택 필터링 확인
       let courseSelectCheck = false
       if (courseSelect.value === '') {
         courseSelectCheck = true
