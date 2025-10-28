@@ -1,69 +1,54 @@
 <template>
-  <div style="padding: 20px;">
+  <div>
 
-    <!-- Header Controls -->
-    <div style="margin-bottom: 20px; border: 1px solid #ccc; padding: 10px;">
-      <!-- View Mode Buttons -->
-      <div style="margin-bottom: 10px;">
-        <strong>보기 방식:</strong>
-        <button @click="setMode('week')" style="margin-left: 10px;">주간 보기</button>
-        <button @click="setMode('month')">월간 보기</button>
-      </div>
-      <!-- Action Buttons -->
+    <div>
+      <button
+        @click="setMode('week')"
+      >주간 보기</button>
+      <button
+        @click="setMode('month')"
+      >월간 보기</button>
+    </div>
+
+    <div v-if="viewMode === 'week'">
       <div>
-        <strong>작업:</strong>
-        <router-link to="/cleaning-rosters/generator" style="margin-left: 10px;">등록</router-link>
-        <button @click="showDeleteForm = true">삭제</button>
+        <button @click="cleaningStore.moveWeek('prev')">이전 주</button>
+        <h2>{{ cleaningStore.cleaningItems?.work_date }}</h2>
+        <button @click="cleaningStore.moveWeek('next')">다음 주</button>
       </div>
+      
+      <div>
+        <select v-model="grade">
+          <option value="null">학년</option>
+          <option value="1">1학년</option>
+          <option value="2">2학년</option>
+          <option value="3">3학년</option>
+        </select>
+      </div>
+      <ul>
+        <CleaningList
+          v-for="(item, index) in cleaningStore.cleaningItems?.rosters"
+          :key="index"
+          :cleaningItem="item"
+          @refresh="fetchData"
+          >
+        </CleaningList>
+      </ul>
+      <router-link ></router-link>
     </div>
-
-    <!-- Main Content -->
-    <div style="border: 1px solid #ccc; padding: 10px; background-color: lightyellow;">
-      <!-- Weekly View -->
-      <div v-if="viewMode === 'week'">
-        <!-- Week/Grade Controls -->
-        <div style="margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-          <div>
-            <button @click="cleaningStore.moveWeek('prev')">&lt; 이전 주</button>
-            <strong style="margin: 0 10px;">{{ cleaningStore.cleaningItems?.work_date }}</strong>
-            <button @click="cleaningStore.moveWeek('next')">다음 주 &gt;</button>
-          </div>
-          <div style="margin-top: 10px;">
-            <label for="grade-select">학년: </label>
-            <select v-model="grade" id="grade-select">
-              <option value="null">전체 학년</option>
-              <option value="1">1학년</option>
-              <option value="2">2학년</option>
-              <option value="3">3학년</option>
-            </select>
-          </div>
-        </div>
-        
-        <!-- Roster List -->
-        <div>
-          <CleaningList
-            v-for="(item, index) in cleaningStore.cleaningItems?.rosters"
-            :key="index"
-            :cleaningItem="item"
-            @refresh="fetchData"
-            >
-          </CleaningList>
-        </div>
-      </div>
-
-      <!-- Monthly View -->
-      <div v-else>
-        <CleaningMonth />
-      </div>
+    <div v-else>
+      <CleaningMonth />
     </div>
-
-    <!-- Delete Modal -->
-    <CleaningDelete v-if="showDeleteForm" @close="showDeleteForm = false"/>
+  <button></button>
+  <router-link to="/cleaning-rosters/generator">등록</router-link>
+  <button @click="showDeleteForm = true">삭제</button>
+  <CleaningDelete v-if="showDeleteForm" @close="showDeleteForm = false"/>
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
+
 import { useCleaningStore } from '@/stores/cleaning'
 import CleaningList from './components/CleaningList.vue'
 import CleaningMonth from './components/CleaningMonth.vue'
@@ -97,5 +82,7 @@ onMounted(() => {
 })
 </script>
 
+
 <style scoped>
+
 </style>

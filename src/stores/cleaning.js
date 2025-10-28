@@ -28,14 +28,15 @@ export const useCleaningStore = defineStore('cleaning', {
       this.weekDate.date = date
       this.isLoading = false
     },
-
-    // next | prev 이동 함수
-    async moveWeek(direction) { 
+    // next | prev
+    async moveWeek(direction) {
       const base = new Date(this.weekDate.date)
+      console.log(base)
       const diff = direction === 'next' ? 7 : -7
       base.setDate(base.getDate() + diff)
 
       const nextDate = toDate(base)
+      console.log(nextDate)
       await this.getCleaningRoster({
         date: nextDate,
         gradeId: this.gardeId,
