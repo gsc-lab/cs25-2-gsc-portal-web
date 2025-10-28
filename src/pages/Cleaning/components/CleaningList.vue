@@ -1,17 +1,15 @@
 <template>
   <li>
-    <h1>청소 리스트</h1>
     <div>
         <h3>{{ cleaningItem.grade_id }}학년 - {{ cleaningItem.classroom_name }}</h3>
+        <span>{{ cleaningItem.members.length }}</span>
     </div>
 
     <ul>
-        <li v-for="(duty, i) in cleaningItem.weekly_duties"
+        <li v-for="(member, i) in cleaningItem.members"
         :key="i"
         >   
-        <div>{{ duty.work_date }}</div>
-        <div>{{ duty.members.join(', ') }}</div>
-            
+        {{ member }}
         </li>
     </ul>
   </li>

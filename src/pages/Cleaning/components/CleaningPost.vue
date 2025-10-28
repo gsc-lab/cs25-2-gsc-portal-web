@@ -65,13 +65,12 @@ const classroomList = ref([])
 const formData = ref({
     section: '',
     weekday: 'MON',
-    team_size: 0,
+    team_size: 1,
     grade_rooms: []
 });
 
 const selectedGrade = ref('')
 const selectedClassroom = ref('')
-const selectedClassroomName = ref('');
 
 function addGradeRoom() {
     if (selectedGrade.value && selectedClassroom.value) {
