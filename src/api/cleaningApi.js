@@ -14,18 +14,6 @@ export const fetchCleaningRoster = async (cleaningData) => {
   }
 }
 
-export const monthCleaningRoster = async (cleaningData) => {
-  try {
-    const res = await api.get('/cleaning-rosters/monthly', {
-      params: cleaningData,
-    });
-
-    return res.data;
-  } catch (e) {
-    errorMsg(e);
-  }
-}
-
 // 청소 당번 등록 API
 export const craeteCleaningRoster = async (cleaningData) => {
   try {
@@ -34,7 +22,6 @@ export const craeteCleaningRoster = async (cleaningData) => {
     errorMsg(e);
   }
 }
-
 
 // 해당 섹션 청소 당번 삭제 API
 export const deleteCleaningRoster = async (cleaningData) => {
