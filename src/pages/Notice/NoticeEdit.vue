@@ -3,51 +3,120 @@
     <!-- 헤더 -->
     <div class="notice-detail-header">
       <span>공지사항 수정</span>
-      <button @click="modalOpen = true">공지사항 알림 대상 설정</button>
-      <!-- 공지사항 알림 대상 모달 생성 -->
-      <teleport to="body">
-        <div v-if="modalOpen" class="modal">
-          <p>대상 설정 모달</p>
-          <button>전체</button>
-          <button>1학년</button>
-          <button>2학년</button>
-          <button>3학년</button>
-          <div>
-            <div>
-              <input type="checkbox" />
-              <span>사용자 이름 1</span>
-            </div>
-            <div>
-              <input type="checkbox" />
-              <span>사용자 이름 2</span>
-            </div>
-
+      <button @click="openTargetModal = true">공지사항 알림 대상 설정</button>
+      <!-- Modal 창 생성 -->
+      <div
+        v-if="openTargetModal"
+        class="modal-overlay"
+        @click.self="openTargetModal = false"
+      >
+        <div class="modal-container">
+          <!-- 헤더 -->
+          <div class="modal-header">
+            <h3>공지사항 알림 대상 설정</h3>
+            <button
+              class="modal-close"
+              @click="openTargetModal = false"
+            >
+              X
+            </button>
           </div>
-          <button @click="modalOpen = false">닫기</button>
+
+          <!-- 학생정보 리스트 -->
+          <div class="modal-body">
+            <div class="grade-list">
+              <button
+                v-for="filter in gradeFilters"
+                :key="filter"
+                @click="modalGradeSelect = filter"
+              >
+                {{ filter }}
+              </button>
+            </div>
+            <div class="student-list">
+              <div class="student-header">
+                <div class="col-checked">선택</div>
+                <div class="col-grade">학년</div>
+                <div class="col-user_id">학번</div>
+                <div class="col-name">이름</div>
+                <div class="col-phone">전화번호</div>
+              </div>
+              <template
+                v-for="student in students"
+                :key="student"
+              >
+                <div
+                  v-if="modalGradeSelect === student.grade_name"
+                  class="student-item"
+                >
+                  <input
+                    type="checkbox"
+                    class="col-checked"
+                    v-model="modalStudentSelect"
+                    :value="student.user_id"
+                  />
+                  <div class="col-grade">{{ student.grade_name }}</div>
+                  <div class="col-user_id">{{ student.user_id }}</div>
+                  <div class="col-name">{{ student.name }}</div>
+                  <div class="col-phone">{{ student.phone }}</div>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- 취소, 저장 버튼 -->
+          <div class="modal-footer">
+            <button
+              class="cancel-btn"
+              @click="openTargetModal = false"
+            >
+              닫기
+            </button>
+            <button
+              class="save-btn"
+              @click="saveAndClose"
+            >
+              저장
+            </button>
+          </div>
         </div>
-      </teleport>
+      </div>
     </div>
 
     <!-- 제목 -->
     <div class="notice-detail-section-title">
       <div>제목</div>
       <div>중요</div>
-      <input type="checkbox" v-model="isImportant" />
-      <input type="text" v-model="title" />
+      <input
+        type="checkbox"
+        v-model="isImportant"
+      />
+      <input
+        type="text"
+        v-model="title"
+      />
     </div>
 
     <!-- 작성자 -->
     <div class="notice-detail-section-author">
       <div>작성자</div>
       <!-- 로그인 정보 확인 후 이름 자동 입력 기능 구현 -->
-      <input type="text" value="공지사항 작성자" v-model="author" />
+      <input
+        type="text"
+        value="공지사항 작성자"
+        v-model="author"
+      />
     </div>
 
     <!-- 학년 -->
     <div class="notice-detail-section-select">
       <div>학년</div>
       <select v-model="gradeCheck">
-        <option v-for="grade in grades" :key="grade.grade_id" :value="grade.grade_id">
+        <option
+          v-for="grade in grades"
+          :key="grade.grade_id"
+          :value="grade.grade_id"
+        >
           {{ grade.grade_id === '전체' ? grade.grade_id : grade.grade_id + '학년' }}
         </option>
       </select>
@@ -56,7 +125,11 @@
     <div class="notice-detail-section-select">
       <div>과목유형</div>
       <select v-model="courseTypeCheck">
-        <option v-for="courseT in courseType" :key="courseT" :value="courseT.course_type">
+        <option
+          v-for="courseT in courseType"
+          :key="courseT"
+          :value="courseT.course_type"
+        >
           {{ courseT.course_type === 'regular' ? '정규' : courseT.course_type === 'special' ? '특강' : '전체' }}
         </option>
       </select>
@@ -64,8 +137,16 @@
     <!-- 학년, 과목 유형에 따른 과목 필터링 -->
     <div class="notice-detail-section-select">
       <div>과목</div>
-      <select v-if="filterCourse.length" v-model="course_title">
-        <option v-for="course in filterCourse" :key="course.course_id" :value="course.title">{{ course.title }}
+      <select
+        v-if="filterCourse.length"
+        v-model="course_title"
+      >
+        <option
+          v-for="course in filterCourse"
+          :key="course.course_id"
+          :value="course.title"
+        >
+          {{ course.title }}
         </option>
       </select>
     </div>
@@ -73,36 +154,58 @@
     <!-- 첨부파일 -->
     <div class="notice-detail-files">
       <span>첨부파일</span>
-      <input type="file" multiple @change="handleFiles" />
+      <input
+        type="file"
+        multiple
+        @change="handleFiles"
+      />
       <ul>
-        <li v-for="(file, index) in oldFiles" :key="'old-' + index">
+        <li
+          v-for="(file, index) in files"
+          :key="'old-' + index"
+        >
           {{ file.name || fixFileName(file.file_name) }}
           <button @click="removeOldFile(index)">삭제</button>
         </li>
-        <li v-for="(file, index) in newFiles" :key="'new-' + index">
+        <li
+          v-for="(file, index) in newFiles"
+          :key="'new-' + index"
+        >
           {{ fixFileName(file.name) }}
           <button @click="removeNewFile(index)">삭제</button>
-
         </li>
       </ul>
     </div>
 
     <!-- 내용 -->
     <div class="notice-detail-content">
-      <textarea value="내용을 입력하세요" v-model="content"></textarea>
+      <textarea
+        value="내용을 입력하세요"
+        v-model="content"
+      ></textarea>
     </div>
 
     <!-- 등록, 뒤로 버튼 -->
     <div class="notice-detail-footer">
-      <button class="register-btn" @click="updateNotice">수정하기</button>
-      <button class="back-btn" @click="backPage">뒤로</button>
+      <button
+        class="register-btn"
+        @click="updateNotice"
+      >
+        수정하기
+      </button>
+      <button
+        class="back-btn"
+        @click="backPage"
+      >
+        뒤로
+      </button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { getNoticeView, getCourse, gradeList, course_type, patchNotice as patchNotice } from '@/api/apiNotice';
+import { getNoticeView, getCourse, gradeList, course_type, patchNotice as patchNotice, getAllUser } from '@/api/apiNotice';
 import { useRoute } from 'vue-router';
 import router from '@/router';
 
@@ -115,22 +218,30 @@ const author = ref('') // 작성자
 const gradeCheck = ref(''); // 학년 선택
 const courseTypeCheck = ref('general') // select 태그에서 선택시 변경 : 기본값 regular
 const course_title = ref('') // 선택한 과목 명
-const oldFiles = ref([]) // 기존 파일
+const files = ref([]) // 기존 파일
 const newFiles = ref([]) // 새로 추가되는 파일
 // const files = ref([]) // 파일 배열
 const content = ref('') // 내용
 
+// ======================================================================
+
+const openTargetModal = ref(false)
+const gradeFilters = ref(['1학년', '2학년', '3학년'])
+const modalGradeSelect = ref('')          // 모달) 학년 선택
+const modalStudentSelect = ref([])        // 모달) 선택된 학생들
+
+// ======================================================================
+
 const courses = ref([]) // 과목 선택 배열
 const grades = ref([]) // 학년 저장 배열
 const courseType = ref([]) // 과목 타입 저장 배열 : 'regular' , 'special'
-
-const modalOpen = ref(false);
-// const users = ref([]);
+const students = ref([]);                 // 학생 목록 배열
 
 onMounted(async () => {
   try {
     const noticeId = route.params.id;
     courses.value = await getCourse()
+    students.value = await getAllUser();
     grades.value = gradeList();
     courseType.value = course_type()
     console.log(noticeId)
@@ -147,8 +258,8 @@ onMounted(async () => {
     courseTypeCheck.value = notice.value.course_type || 'general'
     course_title.value = notice.value.course_title || ''
     content.value = notice.value.content || ''
-    oldFiles.value = notice.value.attachments || []
-    console.log(oldFiles.value)
+    files.value = notice.value.attachments || []
+    console.log(files.value)
   } catch (err) {
     console.log(err)
   }
@@ -188,7 +299,7 @@ const handleFiles = (event) => {
 }
 
 const removeOldFile = (index) => {
-  oldFiles.value.splice(index, 1)
+  files.value.splice(index, 1)
 }
 
 const removeNewFile = (index) => {
@@ -234,10 +345,15 @@ const updateNotice = async () => {
     alert('업로드 중 오류가 발생했습니다.')
   }
 }
+
+const saveAndClose = () => {
+  console.log(modalStudentSelect.value)
+  openTargetModal.value = false
+}
+
 const backPage = () => {
   router.back()
 }
-
 </script>
 
 <style>

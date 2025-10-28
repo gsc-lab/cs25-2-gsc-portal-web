@@ -18,7 +18,7 @@
               class="modal-close"
               @click="openTargetModal = false"
             >
-              ×
+              X
             </button>
           </div>
 
@@ -113,7 +113,7 @@
     <!-- 학년 -->
     <div class="notice-detail-section-select">
       <div>학년</div>
-      <select v-model="selectGrade">
+      <select v-model="gradeSelect">
         <option
           v-for="grade in grades"
           :key="grade.grade_id"
@@ -126,7 +126,7 @@
     <!-- 과목 유형 선택 -->
     <div class="notice-detail-section-select">
       <div>과목유형</div>
-      <select v-model="selectCourseType">
+      <select v-model="courseTypeSelect">
         <option
           v-for="courseT in courseType"
           :key="courseT"
@@ -149,7 +149,7 @@
       <div>과목</div>
       <select
         v-if="filterCourse.length"
-        v-model="selectCourse"
+        v-model="courseSelect"
       >
         <option
           v-for="course in filterCourse"
@@ -209,7 +209,7 @@
 <script setup>
 import { course_type, getCourse, gradeList, postNotice, getAllUser } from "@/api/apiNotice";
 import router from "@/router";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 
 // ======================================================================
@@ -218,9 +218,9 @@ const openTargetModal = ref(false)
 const title = ref("");                    // 제목
 const isImportant = ref(false);           // 중요
 const author = ref("");                   // 작성자
-const selectGrade = ref("전체");          // 학년 선택
-const selectCourseType = ref("general");  // 선택된 과목 유형 (전체, 정규, 특강, 한국어)
-const selectCourse = ref("");             // 과목 명
+const gradeSelect = ref("전체");          // 학년 선택
+const courseTypeSelect = ref("general");  // 과목유형 선택 (전체, 정규, 특강, 한국어)
+const courseSelect = ref("");             // 과목명 선택
 const files = ref([]);                    // 파일 배열
 const content = ref("");                  // 내용
 
@@ -237,7 +237,7 @@ const modalStudentSelect = ref([])        // 모달) 선택된 학생들
 const courses = ref([]);                  // 과목 선택 배열
 const grades = ref([]);                   // 학년 저장 배열
 const courseType = ref([]);               // 과목 타입 저장 배열 : 'regular' , 'special'
-const students = ref([]);
+const students = ref([]);                 // 학생 목록 배열
 
 // ======================================================================
 
@@ -267,18 +267,18 @@ const handleImportant = () => {
 const filterCourse = computed(() => {
   // if (gradeCheck.value === '전체') return courses.value
   // 선택된 학년이 전체일 경우 => 전체 과목배열을 순회하여 선택된 과목타입이 같을 경우 반환 !
-  if (selectGrade.value === "전체") {
-    return courses.value.filter((c) => c.course_type === selectCourseType.value);
+  if (gradeSelect.value === "전체") {
+    return courses.value.filter((course) => course.course_type === courseTypeSelect.value);
   } else {
     return courses.value.filter(
-      (c) => c.grade_id === selectGrade.value && c.course_type === selectCourseType.value,
+      (course) => course.grade_id === gradeSelect.value && course.course_type === courseTypeSelect.value,
     );
   }
 });
 
 // 과목 배열에서 과목의 ID 값을 이용하여 선택된 과목의 값이 일치하는 값 저장
 const selectedCourse = computed(() =>
-  courses.value.find((c) => c.course_id === selectCourse.value),
+  courses.value.find((course) => course.course_id === courseSelect.value),
 );
 
 const handleFiles = (event) => {
@@ -289,6 +289,7 @@ const handleFiles = (event) => {
 const removeFile = (index) => {
   files.value.splice(index, 1);
 };
+const allTarget = ref()
 
 // 공지사항 등록 ( API POST 요청 )
 const submitNotice = async () => {
@@ -296,23 +297,34 @@ const submitNotice = async () => {
     alert("제목 및 내용을 입력해주세요");
     return;
   }
+
+  const isGeneralNotice = gradeSelect.value === '전체' && courseTypeSelect.value === 'general'
+
+  allTarget.value = gradeSelect.value == '전체'
+  ? []
+  : [
+    {
+      grade_id: gradeSelect.value, class_id: null, language_id: null
+    }
+  ]
+
   const noticeData = {
     title: title.value,
     author: author.value,
     is_pinned: isImportant.value ? 1 : 0,
     // 타켓이 없을 경우 빈 객체로 전달해야 함 !
-    targets: [
-      {
-        grade_id: null,
-        class_id: null,
-        language_id: null,
-      },
-    ],
-    course_title: selectCourse.value || null,
-    course_id: selectedCourse.value?.course_id || null,
-    course_type: selectedCourse.value?.course_type || selectCourseType.value,
+    targets: allTarget.value,
+    course_title: selectedCourse.value?.title || null,
+    course_id: isGeneralNotice || !selectedCourse.value ? null : selectedCourse.value.course_id,
+    course_type: courseTypeSelect.value,
     content: content.value,
   };
+
+  if (isGeneralNotice) {
+    delete noticeData.course_id
+  }
+
+  console.log("등록 데이터", noticeData)
 
   try {
     await postNotice(noticeData, files.value);
@@ -323,6 +335,12 @@ const submitNotice = async () => {
     alert("업로드 중 오류가 발생했습니다.");
   }
 };
+
+watch(courseTypeSelect, (newVal, oldVal) => {
+  if (oldVal !== newVal) {
+    courseSelect.value = ''
+  }
+})
 
 const saveAndClose = () => {
   console.log(modalStudentSelect.value)

@@ -3,14 +3,16 @@
     <!-- 헤더 -->
     <div class="notice-detail-header">
       <span>공지사항 상세보기</span>
-      <button @click="HandleClick(notice.notice_id)">수정</button>
-      <button @click="HandleDelete">삭제</button>
+      <div class="header-button">
+        <button @click="HandleEdit(notice.notice_id)">수정</button>
+        <button @click="HandleDelete(notice.notice_id)">삭제</button>
+      </div>
     </div>
 
     <!-- 제목 / 작성일 -->
     <div class="notice-detail-section">
       <div>제목</div>
-      <div> {{ notice?.title }}</div>
+      <div>{{ notice?.title }}</div>
       <div>작성일</div>
       <div>{{ formatDate }}</div>
     </div>
@@ -20,15 +22,23 @@
       <div>작성자</div>
       <div>{{ notice?.author?.name }}</div>
       <div>과목</div>
-      <div>{{ notice?.course_type }}</div>
+      <div>
+        {{ courseTypeName }}
+      </div>
     </div>
 
     <!-- 첨부파일 -->
     <div class="notice-detail-files">
       <span>첨부파일</span>
       <ul v-if="notice?.attachments?.length">
-        <li v-for="file in notice.attachments" :key="file.file_id">
-          <a href="#" @click.prevent.stop="fileDownLoad(file.file_id, file.file_name)">
+        <li
+          v-for="file in notice.attachments"
+          :key="file.file_id"
+        >
+          <a
+            href="#"
+            @click.prevent.stop="fileDownLoad(file.file_id, file.file_name)"
+          >
             {{ fixFileName(file.file_name) }}
           </a>
         </li>
@@ -42,14 +52,19 @@
 
     <!-- 하단 버튼 -->
     <div class="notice-detail-footer">
-      <button class="back-btn" @click="backPage">뒤로</button>
+      <button
+        class="back-btn"
+        @click="backPage"
+      >
+        뒤로
+      </button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { getFileDownLoad, getNoticeView } from '@/api/apiNotice';
+import { deleteNotice, getFileDownLoad, getNoticeView } from '@/api/apiNotice';
 import { useRoute } from 'vue-router';
 import router from '@/router';
 
@@ -58,10 +73,11 @@ const notice = ref(null);
 
 onMounted(async () => {
   try {
+    // 현재 공지사항의 notice_id
     const noticeId = route.params.id;
-    console.log(noticeId)
-    const res = await getNoticeView(noticeId);
-    notice.value = res
+    // noticeId 를 사용하여 특정 공지사항 조회 API 호출
+    const response = await getNoticeView(noticeId);
+    notice.value = response
     console.log(notice.value)
   } catch (err) {
     console.log(err);
@@ -82,6 +98,7 @@ const formatDate = computed(() => {
   })
 })
 
+// 파일이름 설정
 const fixFileName = (str) => {
   try {
     return decodeURIComponent(escape(str))
@@ -90,11 +107,7 @@ const fixFileName = (str) => {
   }
 }
 
-const HandleClick = (notice_id) => {
-  console.log(notice_id)
-  router.push({ path: `/noticeEdit/${notice_id}` })
-}
-
+// 파일 다운로드
 const fileDownLoad = async (file_id, rawName = 'download') => {
   try {
 
@@ -121,10 +134,46 @@ const fileDownLoad = async (file_id, rawName = 'download') => {
   }
 }
 
-const backPage = () => {
-  router.back()
+// 과목유형이름 설정
+const courseTypeName = computed(() => {
+  if(!notice.value) {
+    return ''
+  }
+  switch (notice.value.course_type) {
+    case 'general':
+      return '전체'
+    case 'regular':
+      return '정규'
+    case 'special':
+      return '특강'
+    default:
+      return "한국어"
+  }
+})
+
+// 공지사항 수정 버튼 클릭시 수정 컴포넌트로 이동 (notice_id 전달)
+const HandleEdit = (notice_id) => {
+  console.log(notice_id)
+  router.push({ path: `/noticeEdit/${notice_id}` })
 }
 
+// 공지사항 삭제 버튼 클릭시
+const HandleDelete = async (notice_id) => {
+  const isConfrim = window.confirm("삭제?")
+  if (!isConfrim) return
+
+  try {
+    await deleteNotice(notice_id)
+    alert("공지사항 삭제함")
+    router.push({ path: '/notice/'})
+  } catch (err) {
+    console.err("에러: ", err)
+  }
+}
+
+const backPage = () => {
+  router.push({ path: '/notice/'})
+}
 </script>
 
 <style>
@@ -140,7 +189,6 @@ const backPage = () => {
   color: #333;
 }
 
-/* 🔹 헤더 타이틀 영역 */
 .notice-detail-header {
   display: flex;
   justify-content: space-between;
@@ -152,7 +200,12 @@ const backPage = () => {
   font-weight: bold;
 }
 
-.notice-detail-header button {
+.header-button {
+  display: flex;
+  gap: 15px;
+}
+
+.header-buttons button {
   background-color: lightcoral;
   color: #fff;
   border: none;
@@ -163,10 +216,9 @@ const backPage = () => {
   transition: background-color 0.2s;
 }
 
-.notice-detail-header button:hover {
+.header-buttons button:hover {
   background-color: #e65b5b;
 }
-
 /* 🔸 항목 블록 공통 스타일 */
 .notice-detail-section {
   display: grid;
