@@ -189,7 +189,7 @@
 import { course_type, getCourse, gradeList, postNotice, getAllUser } from '@/api/apiNotice'
 import router from '@/router'
 import { useUserStore } from '@/stores/user'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch, watchEffect } from 'vue'
 
 const user = useUserStore()
 
@@ -256,9 +256,15 @@ const filterCourse = computed(() => {
 })
 
 // 과목 배열에서 과목의 ID 값을 이용하여 선택된 과목의 값이 일치하는 값 저장
-const selectedCourse = computed(() =>
-  courses.value.find((course) => course.course_id === courseSelect.value),
-)
+const selectedCourseId = computed(() => {
+  const selected = courses.value.find((course) => course.course_id === courseSelect.value)
+  return selected ? selected.course_id : null
+})
+
+const selectedCourseTitle = computed(() => {
+  const selected = courses.value.find((course) => course.course_id === selectedCourseId.value)
+  return selected ? selected.title : null
+})
 
 const handleFiles = (event) => {
   const selected = event.target.files
@@ -268,7 +274,6 @@ const handleFiles = (event) => {
 const removeFile = (index) => {
   files.value.splice(index, 1)
 }
-const allTarget = ref()
 
 // 공지사항 등록 ( API POST 요청 )
 const submitNotice = async () => {
@@ -277,33 +282,27 @@ const submitNotice = async () => {
     return
   }
 
-  const isGeneralNotice = gradeSelect.value === '전체' && courseTypeSelect.value === 'general'
-
-  allTarget.value =
-    gradeSelect.value == '전체'
-      ? []
-      : [
-          {
-            grade_id: gradeSelect.value,
-            class_id: null,
-            language_id: null,
-          },
-        ]
-
   const noticeData = {
     title: title.value,
     author: author.value,
-    is_pinned: isImportant.value ? 1 : 0, // 타켓이 없을 경우 빈 객체로 전달해야 함 !
-    // targets: allTarget.value,
-    course_title: selectedCourse.value?.title || null,
-    course_id: isGeneralNotice || !selectedCourse.value ? null : selectedCourse.value.course_id,
+    is_pinned: isImportant.value ? 1 : 0,
+    course_id: selectedCourseId.value ? selectedCourseId.value : null,
+    course_title: selectedCourseTitle.value ? selectedCourseTitle.value?.title : null,
     specific_users: modalStudentSelect.value || [],
     course_type: courseTypeSelect.value,
     content: content.value,
   }
 
-  if (isGeneralNotice) {
-    delete noticeData.course_id
+  if (gradeSelect.value !== '전체') {
+    noticeData.targets = [
+      {
+        target_grade_id: gradeSelect.value || null,
+        target_level_id: null,
+        target_language_id: null,
+      },
+    ]
+  } else {
+    noticeData.targets = []
   }
 
   console.log('등록 데이터', noticeData)
@@ -323,7 +322,13 @@ watch(courseTypeSelect, (newVal, oldVal) => {
     courseSelect.value = ''
   }
 })
-
+watchEffect(() => {
+  console.log('선택된 학년: ', gradeSelect.value)
+  console.log('선택된 과목 타입: ', courseTypeSelect.value)
+  console.log('선택과목 아이디: ', courseSelect.value)
+  console.log('필터링: ', selectedCourseId.value)
+  console.log('선택된 과목이름: ', selectedCourseTitle.value)
+})
 const saveAndClose = () => {
   console.log(modalStudentSelect.value)
   openTargetModal.value = false
