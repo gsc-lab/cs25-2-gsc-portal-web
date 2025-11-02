@@ -1,4 +1,4 @@
-import apiClient from "."
+import apiClient from "./index"
 
 export const getAllUser = async () => {
   const user = await apiClient.get('/admin/students')
