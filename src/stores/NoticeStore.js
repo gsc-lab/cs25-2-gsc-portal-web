@@ -51,18 +51,12 @@ export const useNoticeStore = defineStore('Notice', () => {
     return noticeList.value.filter((notice) => {
       const course = courseMap.value.get(notice.course_id)
 
-      // 학년별 필터링 확인
       let gradeCheck = false
-      // 과목 id 가 존재할 경우
       if (notice.course_id) {
-        // course의 학년정보가 선택 학년과 동일할 경우 gradeCheck 는 True
         gradeCheck = course?.grade_id === gradeSelect.value
       } else {
-        // 특정 학년에 대한 전체 공지사항은 공지사항의 targets에 grade_id 가 null 이 아니거나 빈객체 가 아닐경우 True
-        const allGardeTarget = notice.targets.length !== 0 || notice.targets.some((target) => target.grade_id !== null)
-        // notice.targets 의 배열길이가 0 이 아니거나 target.grade_id 가 null이 아닐경우
-        if (allGardeTarget) {
-          //
+
+        if (notice.targets.length > 0 || notice.targets.some((target) => target?.grade_id !== null)) {
           gradeCheck = notice.targets.some((target) => target.grade_id === gradeSelect.value)
         } else {
           gradeCheck = gradeSelect.value === ''
