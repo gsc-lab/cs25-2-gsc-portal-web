@@ -33,28 +33,39 @@ export const getFileDownLoad = async (file_id) => {
 // ===================== 공지사항 등록 ======================
 
 export const postNotice = async (data, files) => {
-  const formData = new FormData();
+  let response;
 
-  Object.entries(data).forEach(([key, value]) => {
-    if (typeof value === "object" && value !== null) {
-      formData.append(key, JSON.stringify(value))
-    } else {
-      formData.append(key, value);
-    }
-  })
+  if (files.length > 0) {
+    const formData = new FormData();
 
-  if (files && files.length > 0) {
-    for (const file of files) {
-      formData.append("files", file);
+    Object.entries(data).forEach(([key, value]) => {
+      if (value === null || value === undefined) return
+      if (typeof value === "object") {
+        formData.append(key, JSON.stringify(value))
+      } else {
+        formData.append(key, value);
+      }
+    })
+
+    if (files && files.length > 0) {
+      for (const file of files) {
+        formData.append("files", file);
+      }
     }
+    console.log("파일 포함 (form Data 전송", formData)
+    response = await apiClient.post("/notices", formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    })
+  } else {
+    console.log("파일 x json 전송", data)
+    response = await apiClient.post('/notices/', data, {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+
   }
 
-  console.log([...formData.entries()])
-  const response = await apiClient.post('/notices/', formData, {
-    headers: {
-      "Content-Type": "multipart/form-data"
-    }
-  })
   return response.data;
 }
 
@@ -64,7 +75,8 @@ export const patchNotice = async (noticeId, data, newFiles = []) => {
   const formData = new FormData()
 
   Object.entries(data).forEach(([key, value]) => {
-    if (typeof value === "object" && value !== null) {
+    if (value === null || value === undefined) return
+    if (typeof value === "object") {
       formData.append(key, JSON.stringify(value))
     } else {
       formData.append(key, value)
@@ -88,7 +100,14 @@ export const patchNotice = async (noticeId, data, newFiles = []) => {
 
 export const deleteNotice = async (notice_id) => {
   const deleteNotice = await apiClient.delete(`/notices/${notice_id}`)
-  return deleteNotice
+  return deleteNotice.data
+}
+
+// ==================== 공지사항 대상 조회 ===================
+
+export const getNoticeTarget = async (notice_id) => {
+  const noticeTarget = await apiClient.get(`/notices/${notice_id}/status`)
+  return noticeTarget.data
 }
 
 // ==================== 모든 학생 정보 =====================
@@ -98,6 +117,19 @@ export const getAllUser = async () => {
   return users.data
 }
 
+// ==================== 공지사항 알림 정송  =====================
+export const postNoticeAlarm = async (notice_id) => {
+  const noticeAlarm = await apiClient.post(`/notices/${notice_id}/dispatch`)
+
+  return noticeAlarm.data
+}
+
+// ==================== 공지사항 읽음 처리 =====================
+export const patchNoticeRead = async (notice_id) => {
+  const noticeRead = await apiClient.patch(`/notices/${notice_id}/read`)
+
+  return noticeRead.data
+}
 
 
 // ======================= 학년 정보 =======================
@@ -123,19 +155,11 @@ export const gradeList = () => {
 // ===================== 과목 타입 선택 =====================
 
 export const course_type = () => {
-  const courseType = [
-    {
-      course_type: 'general',
-    },
-    {
-      course_type: 'regular',
-    },
-    {
-      course_type: 'special',
-    },
-    {
-      course_type: 'korean'
-    }
-  ]
+  const courseType = ([
+    { course_type: 'general' },
+    { course_type: 'regular' },
+    { course_type: 'special' },
+    { course_type: 'korean' }
+  ])
   return courseType
 }
