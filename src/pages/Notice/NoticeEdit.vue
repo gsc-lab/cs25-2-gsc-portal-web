@@ -78,7 +78,7 @@
               />
               <label for="file-upload" class="file-upload-btn">파일 추가</label>
               <ul class="file-list">
-                <li v-for="(file, index) in oldFiles" :key="'old-' + index">
+                <li v-for="(file, index) in existing_file_ids" :key="'old-' + index">
                   <span>(기존) {{ file.name || fixFileName(file.file_name) }}</span>
                   <button @click="removeOldFile(index)" class="file-remove-btn">삭제</button>
                 </li>
@@ -186,7 +186,7 @@ const author = ref('') // 작성자
 const gradeSelect = ref('전체') // 학년 선택
 const courseTypeCheck = ref('general') // select 태그에서 선택시 변경 : 기본값 regular
 const courseSelect = ref('') // 선택한 과목 명
-const oldFiles = ref([]) // 기존 파일
+const existing_file_ids = ref([]) // 유지하고 싶은 기존 파일
 const newFiles = ref([]) // 새로 추가되는 파일
 const content = ref('') // 내용
 
@@ -224,12 +224,11 @@ onMounted(async () => {
     isImportant.value = notice.value.is_pinned === 1
     author.value = notice.value.author.name || ''
     gradeSelect.value = selectedGrade.value || '전체'
-    // gradeSelect.value = selectedCourseId.value ? notice.value.targets[0]?.grade_id : '전체' // .targets[0]이 없을 수 있으므로 ? 추가
     courseTypeCheck.value = notice.value.course_type || 'general'
     courseSelect.value = notice.value.course_title || null
     content.value = notice.value.content || ''
-    oldFiles.value = notice.value.attachments || []
-    console.log(oldFiles.value)
+    existing_file_ids.value = notice.value.attachments || []
+    console.log(existing_file_ids.value)
     console.log(courses.value)
   } catch (err) {
     console.log(err)
@@ -278,7 +277,7 @@ const handleFiles = (event) => {
 }
 
 const removeOldFile = (index) => {
-  oldFiles.value.splice(index, 1)
+  existing_file_ids.value.splice(index, 1)
 }
 
 const removeNewFile = (index) => {
@@ -296,21 +295,21 @@ const updateNotice = async () => {
     course_type: courseTypeCheck.value,
     specific_users: modalStudentSelect.value || [],
     content: content.value,
-    files: oldFiles.value.map((file) => file.file_id || file.file_name),
+    existing_file_ids: existing_file_ids.value.map((file) => file.file_id),
   }
 
   if (gradeSelect.value !== '전체') {
     noticeData.targets = [
       {
-        target_grade_id: gradeSelect.value,
-        target_level_id: null,
-        target_language_id: null,
+        grade_id: gradeSelect.value,
+        level_id: null,
+        language_id: null,
       },
     ]
   } else {
     noticeData.targets = []
   }
-  console.log(noticeData)
+  console.log(noticeData.files)
 
   try {
     await patchNotice(route.params.id, noticeData, newFiles.value)

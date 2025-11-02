@@ -72,30 +72,37 @@ export const postNotice = async (data, files) => {
 // ===================== 공지사항 수정 =====================
 
 export const patchNotice = async (noticeId, data, newFiles = []) => {
-  const formData = new FormData()
+  let response;
 
-  Object.entries(data).forEach(([key, value]) => {
-    if (value === null || value === undefined) return
-    if (typeof value === "object") {
-      formData.append(key, JSON.stringify(value))
-    } else {
-      formData.append(key, value)
-    }
-  })
+  if ((data.existing_file_ids.length > 0) || (newFiles && newFiles.length > 0)) {
+    const formData = new FormData()
 
-  if (newFiles && newFiles.length > 0) {
-    for (const file of newFiles) {
-      formData.append("files", file);
+    Object.entries(data).forEach(([key, value]) => {
+      if (value === null || value === undefined) return
+      if (typeof value === "object") {
+        formData.append(key, JSON.stringify(value))
+      } else {
+        formData.append(key, value)
+      }
+    })
+
+    if (newFiles && newFiles.length > 0) {
+      for (const file of newFiles) {
+        formData.append("files", file);
+      }
     }
+    console.log("파일 포함 (form Data 전송", formData)
+    response = await apiClient.patch(`/notices/${noticeId}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    })
+  } else {
+    console.log("파일 x json 전송", data)
+    response = await apiClient.patch(`/notices/${noticeId}`, data, {
+      headers: { "Content-Type": "application/json" }
+    })
   }
-  const res = await apiClient.patch(`/notices/${noticeId}`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data"
-    }
-  })
-  return res.data
+  return response.data
 }
-
 // ===================== 공지사항 삭제 =====================
 
 export const deleteNotice = async (notice_id) => {
