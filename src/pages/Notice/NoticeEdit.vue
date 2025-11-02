@@ -1,38 +1,127 @@
 <template>
-  <div class="notice-detail">
-    <!-- 헤더 -->
-    <div class="notice-detail-header">
-      <span>공지사항 수정</span>
-      <button @click="openTargetModal = true">공지사항 알림 대상 설정</button>
-      <!-- Modal 창 생성 -->
-      <div
-        v-if="openTargetModal"
-        class="modal-overlay"
-        @click.self="openTargetModal = false"
-      >
-        <div class="modal-container">
-          <!-- 헤더 -->
-          <div class="modal-header">
-            <h3>공지사항 알림 대상 설정</h3>
-            <button
-              class="modal-close"
-              @click="openTargetModal = false"
-            >
-              X
-            </button>
+  <main class="notice-page-wrapper">
+    <div class="notice-page-container">
+      <div class="notice-write-card">
+        <div class="notice-write-header">
+          <h1 class="portal-title">공지사항 수정</h1>
+          <button @click="openTargetModal = true" class="btn btn-secondary">
+            공지사항 알림 대상 설정
+          </button>
+        </div>
+
+        <div class="notice-form-body">
+          <div class="form-row">
+            <label class="form-label" for="notice-title">제목</label>
+            <div class="title-input-group">
+              <input id="notice-title" class="form-input" type="text" v-model="title" />
+              <div class="checkbox-group">
+                <input type="checkbox" id="notice-important" v-model="isImportant" />
+                <label for="notice-important">중요</label>
+              </div>
+            </div>
           </div>
 
-          <!-- 학생정보 리스트 -->
-          <div class="modal-body">
-            <div class="grade-list">
-              <button
-                v-for="filter in gradeFilters"
-                :key="filter"
-                @click="modalGradeSelect = filter"
-              >
-                {{ filter }}
-              </button>
+          <div class="form-row">
+            <label class="form-label" for="notice-author">작성자</label>
+            <input id="notice-author" class="form-input" type="text" v-model="author" />
+          </div>
+
+          <div class="form-row">
+            <label class="form-label" for="notice-grade">분류</label>
+            <div class="select-group">
+              <select id="notice-grade" class="form-select" v-model="gradeSelect">
+                <option v-for="grade in grades" :key="grade.grade_id" :value="grade.grade_id">
+                  {{ grade.grade_id === '전체' ? '전체 학년' : grade.grade_id + '학년' }}
+                </option>
+              </select>
+              <select class="form-select" v-model="courseTypeCheck">
+                <option v-for="courseT in courseType" :key="courseT" :value="courseT.course_type">
+                  {{
+                    courseT.course_type === 'general'
+                      ? '전체'
+                      : courseT.course_type === 'regular'
+                        ? '정규'
+                        : courseT.course_type === 'special'
+                          ? '특강'
+                          : '한국어'
+                  }}
+                </option>
+              </select>
             </div>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label" for="notice-course">과목</label>
+            <select
+              id="notice-course"
+              class="form-select"
+              v-if="filterCourse.length"
+              v-model="courseSelect"
+            >
+              <option value="">과목을 선택하세요</option>
+              <option v-for="course in filterCourse" :key="course.course_id" :value="course.title">
+                {{ course.title }}
+              </option>
+            </select>
+            <div v-else class="form-input-placeholder">선택 가능한 과목이 없습니다.</div>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">첨부파일</label>
+            <div class="file-upload-area">
+              <input
+                type="file"
+                multiple
+                @change="handleFiles"
+                id="file-upload"
+                class="file-input-hidden"
+              />
+              <label for="file-upload" class="file-upload-btn">파일 추가</label>
+              <ul class="file-list">
+                <li v-for="(file, index) in oldFiles" :key="'old-' + index">
+                  <span>(기존) {{ file.name || fixFileName(file.file_name) }}</span>
+                  <button @click="removeOldFile(index)" class="file-remove-btn">삭제</button>
+                </li>
+                <li v-for="(file, index) in newFiles" :key="'new-' + index">
+                  <span>(신규) {{ fixFileName(file.name) }}</span>
+                  <button @click="removeNewFile(index)" class="file-remove-btn">삭제</button>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="form-row content-row">
+            <label class="form-label" for="notice-content">내용</label>
+            <textarea id="notice-content" class="form-textarea" v-model="content"></textarea>
+          </div>
+        </div>
+
+        <div class="notice-write-footer">
+          <button class="btn btn-gray" @click="backPage">뒤로</button>
+          <button class="btn btn-primary" @click="updateNotice">수정하기</button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="openTargetModal" class="modal-overlay" @click.self="openTargetModal = false">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3>공지사항 알림 대상 설정</h3>
+          <button class="modal-close" @click="openTargetModal = false">×</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="grade-list">
+            <button
+              v-for="filter in gradeFilters"
+              :key="filter"
+              @click="modalGradeSelect = filter"
+              :class="['filter-btn', { active: modalGradeSelect === filter }]"
+            >
+              {{ filter }}
+            </button>
+          </div>
+          <div class="student-list-card">
             <div class="student-list">
               <div class="student-header">
                 <div class="col-checked">선택</div>
@@ -41,237 +130,122 @@
                 <div class="col-name">이름</div>
                 <div class="col-phone">전화번호</div>
               </div>
-              <template
-                v-for="student in students"
-                :key="student"
-              >
-                <div
-                  v-if="modalGradeSelect === student.grade_name"
-                  class="student-item"
-                >
-                  <input
-                    type="checkbox"
-                    class="col-checked"
-                    v-model="modalStudentSelect"
-                    :value="student.user_id"
-                  />
-                  <div class="col-grade">{{ student.grade_name }}</div>
-                  <div class="col-user_id">{{ student.user_id }}</div>
-                  <div class="col-name">{{ student.name }}</div>
-                  <div class="col-phone">{{ student.phone }}</div>
-                </div>
-              </template>
+              <div class="student-items-container">
+                <template v-for="student in students" :key="student.user_id">
+                  <div v-if="modalGradeSelect === student.grade_name" class="student-item">
+                    <input
+                      type="checkbox"
+                      class="col-checked"
+                      v-model="modalStudentSelect"
+                      :value="student.user_id"
+                      :id="`student-${student.user_id}`"
+                    />
+                    <label :for="`student-${student.user_id}`" class="student-item-content">
+                      <div class="col-grade">{{ student.grade_name }}</div>
+                      <div class="col-user_id">{{ student.user_id }}</div>
+                      <div class="col-name">{{ student.name }}</div>
+                      <div class="col-phone">{{ student.phone }}</div>
+                    </label>
+                  </div>
+                </template>
+              </div>
             </div>
           </div>
+        </div>
 
-          <!-- 취소, 저장 버튼 -->
-          <div class="modal-footer">
-            <button
-              class="cancel-btn"
-              @click="openTargetModal = false"
-            >
-              닫기
-            </button>
-            <button
-              class="save-btn"
-              @click="saveAndClose"
-            >
-              저장
-            </button>
-          </div>
+        <div class="modal-footer">
+          <button class="btn btn-gray" @click="openTargetModal = false">닫기</button>
+          <button class="btn btn-primary" @click="saveAndClose">저장</button>
         </div>
       </div>
     </div>
-
-    <!-- 제목 -->
-    <div class="notice-detail-section-title">
-      <div>제목</div>
-      <div>중요</div>
-      <input
-        type="checkbox"
-        v-model="isImportant"
-      />
-      <input
-        type="text"
-        v-model="title"
-      />
-    </div>
-
-    <!-- 작성자 -->
-    <div class="notice-detail-section-author">
-      <div>작성자</div>
-      <!-- 로그인 정보 확인 후 이름 자동 입력 기능 구현 -->
-      <input
-        type="text"
-        value="공지사항 작성자"
-        v-model="author"
-      />
-    </div>
-
-    <!-- 학년 -->
-    <div class="notice-detail-section-select">
-      <div>학년</div>
-      <select v-model="gradeCheck">
-        <option
-          v-for="grade in grades"
-          :key="grade.grade_id"
-          :value="grade.grade_id"
-        >
-          {{ grade.grade_id === '전체' ? grade.grade_id : grade.grade_id + '학년' }}
-        </option>
-      </select>
-    </div>
-    <!-- 과목 유형 선택 -->
-    <div class="notice-detail-section-select">
-      <div>과목유형</div>
-      <select v-model="courseTypeCheck">
-        <option
-          v-for="courseT in courseType"
-          :key="courseT"
-          :value="courseT.course_type"
-        >
-          {{ courseT.course_type === 'regular' ? '정규' : courseT.course_type === 'special' ? '특강' : '전체' }}
-        </option>
-      </select>
-    </div>
-    <!-- 학년, 과목 유형에 따른 과목 필터링 -->
-    <div class="notice-detail-section-select">
-      <div>과목</div>
-      <select
-        v-if="filterCourse.length"
-        v-model="course_title"
-      >
-        <option
-          v-for="course in filterCourse"
-          :key="course.course_id"
-          :value="course.title"
-        >
-          {{ course.title }}
-        </option>
-      </select>
-    </div>
-
-    <!-- 첨부파일 -->
-    <div class="notice-detail-files">
-      <span>첨부파일</span>
-      <input
-        type="file"
-        multiple
-        @change="handleFiles"
-      />
-      <ul>
-        <li
-          v-for="(file, index) in files"
-          :key="'old-' + index"
-        >
-          {{ file.name || fixFileName(file.file_name) }}
-          <button @click="removeOldFile(index)">삭제</button>
-        </li>
-        <li
-          v-for="(file, index) in newFiles"
-          :key="'new-' + index"
-        >
-          {{ fixFileName(file.name) }}
-          <button @click="removeNewFile(index)">삭제</button>
-        </li>
-      </ul>
-    </div>
-
-    <!-- 내용 -->
-    <div class="notice-detail-content">
-      <textarea
-        value="내용을 입력하세요"
-        v-model="content"
-      ></textarea>
-    </div>
-
-    <!-- 등록, 뒤로 버튼 -->
-    <div class="notice-detail-footer">
-      <button
-        class="register-btn"
-        @click="updateNotice"
-      >
-        수정하기
-      </button>
-      <button
-        class="back-btn"
-        @click="backPage"
-      >
-        뒤로
-      </button>
-    </div>
-  </div>
+  </main>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
-import { getNoticeView, getCourse, gradeList, course_type, patchNotice as patchNotice, getAllUser } from '@/api/apiNotice';
-import { useRoute } from 'vue-router';
-import router from '@/router';
+import { computed, onMounted, ref, watchEffect } from 'vue'
+import {
+  getNoticeView,
+  getCourse,
+  gradeList,
+  course_type,
+  patchNotice as patchNotice,
+  getAllUser,
+} from '@/api/apiNotice'
+import { useRoute } from 'vue-router'
+import router from '@/router'
 
-const route = useRoute();
-const notice = ref(null);
+const route = useRoute()
+const notice = ref(null)
+
+// ======================= 기존 게시글 내용 저장 ========================
 
 const title = ref('') // 제목
-const isImportant = ref(false); // 중요
+const isImportant = ref(false) // 중요
 const author = ref('') // 작성자
-const gradeCheck = ref(''); // 학년 선택
+const gradeSelect = ref('전체') // 학년 선택
 const courseTypeCheck = ref('general') // select 태그에서 선택시 변경 : 기본값 regular
-const course_title = ref('') // 선택한 과목 명
-const files = ref([]) // 기존 파일
+const courseSelect = ref('') // 선택한 과목 명
+const oldFiles = ref([]) // 기존 파일
 const newFiles = ref([]) // 새로 추가되는 파일
-// const files = ref([]) // 파일 배열
 const content = ref('') // 내용
 
 // ======================================================================
 
 const openTargetModal = ref(false)
 const gradeFilters = ref(['1학년', '2학년', '3학년'])
-const modalGradeSelect = ref('')          // 모달) 학년 선택
-const modalStudentSelect = ref([])        // 모달) 선택된 학생들
+const modalGradeSelect = ref('1학년') // 모달) 학년 선택
+const modalStudentSelect = ref([]) // 모달) 선택된 학생들
 
 // ======================================================================
 
 const courses = ref([]) // 과목 선택 배열
+// ( course_id / title / grade_id / course_type )
 const grades = ref([]) // 학년 저장 배열
 const courseType = ref([]) // 과목 타입 저장 배열 : 'regular' , 'special'
-const students = ref([]);                 // 학생 목록 배열
+const students = ref([]) // 학생 목록 배열
+// ( user_id / name / email / phone / grade_name )
 
 onMounted(async () => {
   try {
-    const noticeId = route.params.id;
-    courses.value = await getCourse()
-    students.value = await getAllUser();
-    grades.value = gradeList();
-    courseType.value = course_type()
+    const noticeId = route.params.id // URL의 notice_id 값 가져오기 ( router 에는 notice/:id 설정 )
+    courses.value = await getCourse() // 전체 과목 요청 API
+    students.value = await getAllUser() // 전체 학생 요청 API
+    grades.value = gradeList() // 학년
+    courseType.value = course_type() // 과목 타입
     console.log(noticeId)
 
-    const res = await getNoticeView(noticeId)
+    const res = await getNoticeView(noticeId) // 선택된 공지사항 요청 API
     notice.value = res || {}
 
     console.log(notice.value)
-
+    console.log(students.value)
     title.value = notice.value.title || ''
     isImportant.value = notice.value.is_pinned === 1
     author.value = notice.value.author.name || ''
-    gradeCheck.value = notice.value.targets[0].grade_id || '전체'
+    gradeSelect.value = selectedGrade.value || '전체'
+    // gradeSelect.value = selectedCourseId.value ? notice.value.targets[0]?.grade_id : '전체' // .targets[0]이 없을 수 있으므로 ? 추가
     courseTypeCheck.value = notice.value.course_type || 'general'
-    course_title.value = notice.value.course_title || ''
+    courseSelect.value = notice.value.course_title || null
     content.value = notice.value.content || ''
-    files.value = notice.value.attachments || []
-    console.log(files.value)
+    oldFiles.value = notice.value.attachments || []
+    console.log(oldFiles.value)
+    console.log(courses.value)
   } catch (err) {
     console.log(err)
   }
 })
 
+// 학년 별 해당 과목 필터링
 const filterCourse = computed(() => {
   // if (gradeCheck.value === '전체') return courses.value
-  if (gradeCheck.value === '전체') {
+  if (gradeSelect.value === '전체') {
     // 대상 (grade) 이 전체일 경우 과목 명에 따라 courses에 담기는 데이터를 구분
-    return courses.value.filter(c => c.course_type === courseTypeCheck.value)
+    return courses.value.filter((c) => c.course_type === courseTypeCheck.value)
   } else {
-    return courses.value.filter(c => c.grade_id === gradeCheck.value && c.course_type === courseTypeCheck.value)
+    return courses.value.filter(
+      (c) => c.grade_id === gradeSelect.value && c.course_type === courseTypeCheck.value,
+    )
   }
 })
 
@@ -283,68 +257,74 @@ const fixFileName = (str) => {
   }
 }
 
+const selectedGrade = computed(() => {
+  if (!notice.value || !notice.value.course_id) return null
+  const selected = courses.value.find((course) => course.course_id === notice.value.course_id)
+  return selected ? selected.grade_id : null
+})
+
 // const selectedCourse = computed(() =>
-//   courses.value.find((c) => c.course_id === course_title.value)
+// courses.value.find((c) => c.course_id === course_title.value)
 // )
 
-const selectedCourseId = computed(() => {
-  const selected = courses.value.find(c => c.title === course_title.value)
-  return selected ? selected.course_id : null
-}
-)
+// 선택된 과목이 전체 과목에 존재하는지 확인 ( 있을 경우 course_id 반환 없으면 null 반환 )
+const selectedCourse = computed(() => {
+  return courses.value.find((course) => course.title === courseSelect.value) || null
+})
 
 const handleFiles = (event) => {
-  const selected = Array.from(event.target.files);
+  const selected = Array.from(event.target.files)
   newFiles.value.push(...selected)
 }
 
 const removeOldFile = (index) => {
-  files.value.splice(index, 1)
+  oldFiles.value.splice(index, 1)
 }
 
 const removeNewFile = (index) => {
   newFiles.value.splice(index, 1)
 }
 
-
 // 공지사항 수정 등록 ( API POST 요청 )
 const updateNotice = async () => {
-  const noticeData = {}
-
-  if (title.value !== notice.value?.title) {
-    noticeData.title = title.value
+  const noticeData = {
+    title: title.value,
+    author: author.value,
+    is_pinned: isImportant.value ? 1 : 0,
+    course_id: selectedCourse.value ? selectedCourse.value.course_id : null,
+    course_title: selectedCourse.value ? selectedCourse.value.title : null,
+    course_type: courseTypeCheck.value,
+    specific_users: modalStudentSelect.value || [],
+    content: content.value,
+    files: oldFiles.value.map((file) => file.file_id || file.file_name),
   }
 
-  noticeData.is_pinned = isImportant.value ? 1 : 0
-
-  if (content.value !== notice.value?.content) {
-    noticeData.content = content.value
+  if (gradeSelect.value !== '전체') {
+    noticeData.targets = [
+      {
+        target_grade_id: gradeSelect.value,
+        target_level_id: null,
+        target_language_id: null,
+      },
+    ]
+  } else {
+    noticeData.targets = []
   }
-
-  if (selectedCourseId.value !== notice.value?.course_id) {
-    noticeData.course_id = selectedCourseId.value
-  }
-
-  const newTargets = [
-    {
-      target_grade_id: gradeCheck.value || null,
-      target_level_id: null,
-      target_language_id: null,
-    },
-  ]
-  if (JSON.stringify(newTargets) !== JSON.stringify(notice.value?.targets)) {
-    noticeData.targets = newTargets
-  }
+  console.log(noticeData)
 
   try {
-    await patchNotice(route.params.id, noticeData, newFiles.value);
+    await patchNotice(route.params.id, noticeData, newFiles.value)
     alert('공지사항이 수정 되었습니다.')
     router.push({ path: '/notice' })
   } catch (err) {
-    console.error(err);
+    console.error(err)
     alert('업로드 중 오류가 발생했습니다.')
   }
 }
+
+watchEffect(() => {
+  console.log('과목 ID 에서 필터링된 학년', selectedGrade.value)
+})
 
 const saveAndClose = () => {
   console.log(modalStudentSelect.value)
@@ -356,190 +336,427 @@ const backPage = () => {
 }
 </script>
 
-<style>
-.notice-detail {
+<style scoped>
+/* ===== 1. 전체 레이아웃 ===== */
+.notice-page-wrapper {
   width: 100%;
-  max-width: 1000px;
-  margin: 60px auto;
-  border: 3px solid #ccc;
-  border-radius: 6px;
-  background-color: #fff;
-  overflow: hidden;
-  font-size: 15px;
-  color: #333;
+  min-height: calc(100vh - 80px); /* 100vh - 헤더 높이 */
+  background-color: #f9fafb; /* 대시보드와 동일한 배경 */
+  font-family: 'Pretendard Variable', Pretendard, sans-serif;
+  padding: 2.5rem 0.5rem; /* 상하 여백 */
 }
 
-/* 🔹 헤더 타이틀 영역 */
-.notice-detail-header {
+.notice-page-container {
+  width: 1440px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+/* ===== 2. 공지사항 작성 카드 ===== */
+.notice-write-card {
+  background: #fff;
+  border-radius: 1.25rem;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.07),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  color: #1f2937;
+}
+
+/* ===== 3. 카드 헤더 ===== */
+.notice-write-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #e6f2ff;
-  border-bottom: 2px solid #ccc;
-  padding: 12px 20px;
-  font-size: 20px;
-  font-weight: bold;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.notice-detail-header button {
-  background-color: lightcoral;
-  color: #fff;
-  border: none;
-  padding: 6px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.2s;
+.portal-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  font-family: 'Montserrat', sans-serif;
+  color: #111827;
 }
 
-.notice-detail-header button:hover {
-  background-color: #e65b5b;
+/* ===== 4. 폼 영역 ===== */
+.notice-form-body {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
 }
 
-/* 🔸 항목 블록 공통 스타일 */
-.notice-detail-section-title {
+.form-row {
   display: grid;
-  grid-template-columns: 80px 50px 30px 1fr;
-  align-items: center;
-  text-align: center;
-  gap: 10px;
-  padding: 10px 20px;
-  border-bottom: 1px solid #ccc;
-  background-color: #9cd3dc;
+  grid-template-columns: 140px 1fr;
+  align-items: flex-start;
+  gap: 1rem;
 }
 
-.notice-detail-section-author {
-  display: grid;
-  grid-template-columns: 80px 1fr;
-  align-items: center;
-  text-align: center;
-  gap: 10px;
-  padding: 10px 20px;
-  border-bottom: 1px solid #ccc;
-  background-color: #9cd3dc;
+.form-row.content-row {
+  align-items: flex-start;
 }
 
-.notice-detail-section-select {
-  display: grid;
-  grid-template-columns: 80px 200px 100px 200px;
-  align-items: center;
-  text-align: center;
-  gap: 10px;
-  padding: 10px 20px;
-  border-bottom: 1px solid #ccc;
-  background-color: #9cd3dc;
+.form-label {
+  font-size: 1rem;
+  font-weight: 600;
+  padding-top: 0.6rem;
+  color: #374151;
 }
 
-/* 블록 내의 항목명 스타일 */
-.notice-detail-section>div:first-child,
-.notice-detail-section>div:nth-child(3) {
-  font-weight: bold;
-  text-align: center;
-  color: #444;
+/* ===== 5. 폼 입력 요소 스타일 ===== */
+.form-input,
+.form-select,
+.form-textarea,
+.form-input-placeholder {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  font-size: 1rem;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+  color: #1f2937;
 }
 
-/* 블록 내의 값 스타일 */
-.notice-detail-section>div:nth-child(2),
-.notice-detail-section>div:nth-child(4) {
-  text-align: center;
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
-/* 🔸 첨부파일 섹션 (1행 전용) */
-.notice-detail-files {
+.form-input-placeholder {
+  color: #9ca3af;
+  background-color: #f9fafb;
+}
+
+.form-textarea {
+  min-height: 300px;
+  resize: vertical;
+}
+
+.title-input-group {
   display: flex;
   align-items: center;
-  padding: 10px 20px;
-  border-bottom: 1px solid #ccc;
-  background-color: #fffafc;
+  gap: 1.5rem;
+}
+.title-input-group .form-input {
+  flex: 1;
+}
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.checkbox-group input[type='checkbox'] {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: #6366f1;
+}
+.checkbox-group label {
+  font-weight: 500;
+  cursor: pointer;
 }
 
-.notice-detail-files span {
-  font-weight: bold;
+.select-group {
+  display: flex;
+  gap: 1rem;
+}
+.select-group .form-select {
+  width: 200px;
+}
+
+/* ===== 6. 파일 업로드 영역 ===== */
+.file-upload-area {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.file-input-hidden {
+  display: none;
+}
+.file-upload-btn {
+  display: inline-block;
+  background: #fff;
+  color: #3f2b96;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 120px;
   text-align: center;
-  margin-right: 12px;
+}
+.file-upload-btn:hover {
+  background: #f4f6ff;
 }
 
-.notice-detail-files a {
-  color: #0077cc;
-  text-decoration: none;
+.file-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.file-list li {
+  background-color: #f4f6ff;
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+.file-list li span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 10px;
+}
+.file-remove-btn {
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
-.notice-detail-files a:hover {
-  text-decoration: underline;
+/* ===== 7. 카드 푸터 (버튼) ===== */
+.notice-write-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem 2rem;
+  background-color: #f9fafb;
+  border-top: 1px solid #e5e7eb;
 }
 
-/* 🧾 본문 영역 */
-.notice-detail-content {
-  padding: 20px;
-  height: 200px;
-  min-height: 250px;
-  background-color: #f9f9f9;
-  border-top: 2px solid #ddd;
-  border-bottom: 2px solid #ddd;
-  line-height: 1.7;
-  font-size: 15px;
-}
-
-textarea {
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
-  padding: 10px;
-  font-size: 20px;
-}
-
-/* 🔙 버튼 영역 */
-.notice-detail-footer {
+/* ===== 8. 모달 스타일 (전체 테마 적용) ===== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
-  gap: 20px;
-  padding: 20px;
-  background-color: #fefefe;
+  align-items: center;
+  z-index: 9999; /* ✅ 수정 1: z-index 상향 */
+}
+.modal-container {
+  width: 900px; /* 너비 조정 */
+  height: 700px; /* 높이 조정 */
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalPop 0.25s ease;
 }
 
-.notice-detail-footer button {
-  width: 120px;
-  height: 36px;
-  border-radius: 4px;
+/* 모달 헤더 */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+.modal-header h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+.modal-close {
+  background: none;
   border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
   cursor: pointer;
-  font-weight: bold;
+}
+
+/* 모달 바디 */
+.modal-body {
+  flex: 1;
+  padding: 1.5rem;
+  background-color: #f9fafb;
+  overflow-y: hidden; /* 스크롤을 학생 목록에서 처리 */
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* 모달 - 학년 필터 */
+.grade-list {
+  display: flex;
+  gap: 10px;
+}
+.filter-btn {
+  /* ✅ 공지사항 목록 필터와 동일한 스타일 */
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  background-color: #fff;
+  color: #3f2b96;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+.filter-btn:hover {
+  background-color: #f4f6ff;
+}
+.filter-btn.active {
+  background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
+  color: white;
+  border-color: transparent;
+}
+
+/* 모달 - 학생 목록 */
+.student-list-card {
+  flex: 1; /* 남은 공간 모두 차지 */
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.student-list {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.student-header,
+.student-item-content {
+  display: grid;
+  grid-template-columns: 80px 100px 1fr 1fr; /* 체크박스 제외하고 4단 */
+  align-items: center;
+  text-align: center;
+  padding: 0 1rem;
+}
+
+.student-header {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0.75rem 1rem;
+  /* 헤더와 아이템 그리드 맞추기 위해 체크박스 영역만큼 패딩 */
+  padding-left: calc(1rem + 60px);
+}
+
+.student-items-container {
+  overflow-y: auto; /* 여기서만 스크롤 */
+  flex: 1;
+}
+
+.student-item {
+  display: grid; /* 체크박스와 내용 분리 */
+  grid-template-columns: 60px 1fr;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
   transition: background-color 0.2s;
 }
+.student-item:last-child {
+  border-bottom: none;
+}
+.student-item:hover {
+  background-color: #f4f6ff;
+}
 
-.notice-detail-footer .back-btn {
-  background-color: lightcoral;
+.student-item input[type='checkbox'] {
+  justify-self: center;
+  accent-color: #6366f1;
+  width: 1.1rem;
+  height: 1.1rem;
+}
+.student-item-content {
+  padding: 0.75rem 0;
+  cursor: pointer;
+}
+
+.col-name {
+  text-align: left;
+  padding-left: 1rem;
+}
+.col-phone {
+  text-align: left;
+  padding-left: 1rem;
+}
+
+/* 모달 푸터 */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  background-color: #fff;
+}
+
+/* ===== 9. 공통 버튼 스타일 ===== */
+.btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.7rem 1.5rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+.btn:hover {
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
   color: white;
 }
-
-.notice-detail-footer .back-btn:hover {
-  background-color: #e65b5b;
+.btn-primary:hover {
+  opacity: 0.9;
 }
 
-.notice-detail-footer .register-btn {
-  background-color: lightskyblue;
-  color: white;
+.btn-secondary {
+  background: #fff;
+  color: #3f2b96;
+  border: 1px solid #d1d5db;
+}
+.btn-secondary:hover {
+  background: #f4f6ff;
 }
 
-.notice-detail-footer .register-btn:hover {
-  background-color: #0077cc;
+.btn-gray {
+  background: #e5e7eb;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+.btn-gray:hover {
+  background: #d1d5db;
 }
 
-.notice-detail-footer .confirm-btn {
-  background-color: #b0e0e6;
-}
-
-.notice-detail-footer .confirm-btn:hover {
-  background-color: #9cd3dc;
-}
-
-.modal {
-  position: fixed;
-  background-color: lightgreen;
-  z-index: 999;
-  top: 20%;
-  left: 30%;
-  width: 800px;
-  margin-left: -150px;
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 </style>
