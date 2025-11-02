@@ -296,9 +296,9 @@ const submitNotice = async () => {
   if (gradeSelect.value !== '전체') {
     noticeData.targets = [
       {
-        target_grade_id: gradeSelect.value || null,
-        target_level_id: null,
-        target_language_id: null,
+        grade_id: gradeSelect.value || null,
+        level_id: null,
+        language_id: null,
       },
     ]
   } else {
