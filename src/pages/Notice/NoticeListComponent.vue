@@ -81,7 +81,14 @@
 
         <div v-for="(notice, index) in filterNotices" :key="notice.notice_id">
           <div class="notice-item" @click="HandleNoticeClick(notice.notice_id)">
-            <div class="col-num">{{ index + 1 }}</div>
+            <div class="col-num">
+              <p v-if="notice.is_pinned">
+                {{ "♥ 중요" }}
+              </p>
+              <p v-else>
+                {{ index + 1 }}
+              </p>
+            </div>
             <div class="col-title">{{ notice.title }}</div>
             <div class="col-content">
               <span>{{ notice.content }}</span>
