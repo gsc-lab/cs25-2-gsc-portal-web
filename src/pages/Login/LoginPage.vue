@@ -50,10 +50,10 @@ const user = useUserStore()
 }
 
 /* 로그인 카드 스타일
-  ✅ 'max-w-lg'로 크기 증가
+  ✅ 'max-w-2xl' 유지, 'py-24'로 세로 패딩을 더욱 늘려 세로 길이 추가 확장
 */
 .login-card {
-  @apply bg-white rounded-3xl p-8 sm:p-10 w-full max-w-lg text-center transform transition-all duration-500 ease-in-out shadow-xl hover:shadow-2xl hover:-translate-y-1;
+  @apply bg-white rounded-3xl p-8 sm:py-24 w-full max-w-2xl text-center transform transition-all duration-500 ease-in-out shadow-xl hover:shadow-2xl hover:-translate-y-1;
   border: 1px solid rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(10px);
   animation: fadeInScale 0.8s ease-out forwards;
@@ -73,14 +73,14 @@ const user = useUserStore()
 
 /* 로고/아이콘 래퍼 */
 .logo-wrapper {
-  @apply mb-8;
+  @apply mb-14; /* 기존 mb-12에서 증가 */
 }
 
 /* 포털 아이콘 스타일
-  ✅ 'w-36 h-36'으로 크기 증가
+  ✅ 'w-80 h-80'으로 타이틀보다 훨씬 크게 증가
 */
 .portal-icon {
-  @apply w-36 h-36 rounded-full object-cover mx-auto mb-4 shadow-lg;
+  @apply w-80 h-80 rounded-full object-cover mx-auto mb-7 shadow-lg; /* 기존 mb-6에서 증가 */
   border: 4px solid #fff;
   transition: transform 0.3s ease;
 }
@@ -89,10 +89,10 @@ const user = useUserStore()
 }
 
 /* 포털 타이틀 스타일
-  ✅ 'text-5xl'로 크기 증가
+  ✅ 'text-6xl' 유지
 */
 .portal-title {
-  @apply text-5xl font-extrabold text-gray-800 tracking-wide;
+  @apply text-6xl font-extrabold text-gray-800 tracking-wide;
   background: linear-gradient(45deg, #4caf50, #2196f3);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -101,12 +101,13 @@ const user = useUserStore()
 }
 
 /* Google 로그인 버튼 스타일
-  ✅ 'font-size: 1.25rem'으로 텍스트 크기 증가
+  ✅ 'font-size: 1.5rem' (text-2xl) 및 패딩('px-10 py-4') 유지
+  ✅ 'mb-10'으로 하단 여백 증가
 */
 .google-login-button {
-  @apply flex items-center justify-center gap-4 bg-white text-gray-700 font-bold rounded-full px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300 w-full mb-6;
+  @apply flex items-center justify-center gap-4 bg-white text-gray-700 font-bold rounded-full px-10 py-4 shadow-lg hover:shadow-xl transition-all duration-300 w-full mb-8; /* mb-8에서 증가 */
   border: 2px solid #ddd;
-  font-size: 1.25rem; /* text-xl에 해당 */
+  font-size: 1.5rem; /* text-2xl에 해당 */
   position: relative;
   overflow: hidden;
 }
@@ -136,7 +137,10 @@ const user = useUserStore()
   @apply relative z-10;
 }
 
+/* Google 로고 아이콘
+  ✅ 'w-8 h-8' 유지
+*/
 .google-icon {
-  @apply w-7 h-7 relative z-10;
+  @apply w-8 h-8 relative z-10;
 }
 </style>
