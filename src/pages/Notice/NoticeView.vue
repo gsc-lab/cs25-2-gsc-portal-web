@@ -40,6 +40,7 @@
               <span class="separator">|</span>
               <span class="date">{{ formatDate }}</span>
               <span class="badge">{{ courseTypeName }}</span>
+              <span class="badge">{{ notice?.course_title }}</span>
             </div>
           </div>
 
@@ -224,7 +225,7 @@ watch(
 )
 
 const backPage = () => {
-  router.push({ path: '/notice/' })
+  router.push({ path: '/notice' })
 }
 </script>
 
