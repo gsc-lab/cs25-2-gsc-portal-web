@@ -1,4 +1,4 @@
-import apiClient from "@/api";
+import apiClient from "./index";
 
 // google 로그인 요청
 export const googleLogin = () => {
@@ -28,3 +28,17 @@ export const userRegister = async (data) => {
   return response.data
 }
 
+// 사용자 정보 요청 API
+
+export const getUserInfo = async () => {
+  const userInfo = await apiClient.get('/auth/me')
+
+  return userInfo.data
+}
+
+// 사용자 로그아웃 요청 API
+export const postuserInfo = async () => {
+  const userInfo = await apiClient.post('/auth/logout')
+
+  return userInfo.data
+}
