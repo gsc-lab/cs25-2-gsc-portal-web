@@ -41,9 +41,14 @@ export const getEmail = async () => {
 // ---------------------------------------------------------------
 // 회원정보 조회 (학생)
 // ---------------------------------------------------------------
-export const getUserInfo = async () => {
+export const getUserInfo = async (grade, status) => {
   try{
-    const res = await api.get(`/admin/student`)
+    const res = await api.get(`/admin/students`, {
+      params: {
+        grade_name: grade,
+        status: status
+      }
+})
     console.log(res.data);
     return res.data;
   } catch (e) {
@@ -85,6 +90,29 @@ export const postEmail = async (email, reason) => {
   }
 }
 
+// ========================== PATCH ===============================
+// ---------------------------------------------------------------
+// 승인 / 거절 등록
+// ---------------------------------------------------------------
+export const patchUser = async (user_id, userInfo) => {
+  console.log(user_id, userInfo);
+  try{
+    const res = await api.patch(`/admin/students/${user_id}`, {
+        name: userInfo.name,
+        phone: userInfo.phone,
+        status: userInfo.status,
+        grade_id: userInfo.grade,
+        language_id: userInfo.language_id,
+        level_name: userInfo.level_name,
+        class_name: userInfo.class_name
+      })
+    console.log(res.data);
+    return res.data;
+  } catch (e) {
+    errorMsg(e);
+  }
+}
+
 
 // ========================== DELETE ===============================
 // ---------------------------------------------------------------
@@ -93,6 +121,20 @@ export const postEmail = async (email, reason) => {
 export const delEmail = async (id) => {
   try{
     const res = await api.delete(`/admin/email/${id}`)
+    console.log(res.data);
+    return res.data;
+  } catch (e) {
+    errorMsg(e);
+  }
+}
+
+
+// ---------------------------------------------------------------
+// 학생 삭제
+// ---------------------------------------------------------------
+export const delUser = async (id) => {
+  try{
+    const res = await api.delete(`/admin/students/${id}`)
     console.log(res.data);
     return res.data;
   } catch (e) {

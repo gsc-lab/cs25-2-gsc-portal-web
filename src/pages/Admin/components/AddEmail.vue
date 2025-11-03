@@ -26,8 +26,10 @@ const handlePost = async () => {
 
 // ==============  삭제  ===============
 const handleDelete = async (id) => {
-  await delEmail(id)
-  setEmailData()
+  if (confirm(`${id}번 이메일을 삭제합니다`)) {
+    await delEmail(id)
+    setEmailData()
+  }
 }
 
 
