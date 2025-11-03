@@ -1,8 +1,6 @@
 <template>
-  <div v-if="user.userInfo">
-    <MainHeader />
-  </div>
-  <router-view :key="$route.fullPath" />
+  <MainHeader v-if="user.userInfo" />
+  <router-view />
 </template>
 
 <script setup>

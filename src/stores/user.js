@@ -4,7 +4,7 @@ import { ref } from "vue";
 
 export const useUserStore = defineStore('user', () => {
 
-  const userInfo = ref([])
+  const userInfo = ref(null)
   const isLoading = ref(false)
   const error = ref('')
 
@@ -14,8 +14,8 @@ export const useUserStore = defineStore('user', () => {
     try {
       const response = await getUserInfo()
       userInfo.value = response
-      console.log("사용자 정보", userInfo.value)
-    } catch {
+    } catch (err) {
+      console.warn("유저 정보 불러오기 실패", err)
       userInfo.value = null
     } finally {
       isLoading.value = false
@@ -33,6 +33,4 @@ export const useUserStore = defineStore('user', () => {
     userInfo,
     logoutUser,
   }
-
-
 })

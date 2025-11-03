@@ -6,23 +6,23 @@
 
         <div class="info-row">
           <span class="label">학번</span>
-          <span class="value">{{ userInfoStore.userInfo?.user_id }}</span>
+          <span class="value">{{ user.userInfo?.user_id }}</span>
         </div>
 
         <div class="info-row">
           <span class="label">이메일</span>
-          <span class="value">{{ userInfoStore.userInfo?.email }}</span>
+          <span class="value">{{ user.userInfo?.email }}</span>
         </div>
 
         <div class="info-row">
           <span class="label">전화번호</span>
-          <span class="value">{{ userInfoStore.userInfo?.phone }}</span>
+          <span class="value">{{ user.userInfo?.phone }}</span>
         </div>
 
         <div class="info-row">
           <span class="label">권한</span>
-          <span class="value role" :class="userInfoStore.userInfo?.role_type">
-            {{ userInfoStore.userInfo?.role_type }}
+          <span class="value role" :class="user.userInfo?.role_type">
+            {{ user.userInfo?.role_type }}
           </span>
         </div>
       </div>
@@ -31,10 +31,9 @@
 </template>
 
 <script setup>
-// ... (Script 내용은 변경 없음)
 import { useUserStore } from '@/stores/user'
 
-const userInfoStore = useUserStore()
+const user = useUserStore()
 </script>
 
 <style scoped>
@@ -61,7 +60,9 @@ const userInfoStore = useUserStore()
 .user-info-card {
   background-color: #fff;
   border-radius: 1.25rem; /* 20px (통일) */
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg (통일) */
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.07),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg (통일) */
   padding: 2rem 2.5rem;
   width: 100%;
   max-width: 600px; /* 너비 조정 */
@@ -71,7 +72,9 @@ const userInfoStore = useUserStore()
 
 .user-info-card:hover {
   /* ✅ 동적 호버 효과 (통일) */
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-2xl */
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-2xl */
   transform: translateY(-4px);
 }
 

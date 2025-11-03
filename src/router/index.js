@@ -27,18 +27,15 @@ export const router = createRouter({
   routes,
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
-  const isLogin = !!userStore.userInfo
 
-  if (to.path === '/login') {
-    next()
-    return
+  if (!userStore.userInfo && to.path !== '/login') {
+    return next('/login')
   }
 
-  if (!isLogin) {
-    next('/login')
-    return
+  if (userStore.userInfo && to.path === '/login') {
+    return next('/dashboard')
   }
 
   next()

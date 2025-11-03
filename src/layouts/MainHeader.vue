@@ -1,5 +1,5 @@
 <template>
-  <header v-if="userStore.userInfo && router.currentRoute.value.path !== '/login'" class="header">
+  <header v-if="user.userInfo && router.currentRoute.value.path !== '/login'" class="header">
     <div class="header-inner">
       <div class="header-left">
         <router-link to="/dashboard" class="logo-text">GSC-Portal</router-link>
@@ -33,46 +33,41 @@
           </ul>
         </div>
 
-        <router-link class="menu" to="/weekend_attendance">강의실 신청</router-link>
+        <router-link class="menu" to="/weekendAttendance">강의실 신청</router-link>
         <router-link class="menu" to="/profile">프로필</router-link>
       </nav>
 
       <div class="header-right">
-        <button class="logout-btn" v-if="userStore.userInfo" @click="logout">로그아웃</button>
+        <button class="logout-btn" v-if="user.userInfo" @click="logout">로그아웃</button>
       </div>
     </div>
   </header>
 </template>
 
 <script setup>
-import { useUserStore } from '@/stores/user'
+import { useUserStore } from '@//stores/user'
 import { useRouter } from 'vue-router'
 import { postuserInfo } from '@/api/auth'
-import { storeToRefs } from 'pinia'
 
 const router = useRouter()
-const userStore = useUserStore()
-
-const { logoutUser } = storeToRefs(userStore)
-
-// v-if에서 router.path 대신 router.currentRoute.value.path를 사용해야 합니다.
-// (setup 스크립트에서 router.path는 반응형이 아님)
+const user = useUserStore()
 
 async function logout() {
   try {
-    await postuserInfo()
+    const response = await postuserInfo()
+    console.log('로그아웃 요청완료', response)
+    const storeLogout = user.logoutUser()
+    console.log('store 사용자 정보 삭제', storeLogout)
+    console.log('store userinfo', user.userInfo)
+
+    await router.push('/login')
   } catch (err) {
     console.error('로그아웃 실패', err)
   }
-  userStore.logoutUser()
-  router.push('/login')
 }
 </script>
 
 <style scoped>
-/* ✅ 'Pretendard' 폰트가 프로젝트 전역에 설치되어 있어야 합니다.
-  없다면, 이 폰트 설정을 제거하거나 다른 폰트로 변경하세요.
-*/
 .header {
   display: flex;
   justify-content: center; /* 내부 컨텐츠를 중앙 정렬 */

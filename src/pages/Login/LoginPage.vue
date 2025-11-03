@@ -1,5 +1,5 @@
 <template>
-  <div v-if="user.userInfo === null" class="login-container">
+  <div v-if="!user.userInfo" class="login-container">
     <div class="login-card">
       <div class="logo-wrapper">
         <img

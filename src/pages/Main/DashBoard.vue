@@ -85,16 +85,17 @@ import { getAllUser } from '@/api/apiNotice'
 const user = useUserStore()
 
 const dashBoard = ref({})
-// ✅ new Date().toLocaleDateString()가 템플릿에 이미 있으므로 Today 변수는 현재 불필요해 보입니다.
-//    (API 호출 시에는 Today 변수를 사용하는 것이 맞습니다)
+
 const Today = new Date().toISOString().split('T')[0]
 
 onMounted(async () => {
   const response = await getDashBoard({ date: Today })
   dashBoard.value = response
-  console.log(dashBoard.value)
   const res = await getAllUser()
-  console.log(res)
+  await user.fetchUser()
+  console.log('현재 로그인 사용자 정보: ', user.userInfo)
+  console.log('메인 대시보드 정보: ', dashBoard.value)
+  console.log('모든 학생 정보: ', res)
 })
 
 const HandleNoticeMove = () => {

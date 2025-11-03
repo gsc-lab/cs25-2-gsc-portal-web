@@ -7,12 +7,15 @@ import { useUserStore } from '@/stores/user'
 
 const app = createApp(App)
 const pinia = createPinia()
-
 app.use(pinia)
+
+const user = useUserStore()
+
+try {
+  await user.fetchUser()
+} catch (err) {
+  console.error('로그인 상태 확인 실패', err)
+}
+
 app.use(router)
-
-const userStore = useUserStore()
-await userStore.fetchUser()
-
-
 app.mount('#app')
