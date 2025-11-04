@@ -1,6 +1,6 @@
 <script setup>
-import { ref, computed } from "vue";
-import { setTarget } from "@/api/Data";
+import { ref, computed } from 'vue'
+import { setTarget } from '@/utils/reName'
 
 // users = [{user_id: string, grade_id: string, name: string}, {}...]
 const props = defineProps({
@@ -12,37 +12,33 @@ const props = defineProps({
 
 // Emit 정의
 // -> 부모(@select:user="") -> user.id 반환
-const emit = defineEmits(["select:user"]);
+const emit = defineEmits(['select:user'])
 
-const isOpen = ref(false);
-const searchQuery = ref(""); // 검색어
+const isOpen = ref(false)
+const searchQuery = ref('') // 검색어
 
 // 대상 선택
-const selectedUser = ref(null);
+const selectedUser = ref(null)
 
 // 검색 필터링
 const filteredUsers = computed(() =>
-  props.users.filter((user) =>
-    user.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-  )
-);
+  props.users.filter((user) => user.name.toLowerCase().includes(searchQuery.value.toLowerCase())),
+)
 
 // 사용자 선택 후 초기화 및 반환
 const selectUser = (user) => {
-  selectedUser.value = user;
-  isOpen.value = false;
-  searchQuery.value = "";
+  selectedUser.value = user
+  isOpen.value = false
+  searchQuery.value = ''
   // 부모에 id값 반환
-  emit("select:user", user.user_id);
-};
-
+  emit('select:user', user.user_id)
+}
 </script>
-
 
 <template>
   <div>
     <div @click="isOpen = !isOpen">
-      {{ selectedUser ? selectedUser.name : "-- 사용자 선택하세요 --" }}
+      {{ selectedUser ? selectedUser.name : '-- 사용자 선택하세요 --' }}
       <span>▼</span>
     </div>
 
@@ -54,11 +50,7 @@ const selectUser = (user) => {
       </div>
       <!-- 학생 명담 -->
       <ul>
-        <li
-          v-for="user in filteredUsers"
-          :key="user.user_id"
-          @click="selectUser(user)"
-        >
+        <li v-for="user in filteredUsers" :key="user.user_id" @click="selectUser(user)">
           {{ user.name }} : {{ setTarget(user.grade_id) }}
         </li>
       </ul>
