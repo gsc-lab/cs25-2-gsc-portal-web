@@ -1,0 +1,119 @@
+<template>
+  <div class="cleaning-card">
+    청소 당번
+    <div class="cleaning-header">
+      <button v-for="grade in ['', '1', '2', '3']" :key="grade" @click="HandleGradeCleaning(grade)">
+        <p v-if="grade === ''">전체</p>
+        <p v-else>{{ grade + '학년' }}</p>
+      </button>
+      <div>
+        <button v-for="weekend in weekendList" :key="weekend" @click="HandleWeekend(weekend)">
+          {{ weekend === 'lastWeekend' ? '지난주' : '다음주' }}
+        </button>
+        {{ date.toLocaleDateString() }}
+      </div>
+    </div>
+    <div class="cleaning-content"></div>
+  </div>
+  <div>
+    <h1 style="font-size: 30px">청소 일정</h1>
+  </div>
+</template>
+<script setup>
+import { getCleaningRoster } from '@/api/apiCleaning'
+import router from '@/router'
+import { onMounted, ref, watch, watchEffect } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+// 청소 당번 멤버 조회 값 저장
+const cleaningRoster = ref(null)
+const weekendList = ref(['lastWeekend', 'nextWeekend'])
+
+// ==================================================================
+const gradeSelect = ref('') // 선택된 학년
+const weekendSelect = ref('')
+
+const date = ref(new Date())
+console.log('오늘 날짜:', date.value)
+
+// ==================================================================
+
+const HandleWeekend = (weekend) => {
+  weekendSelect.value = weekend
+  console.log('버튼 클릭 감지', weekendSelect.value)
+  // 저번 주 버튼 클릭 시 ( date - 7 )
+  if (weekend === 'lastWeekend') {
+    // console.log('지금 날짜 - 7')
+    console.log('지난주 클릭: ', date.value.toLocaleDateString())
+    date.value = new Date(date.value.setDate(date.value.getDate() - 7))
+  }
+  // 다음 주 버튼 클릭 시 ( date + 7 )
+  if (weekend === 'nextWeekend') {
+    // console.log('지금 날짜 + 7')
+    console.log('다음주 클릭: ', date.value.toLocaleDateString())
+    date.value = new Date(date.value.setDate(date.value.getDate() + 7))
+  }
+}
+
+// let date = new Date(2025, 4, 5) => 2025 년 5월 5일로 출력 ! 월 계산시 주의 !
+// 연도 계산
+// + : date.setFullYear(date.getFullYear() + 1 )
+// - : date.setFullYear(date.getFullYear() - 1 )
+// 월 계산 :
+// + : date.setMonth(date.getMonth() + 1 )
+// - : date.setMonth(date.getMonth() - 1 )
+// 일 계산
+// + : date.setDate(date.getDate() + 1 )
+// - : date.setDate(date.getDate() - 1 )
+
+const formData = ref({
+  grade_id: gradeSelect.value,
+  date: date.value.toLocaleDateString(),
+})
+
+onMounted(async () => {
+  try {
+    console.log(formData.value)
+    cleaningRoster.value = await getCleaningRoster(formData)
+    console.log(cleaningRoster.value)
+  } catch (err) {
+    console.error('청소 조회 실패 ', err)
+  }
+})
+
+const HandleGradeCleaning = (grade) => {
+  console.log('청소, 선택된 학년: ', grade)
+  if (grade) {
+    gradeSelect.value = grade
+    console.log('선택된 학년', gradeSelect.value)
+    router.push(`/cleaningH/grade/${grade}`)
+  } else {
+    console.log('전체 학년')
+    router.push('/cleaningH')
+  }
+}
+watchEffect(() => {
+  console.log('watchEffect', gradeSelect.value)
+})
+
+watch([gradeSelect, date], async ([newGrade, newDate], [oldGrade, oldDate]) => {
+  if (newGrade !== oldGrade || newDate !== oldDate) {
+    console.log('선택 학년 변경 감지: ', newGrade)
+    console.log('선택 날짜 변경 감지: ', newDate)
+
+    formData.value.grade_id = newGrade || null
+    formData.value.date = newDate
+
+    console.log('전달 데이터 확인: ', formData.value)
+
+    try {
+      cleaningRoster.value = await getCleaningRoster(formData)
+      console.log('청소당번 호출: ', cleaningRoster.value)
+    } catch (err) {
+      console.error('청소당번 호출 실패: ', err)
+    }
+  }
+})
+</script>
