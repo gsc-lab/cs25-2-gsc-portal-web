@@ -12,6 +12,8 @@ const routes = [
   { path: '/noticeView/:id', name: 'noticeView/:id', component: () => import('@/pages/Notice/NoticeView.vue') },
   { path: '/noticeEdit/:id', name: 'noticeEdit/:id', component: () => import('@/pages/Notice/NoticeEdit.vue') },
   { path: '/timetable', name: 'timetable', component: () => import('@/pages/TimeTable/TimeTablePage.vue') },
+  { path: '/cleaningH', name: 'cleaningH', component: () => import('@/pages/Cleaning/CleaningPageH.vue') },
+  { path: '/cleaningH/grade/:gradeId', name: 'cleaning-grade', component: () => import('@/pages/Cleaning/CleaningPageH.vue') },
   { path: '/cleaning', name: 'cleaning', component: () => import('@/pages/Cleaning/CleaningPage.vue') },
   { path: '/cleaning-rosters', name: 'CleaningRosterPage', component: () => import('@/pages/Cleaning/CleaningPage.vue') },
   { path: '/cleaning-rosters/generator', name: 'CleaningGeneratorPage', component: () => import('@/pages/Cleaning/components/CleaningPost.vue') },
@@ -30,6 +32,7 @@ export const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
 
+  // 로그인 상태 여부 확인 user store 에 userInfo 값 에 따른 roter
   if (!userStore.userInfo && to.path !== '/login') {
     return next('/login')
   }
