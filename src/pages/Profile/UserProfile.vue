@@ -25,6 +25,12 @@
             {{ user.userInfo?.role_type }}
           </span>
         </div>
+        <div v-if="user.userInfo?.grade_id" class="info-row">
+          <span class="label">학년</span>
+          <span class="value role" :class="user.userInfo?.grade_id">
+            {{ user.userInfo?.grade_id }}
+          </span>
+        </div>
       </div>
     </div>
   </main>
