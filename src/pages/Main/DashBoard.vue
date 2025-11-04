@@ -29,7 +29,7 @@
               @click="HandleNoticeClick(notice.notice_id)"
             >
               <p class="notice-title">
-                <span v-if="notice.is_pinned" class="pinned">📌</span>
+                <span v-if="notice.is_pinned" class="pinned">♥ 중요</span>
                 {{ notice.title }}
               </p>
             </div>
@@ -89,6 +89,7 @@ import router from '@/router'
 import { useUserStore } from '@/stores/user'
 import { getAllUser } from '@/api/apiNotice'
 
+// user store ( user.userInfo ) 불러오기
 const user = useUserStore()
 
 const dashBoard = ref({})

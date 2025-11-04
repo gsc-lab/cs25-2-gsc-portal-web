@@ -51,6 +51,7 @@ export const useNoticeStore = defineStore('Notice', () => {
     return noticeList.value.filter((notice) => {
       const course = courseMap.value.get(notice.course_id)
 
+      // 학년 체크 ture 시 해당 학년 게시글만 반환
       let gradeCheck = false
       if (notice.course_id) {
         gradeCheck = course?.grade_id === gradeSelect.value
@@ -63,7 +64,7 @@ export const useNoticeStore = defineStore('Notice', () => {
         }
       }
 
-      // 과목별 타입 필터링 확인
+      // 과목별 ture 시 해당 과목 게시글만 반환
 
       let courseTypeCheck = false
       if (courseTypeSelect.value === 'general') {

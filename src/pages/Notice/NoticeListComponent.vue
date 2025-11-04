@@ -83,7 +83,7 @@
           <div class="notice-item" @click="HandleNoticeClick(notice.notice_id)">
             <div class="col-num">
               <p v-if="notice.is_pinned">
-                {{ "♥ 중요" }}
+                {{ '♥ 중요' }}
               </p>
               <p v-else>
                 {{ index + 1 }}
@@ -215,7 +215,6 @@ watch(courseTypeSelect, (newVal, oldVal) => {
 })
 
 // 선택 학년 공지사항으로 이동
-
 const HandleGradeNotice = (grade) => {
   console.log(grade)
   if (grade) {

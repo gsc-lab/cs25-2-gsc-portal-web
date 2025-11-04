@@ -14,6 +14,7 @@
 import { useUserStore } from '@/stores/user'
 import NoticeListComponent from './NoticeListComponent.vue'
 
+// user store ( user.userInfo ) 불러오기
 const user = useUserStore()
 </script>
 

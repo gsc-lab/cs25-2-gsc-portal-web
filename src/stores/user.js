@@ -4,6 +4,7 @@ import { ref } from "vue";
 
 export const useUserStore = defineStore('user', () => {
 
+  // 유저 정보 저장
   const userInfo = ref(null)
   const isLoading = ref(false)
   const error = ref('')

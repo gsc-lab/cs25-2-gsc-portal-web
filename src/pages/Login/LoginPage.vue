@@ -26,6 +26,8 @@
 import { googleLogin } from '@/api/auth'
 import { useUserStore } from '@/stores/user'
 
+// user store ( user.userInfo ) 불러오기
+
 const user = useUserStore()
 </script>
 

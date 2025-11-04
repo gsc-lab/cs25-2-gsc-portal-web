@@ -293,6 +293,7 @@ const submitNotice = async () => {
     content: content.value,
   }
 
+  // 학년 선택 정보가 있을 경우
   if (gradeSelect.value !== '전체') {
     noticeData.targets = [
       {
@@ -301,6 +302,7 @@ const submitNotice = async () => {
         language_id: null,
       },
     ]
+    // 학년 전체일 경우 빈 객체 [] 로 전달
   } else {
     noticeData.targets = []
   }
