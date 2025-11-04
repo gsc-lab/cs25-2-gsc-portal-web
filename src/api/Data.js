@@ -14,15 +14,6 @@ export const getUsers = () => {
   return users;
 }
 
-export const setTarget = (getTarget) => {
-  const reTarget = (getTarget == "1") ? "1학년" :
-    (getTarget == "2") ? "2학년" :
-      (getTarget == "3") ? "3학년":
-      (getTarget == "special") ? "특강":
-              "한국어";
-  return reTarget;
-}
-
 export const getCourses = () => {
   const courses = [
     { course_id: "C001", courseTitle: "인공지능 개론", grade_id: "1"},
