@@ -55,7 +55,12 @@
         </div>
 
         <div class="card huka">
-          <h2 class="card-title">후까 교수님</h2>
+          <div class="card-header">
+            <h2 class="card-title">후까 교수님</h2>
+            <button class="btn btn-primary">
+              <router-link to="huka">일정 상세보기</router-link>
+            </button>
+          </div>
           <div class="card-content">
             <p>1학년 일정</p>
           </div>
@@ -64,7 +69,9 @@
         <div class="card pool">
           <div class="card-header">
             <h2 class="card-title">강의실 개방 투표</h2>
-            <button class="btn btn-primary">신청</button>
+            <button class="btn btn-primary">
+              <router-link to="weekendAttendance">신청</router-link>
+            </button>
           </div>
           <div class="card-content">
             <p>000호</p>
