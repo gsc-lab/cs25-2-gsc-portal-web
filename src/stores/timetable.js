@@ -1,9 +1,8 @@
 import { defineStore } from 'pinia'
 import { lengthHour } from '@/utils/lengthHour'
-import { useClassroomStore } from '@/stores/classroom';
-import { useProfessorStore } from '@/stores/auth';
-import { getAdminTimetable, getCourses } from '@/api/timetableApi';
-
+import { useClassroomStore } from '@/stores/classroom'
+import { useProfessorStore } from '@/stores/auth'
+import { getAdminTimetable, getCourses } from '@/api/timetableApi'
 
 export const useTimetableStore = defineStore('timetable', {
   state: () => ({
@@ -18,7 +17,7 @@ export const useTimetableStore = defineStore('timetable', {
       day: null,
       startTime: null,
       endTime: null,
-      schedule: null
+      schedule: null,
       // schedule{
       //    course_id
       //    title
@@ -38,10 +37,10 @@ export const useTimetableStore = defineStore('timetable', {
     // ------------------------ adminTimetable --------------------------
     // [ set ] : Timetable 셋팅
     async setTimetable(day = this.selectTT.date) {
-      if(day == null) new Date().toISOString().split('T')[0]
-      this.adminTimetable = await getAdminTimetable(day);
+      if (day == null) new Date().toISOString().split('T')[0]
+      this.adminTimetable = await getAdminTimetable(day)
       this.date = day
-      console.log("store: adminTimetable", this.adminTimetable);
+      console.log('store: adminTimetable', this.adminTimetable)
     },
 
     // [ get ] : adminTimetable 반환
@@ -65,12 +64,12 @@ export const useTimetableStore = defineStore('timetable', {
 
       if (schedule[0].schedule) {
         // 교수 이름으로 Id 찾기
-        const Pstore = useProfessorStore();
+        const Pstore = useProfessorStore()
         const professor_id = await Pstore.searchProfessorsId(schedule[0].schedule.professor)
         schedule[0].schedule.professor_id = professor_id
 
         // 장소 이름으로 id 찾기
-        const Cstore = useClassroomStore();
+        const Cstore = useClassroomStore()
         const room_id = await Cstore.searchClassroomId(schedule[0].schedule.room)
         schedule[0].schedule.room_id = room_id
       }
@@ -82,9 +81,9 @@ export const useTimetableStore = defineStore('timetable', {
         day: schedule[0].day,
         startTime: time[0],
         endTime: time[1],
-        schedule: schedule[0].schedule
+        schedule: schedule[0].schedule,
       }
-      console.log("selectTT", this.selectTT);
+      console.log('selectTT', this.selectTT)
     },
     // [ del ] : 시간표 드랙 선택
     removeSchedule() {
@@ -94,8 +93,8 @@ export const useTimetableStore = defineStore('timetable', {
     // --------------------------- courses -----------------------------
     // [ set ] : courses셋팅
     async setCourses() {
-      this.courses = await getCourses();
-      console.log("store: courses", this.courses);
+      this.courses = await getCourses()
+      console.log('store: courses', this.courses)
     },
 
     // [ get ] : courses 반환
@@ -111,10 +110,12 @@ export const useTimetableStore = defineStore('timetable', {
       if (this.courses.length <= 0) {
         await this.setCourses()
       }
-
-      const newCourses = this.courses.filter((course) => course.target == argTarget);
-      console.log("newCourses", newCourses);
-      return newCourses;
+      // 객체로 필터링
+      const newCourses = Object.fromEntries(
+        Object.entries(this.courses).filter(([, course]) => course.target === argTarget),
+      )
+      console.log('newCourses', newCourses)
+      return newCourses
     },
 
     // 과목 id 조회
@@ -122,5 +123,5 @@ export const useTimetableStore = defineStore('timetable', {
     //   const row = this.courses.filter((course) => course.title == argTitle);
     //   return row.course_id;
     // }
-  }
+  },
 })
