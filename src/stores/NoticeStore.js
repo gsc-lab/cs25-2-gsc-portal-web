@@ -13,6 +13,22 @@ export const useNoticeStore = defineStore('Notice', () => {
   const isLoading = ref(false)
   const error = ref('')
 
+  // 학년 목록
+  const grade_id = ref([
+    { grade_id: '전체' },
+    { grade_id: '1' },
+    { grade_id: '2' },
+    { grade_id: '3' },
+  ])
+
+  // 과목 타입 목록
+  const course_type = ref([
+    { course_type: 'general' },
+    { course_type: 'regular' },
+    { course_type: 'special' },
+    { course_type: 'korean' },
+  ])
+
   // 필터링 시 필요 조건 항목
   const gradeSelect = ref("")
   const courseTypeSelect = ref("general")
@@ -103,6 +119,8 @@ export const useNoticeStore = defineStore('Notice', () => {
     fetchNotice,
     setCourse,
     filterNotices,
+    grade_id,
+    course_type
   }
 
 })

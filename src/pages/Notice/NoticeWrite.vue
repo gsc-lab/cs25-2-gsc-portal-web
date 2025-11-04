@@ -13,20 +13,9 @@
           <div class="form-row">
             <label class="form-label" for="notice-title">제목</label>
             <div class="title-input-group">
-              <input
-                id="notice-title"
-                class="form-input"
-                type="text"
-                placeholder="공지사항 제목을 입력하세요"
-                v-model="title"
-              />
+              <input id="notice-title" class="form-input" type="text" placeholder="공지사항 제목을 입력하세요" v-model="title" />
               <div class="checkbox-group">
-                <input
-                  type="checkbox"
-                  id="notice-important"
-                  v-model="isImportant"
-                  @click="handleImportant"
-                />
+                <input type="checkbox" id="notice-important" v-model="isImportant" @click="handleImportant" />
                 <label for="notice-important">중요</label>
               </div>
             </div>
@@ -34,14 +23,8 @@
 
           <div class="form-row">
             <label class="form-label" for="notice-author">작성자</label>
-            <input
-              id="notice-author"
-              class="form-input"
-              value="author.value"
-              type="text"
-              placeholder="작성자 이름"
-              v-model="author"
-            />
+            <input id="notice-author" class="form-input" value="author.value" type="text" placeholder="작성자 이름"
+              v-model="author" />
           </div>
 
           <div class="form-row">
@@ -70,18 +53,9 @@
 
           <div class="form-row">
             <label class="form-label" for="notice-course">과목</label>
-            <select
-              id="notice-course"
-              class="form-select"
-              v-if="filterCourse.length"
-              v-model="courseSelect"
-            >
+            <select id="notice-course" class="form-select" v-if="filterCourse.length" v-model="courseSelect">
               <option value="">과목을 선택하세요</option>
-              <option
-                v-for="course in filterCourse"
-                :key="course.course_id"
-                :value="course.course_id"
-              >
+              <option v-for="course in filterCourse" :key="course.course_id" :value="course.course_id">
                 {{ course.title }}
               </option>
             </select>
@@ -91,13 +65,7 @@
           <div class="form-row">
             <label class="form-label">첨부파일</label>
             <div class="file-upload-area">
-              <input
-                type="file"
-                multiple
-                @change="handleFiles"
-                id="file-upload"
-                class="file-input-hidden"
-              />
+              <input type="file" multiple @change="handleFiles" id="file-upload" class="file-input-hidden" />
               <label for="file-upload" class="file-upload-btn">파일 선택</label>
               <ul class="file-list">
                 <li v-for="(file, index) in files" :key="index">
@@ -110,12 +78,7 @@
 
           <div class="form-row content-row">
             <label class="form-label" for="notice-content">내용</label>
-            <textarea
-              id="notice-content"
-              class="form-textarea"
-              placeholder="내용을 입력하세요"
-              v-model="content"
-            ></textarea>
+            <textarea id="notice-content" class="form-textarea" placeholder="내용을 입력하세요" v-model="content"></textarea>
           </div>
         </div>
 
@@ -135,12 +98,8 @@
 
         <div class="modal-body">
           <div class="grade-list">
-            <button
-              v-for="filter in gradeFilters"
-              :key="filter"
-              @click="modalGradeSelect = filter"
-              :class="['filter-btn', { active: modalGradeSelect === filter }]"
-            >
+            <button v-for="filter in gradeFilters" :key="filter" @click="modalGradeSelect = filter"
+              :class="['filter-btn', { active: modalGradeSelect === filter }]">
               {{ filter }}
             </button>
           </div>
@@ -156,13 +115,8 @@
               <div class="student-items-container">
                 <template v-for="student in students" :key="student.user_id">
                   <div v-if="modalGradeSelect === student.grade_name" class="student-item">
-                    <input
-                      type="checkbox"
-                      class="col-checked"
-                      v-model="modalStudentSelect"
-                      :value="student.user_id"
-                      :id="`student-${student.user_id}`"
-                    />
+                    <input type="checkbox" class="col-checked" v-model="modalStudentSelect" :value="student.user_id"
+                      :id="`student-${student.user_id}`" />
                     <label :for="`student-${student.user_id}`" class="student-item-content">
                       <div class="col-grade">{{ student.grade_name }}</div>
                       <div class="col-user_id">{{ student.user_id }}</div>
@@ -186,12 +140,17 @@
 </template>
 
 <script setup>
-import { course_type, getCourse, gradeList, postNotice, getAllUser } from '@/api/apiNotice'
+import { getCourse, postNotice, getAllUser } from '@/api/apiNotice'
 import router from '@/router'
+import { useNoticeStore } from '@/stores/NoticeStore'
 import { useUserStore } from '@/stores/user'
+import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref, watch, watchEffect } from 'vue'
 
 const user = useUserStore()
+const noticeStore = useNoticeStore()
+
+const { grade_id, course_type } = storeToRefs(noticeStore)
 
 // ======================================================================
 
@@ -213,8 +172,8 @@ const modalStudentSelect = ref([]) // 모달) 선택된 학생들
 
 // API 요청받은값 저장
 const courses = ref([]) // 과목 선택 배열
-const grades = ref([]) // 학년 저장 배열
-const courseType = ref([]) // 과목 타입 저장 배열 : 'regular' , 'special'
+const grades = ref(grade_id) // 학년 저장 배열
+const courseType = ref(course_type) // 과목 타입 저장 배열 : 'regular' , 'special'
 const students = ref([]) // 학생 목록 배열
 // ======================================================================
 
@@ -225,8 +184,6 @@ onMounted(async () => {
     courses.value = await getCourse()
     students.value = await getAllUser()
 
-    grades.value = gradeList()
-    courseType.value = course_type()
     console.log('과목 목록', courses.value)
     // console.log('학생 정보', students.value)
   } catch (err) {
@@ -347,10 +304,13 @@ const backPage = () => {
 /* ===== 1. 전체 레이아웃 ===== */
 .notice-page-wrapper {
   width: 100%;
-  min-height: calc(100vh - 80px); /* 100vh - 헤더 높이 */
-  background-color: #f9fafb; /* 대시보드와 동일한 배경 */
+  min-height: calc(100vh - 80px);
+  /* 100vh - 헤더 높이 */
+  background-color: #f9fafb;
+  /* 대시보드와 동일한 배경 */
   font-family: 'Pretendard Variable', Pretendard, sans-serif;
-  padding: 2.5rem 0.5rem; /* 상하 여백 */
+  padding: 2.5rem 0.5rem;
+  /* 상하 여백 */
 }
 
 .notice-page-container {
@@ -363,10 +323,12 @@ const backPage = () => {
 /* ===== 2. 공지사항 작성 카드 ===== */
 .notice-write-card {
   background: #fff;
-  border-radius: 1.25rem; /* 20px */
+  border-radius: 1.25rem;
+  /* 20px */
   box-shadow:
     0 10px 15px -3px rgba(0, 0, 0, 0.07),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  /* shadow-lg */
   overflow: hidden;
   color: #1f2937;
 }
@@ -393,13 +355,16 @@ const backPage = () => {
   padding: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 1.75rem; /* 폼 행 간의 간격 */
+  gap: 1.75rem;
+  /* 폼 행 간의 간격 */
 }
 
 .form-row {
   display: grid;
-  grid-template-columns: 140px 1fr; /* 라벨 140px, 나머지 영역 */
-  align-items: flex-start; /* 라벨을 상단에 정렬 */
+  grid-template-columns: 140px 1fr;
+  /* 라벨 140px, 나머지 영역 */
+  align-items: flex-start;
+  /* 라벨을 상단에 정렬 */
   gap: 1rem;
 }
 
@@ -411,7 +376,8 @@ const backPage = () => {
 .form-label {
   font-size: 1rem;
   font-weight: 600;
-  padding-top: 0.6rem; /* input 높이와 비슷하게 맞춤 */
+  padding-top: 0.6rem;
+  /* input 높이와 비슷하게 맞춤 */
   color: #374151;
 }
 
@@ -455,19 +421,24 @@ const backPage = () => {
   align-items: center;
   gap: 1.5rem;
 }
+
 .title-input-group .form-input {
-  flex: 1; /* input이 남은 공간을 다 차지 */
+  flex: 1;
+  /* input이 남은 공간을 다 차지 */
 }
+
 .checkbox-group {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
+
 .checkbox-group input[type='checkbox'] {
   width: 1.1rem;
   height: 1.1rem;
   accent-color: #6366f1;
 }
+
 .checkbox-group label {
   font-weight: 500;
   cursor: pointer;
@@ -478,8 +449,10 @@ const backPage = () => {
   display: flex;
   gap: 1rem;
 }
+
 .select-group .form-select {
-  width: 200px; /* 고정 너비 */
+  width: 200px;
+  /* 고정 너비 */
 }
 
 /* ===== 6. 파일 업로드 영역 ===== */
@@ -488,9 +461,12 @@ const backPage = () => {
   flex-direction: column;
   gap: 1rem;
 }
+
 .file-input-hidden {
-  display: none; /* 기본 input 숨기기 */
+  display: none;
+  /* 기본 input 숨기기 */
 }
+
 .file-upload-btn {
   /* Secondary 버튼 스타일 적용 */
   display: inline-block;
@@ -505,6 +481,7 @@ const backPage = () => {
   width: 120px;
   text-align: center;
 }
+
 .file-upload-btn:hover {
   background: #f4f6ff;
 }
@@ -517,6 +494,7 @@ const backPage = () => {
   flex-direction: column;
   gap: 0.5rem;
 }
+
 .file-list li {
   background-color: #f4f6ff;
   padding: 0.5rem 0.8rem;
@@ -526,6 +504,7 @@ const backPage = () => {
   align-items: center;
   font-size: 0.9rem;
 }
+
 .file-remove-btn {
   background-color: #ff4d4f;
   color: white;
@@ -539,7 +518,8 @@ const backPage = () => {
 /* ===== 7. 카드 푸터 (버튼) ===== */
 .notice-write-footer {
   display: flex;
-  justify-content: flex-end; /* 오른쪽 정렬 */
+  justify-content: flex-end;
+  /* 오른쪽 정렬 */
   gap: 1rem;
   padding: 1.5rem 2rem;
   background-color: #f9fafb;
@@ -561,8 +541,10 @@ const backPage = () => {
 }
 
 .modal-container {
-  width: 900px; /* 너비 조정 */
-  height: 700px; /* 높이 조정 */
+  width: 900px;
+  /* 너비 조정 */
+  height: 700px;
+  /* 높이 조정 */
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
@@ -580,11 +562,13 @@ const backPage = () => {
   padding: 1rem 1.5rem;
   border-bottom: 1px solid #e5e7eb;
 }
+
 .modal-header h3 {
   font-size: 1.25rem;
   font-weight: 700;
   margin: 0;
 }
+
 .modal-close {
   background: none;
   border: none;
@@ -598,7 +582,8 @@ const backPage = () => {
   flex: 1;
   padding: 1.5rem;
   background-color: #f9fafb;
-  overflow-y: hidden; /* 스크롤을 학생 목록에서 처리 */
+  overflow-y: hidden;
+  /* 스크롤을 학생 목록에서 처리 */
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -609,6 +594,7 @@ const backPage = () => {
   display: flex;
   gap: 10px;
 }
+
 .filter-btn {
   /* ✅ 공지사항 목록 필터와 동일한 스타일 */
   padding: 0.5rem 1rem;
@@ -621,9 +607,11 @@ const backPage = () => {
   font-size: 0.9rem;
   transition: all 0.3s ease;
 }
+
 .filter-btn:hover {
   background-color: #f4f6ff;
 }
+
 .filter-btn.active {
   background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
   color: white;
@@ -632,7 +620,8 @@ const backPage = () => {
 
 /* 모달 - 학생 목록 */
 .student-list-card {
-  flex: 1; /* 남은 공간 모두 차지 */
+  flex: 1;
+  /* 남은 공간 모두 차지 */
   background: #fff;
   border-radius: 8px;
   border: 1px solid #e5e7eb;
@@ -640,15 +629,18 @@ const backPage = () => {
   display: flex;
   flex-direction: column;
 }
+
 .student-list {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
+
 .student-header,
 .student-item-content {
   display: grid;
-  grid-template-columns: 80px 100px 1fr 1fr; /* 체크박스 제외하고 4단 */
+  grid-template-columns: 80px 100px 1fr 1fr;
+  /* 체크박스 제외하고 4단 */
   align-items: center;
   text-align: center;
   padding: 0 1rem;
@@ -665,20 +657,24 @@ const backPage = () => {
 }
 
 .student-items-container {
-  overflow-y: auto; /* 여기서만 스크롤 */
+  overflow-y: auto;
+  /* 여기서만 스크롤 */
   flex: 1;
 }
 
 .student-item {
-  display: grid; /* 체크박스와 내용 분리 */
+  display: grid;
+  /* 체크박스와 내용 분리 */
   grid-template-columns: 60px 1fr;
   align-items: center;
   border-bottom: 1px solid #e5e7eb;
   transition: background-color 0.2s;
 }
+
 .student-item:last-child {
   border-bottom: none;
 }
+
 .student-item:hover {
   background-color: #f4f6ff;
 }
@@ -689,6 +685,7 @@ const backPage = () => {
   width: 1.1rem;
   height: 1.1rem;
 }
+
 .student-item-content {
   padding: 0.75rem 0;
   cursor: pointer;
@@ -698,6 +695,7 @@ const backPage = () => {
   text-align: left;
   padding-left: 1rem;
 }
+
 .col-phone {
   text-align: left;
   padding-left: 1rem;
@@ -725,6 +723,7 @@ const backPage = () => {
   text-decoration: none;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
+
 .btn:hover {
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
@@ -735,6 +734,7 @@ const backPage = () => {
   background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
   color: white;
 }
+
 .btn-primary:hover {
   opacity: 0.9;
 }
@@ -745,6 +745,7 @@ const backPage = () => {
   color: #3f2b96;
   border: 1px solid #d1d5db;
 }
+
 .btn-secondary:hover {
   background: #f4f6ff;
 }
@@ -755,6 +756,7 @@ const backPage = () => {
   color: #374151;
   border: 1px solid #d1d5db;
 }
+
 .btn-gray:hover {
   background: #d1d5db;
 }
@@ -765,6 +767,7 @@ const backPage = () => {
     opacity: 0;
     transform: scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
