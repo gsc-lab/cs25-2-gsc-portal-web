@@ -92,15 +92,15 @@
             <div class="col-title">{{ notice.title }}</div>
             <div class="col-content">
               <span>{{ notice.content }}</span>
-              <span v-if="notice.attachments.length > 0"> 📁</span>
+              <span v-if="notice.attachments.length > 0">📁</span>
             </div>
             <div v-if="notice.course_id || notice.targets[0]?.grade_id" class="col-target">
               {{ courseIdGradeId(notice.course_id) }}
             </div>
             <div v-else class="col-target">
-              <span>{{
-                notice.targets[0]?.grade_id ? notice.targets[0]?.grade_id + '학년' : '전체'
-              }}</span>
+              <span>
+                {{ notice.targets[0]?.grade_id ? notice.targets[0]?.grade_id + '학년' : '전체' }}
+              </span>
             </div>
             <div class="col-author">{{ notice.author?.name }}</div>
             <div class="col-date">{{ formatDate(notice.created_at) }}</div>
@@ -128,7 +128,7 @@ const detailOpen = ref(false)
 // const user = useUserStore()
 
 // 공지사항 store 사용, 과목 store 사용
-const noticeStore = useNoticeStore()
+const noticeStore = useNoticeStore() // 22
 const coursesStore = useCourseStore()
 
 // const regular = ref([])
@@ -239,8 +239,10 @@ const HandleNoticeClick = (notice_id) => {
 /* ===== 1. 전체 레이아웃 ===== */
 .notice-board-wrapper {
   width: 100%;
-  min-height: calc(100vh - 80px); /* 100vh - 헤더 높이 */
-  background-color: #f9fafb; /* 대시보드와 동일한 배경 */
+  min-height: calc(100vh - 80px);
+  /* 100vh - 헤더 높이 */
+  background-color: #f9fafb;
+  /* 대시보드와 동일한 배경 */
   font-family: 'Pretendard Variable', Pretendard, sans-serif;
 }
 
@@ -249,7 +251,8 @@ const HandleNoticeClick = (notice_id) => {
   width: 1440px;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 2.5rem 0.5rem; /* 상하 여백 */
+  padding: 2.5rem 0.5rem;
+  /* 상하 여백 */
 }
 
 /* ===== 2. 필터 버튼 ===== */
@@ -294,6 +297,7 @@ const HandleNoticeClick = (notice_id) => {
   color: #1f2937;
   border-color: #d1d5db;
 }
+
 .detail-filter:hover {
   background-color: #f9fafb;
 }
@@ -303,7 +307,8 @@ const HandleNoticeClick = (notice_id) => {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  background-color: #f4f6ff; /* 연한 보라색 배경 */
+  background-color: #f4f6ff;
+  /* 연한 보라색 배경 */
   font-weight: 500;
   padding: 1.25rem;
   border-radius: 12px;
@@ -351,11 +356,14 @@ const HandleNoticeClick = (notice_id) => {
 .notice-list-card {
   /* ✅ 대시보드 카드와 동일한 스타일 */
   background: #fff;
-  border-radius: 1.25rem; /* 20px */
+  border-radius: 1.25rem;
+  /* 20px */
   box-shadow:
     0 10px 15px -3px rgba(0, 0, 0, 0.07),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
-  overflow: hidden; /* 모서리 radius 유지를 위해 */
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  /* shadow-lg */
+  overflow: hidden;
+  /* 모서리 radius 유지를 위해 */
 }
 
 /* ✅ Grid 레이아웃 재조정 */
@@ -372,7 +380,8 @@ const HandleNoticeClick = (notice_id) => {
 }
 
 .notice-header {
-  background-color: #f9fafb; /* 연한 회색 배경 */
+  background-color: #f9fafb;
+  /* 연한 회색 배경 */
   font-weight: 700;
   color: #374151;
   text-transform: uppercase;
@@ -381,17 +390,20 @@ const HandleNoticeClick = (notice_id) => {
 }
 
 .notice-item {
-  border-bottom: 1px solid #e5e7eb; /* 부드러운 구분선 */
+  border-bottom: 1px solid #e5e7eb;
+  /* 부드러운 구분선 */
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
 .notice-item:last-child {
-  border-bottom: none; /* 마지막 아이템 구분선 제거 */
+  border-bottom: none;
+  /* 마지막 아이템 구분선 제거 */
 }
 
 .notice-item:hover {
-  background-color: #f4f6ff; /* 호버 시 연한 보라색 */
+  background-color: #f4f6ff;
+  /* 호버 시 연한 보라색 */
 }
 
 /* ✅ 제목과 내용은 왼쪽 정렬 */
@@ -413,13 +425,16 @@ const HandleNoticeClick = (notice_id) => {
 .col-num {
   font-weight: 600;
 }
+
 .col-date {
   font-size: 0.9rem;
   color: #6b7280;
 }
+
 .col-author {
   font-weight: 500;
 }
+
 .col-target {
   font-weight: 500;
 }
