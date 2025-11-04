@@ -17,18 +17,36 @@
   </div>
   <div>
     <h1 style="font-size: 30px">청소 일정</h1>
+    <div>
+      <span style="font-size: 20px; padding: 10px">학기 정보:</span>
+      <span>
+        {{ cleaningRoster?.section }}
+      </span>
+    </div>
+    <div>
+      <span style="font-size: 20px; padding: 10px">교실:</span>
+      <span>{{ cleaningRoster?.rosters[0]?.classroom_name }}</span>
+    </div>
+    <div>
+      <span style="font-size: 20px; padding: 10px">담당 학생:</span>
+      <span v-for="member in cleaningRoster?.rosters[0]?.members" :key="member">
+        {{ member + '  ' }}
+      </span>
+    </div>
   </div>
 </template>
 <script setup>
 import { getCleaningRoster } from '@/api/apiCleaning'
 import router from '@/router'
 import { onMounted, ref, watch, watchEffect } from 'vue'
-import { useRoute } from 'vue-router'
+// import { useRoute } from 'vue-router'
 
-const route = useRoute()
+// const route = useRoute()
 
 // 청소 당번 멤버 조회 값 저장
 const cleaningRoster = ref(null)
+
+// 주차별 날자 조회시 사용되는 데이터 값 ( 저번주, 다음주 )
 const weekendList = ref(['lastWeekend', 'nextWeekend'])
 
 // ==================================================================
@@ -69,13 +87,13 @@ const HandleWeekend = (weekend) => {
 // - : date.setDate(date.getDate() - 1 )
 
 const formData = ref({
-  grade_id: gradeSelect.value,
-  date: date.value.toLocaleDateString(),
+  grade_id: null,
+  date: date.value.toLocaleDateString('en-CA'),
 })
 
 onMounted(async () => {
   try {
-    console.log(formData.value)
+    console.log('form-data: ', formData.value)
     cleaningRoster.value = await getCleaningRoster(formData)
     console.log(cleaningRoster.value)
   } catch (err) {
@@ -90,6 +108,7 @@ const HandleGradeCleaning = (grade) => {
     console.log('선택된 학년', gradeSelect.value)
     router.push(`/cleaningH/grade/${grade}`)
   } else {
+    gradeSelect.value = grade
     console.log('전체 학년')
     router.push('/cleaningH')
   }
@@ -104,7 +123,7 @@ watch([gradeSelect, date], async ([newGrade, newDate], [oldGrade, oldDate]) => {
     console.log('선택 날짜 변경 감지: ', newDate)
 
     formData.value.grade_id = newGrade || null
-    formData.value.date = newDate
+    formData.value.date = newDate.toLocaleDateString('en-CA')
 
     console.log('전달 데이터 확인: ', formData.value)
 
