@@ -14,6 +14,7 @@ const routes = [
   { path: '/timetable', name: 'timetable', component: () => import('@/pages/TimeTable/TimeTablePage.vue') },
   { path: '/cleaningH', name: 'cleaningH', component: () => import('@/pages/Cleaning/CleaningPageH.vue') },
   { path: '/cleaningH/grade/:gradeId', name: 'cleaning-grade', component: () => import('@/pages/Cleaning/CleaningPageH.vue') },
+  { path: '/cleaningH/cleaningRosterCreate', name: 'cleaning-create', component: () => import('@/pages/Cleaning/CleaningRosterCreate.vue') },
   { path: '/cleaning', name: 'cleaning', component: () => import('@/pages/Cleaning/CleaningPage.vue') },
   { path: '/cleaning-rosters', name: 'CleaningRosterPage', component: () => import('@/pages/Cleaning/CleaningPage.vue') },
   { path: '/cleaning-rosters/generator', name: 'CleaningGeneratorPage', component: () => import('@/pages/Cleaning/components/CleaningPost.vue') },
