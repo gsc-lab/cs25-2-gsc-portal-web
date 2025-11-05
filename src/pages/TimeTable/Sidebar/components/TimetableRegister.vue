@@ -110,7 +110,7 @@ const handleSubmit = async () => {
   <div>
     <label for="course">과목 : </label>
     <select id="course" v-model="postTimetableData.course_id">
-      <option v-for="course in courses" :value="course.course_id" :key="course.course_id">
+      <option v-for="(course, idx) in courses" :value="idx" :key="idx">
         {{ course.title }}
       </option>
     </select>
