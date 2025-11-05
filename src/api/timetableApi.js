@@ -260,6 +260,40 @@ export const getClassStudents = async (class_id) => {
   //   errorMsg(e);
   // }
 }
+// ========================== PUT ===============================
+// ---------------------------------------------------------------
+// 과목 수정
+// ---------------------------------------------------------------
+export const putCourse = async (Data) => {
+  console.log('putCourse', Data)
+  try {
+    const res = await api.put(`/timetables/registerCourses/${Data.course_id}`, {
+      sec_id: Data.data.section,
+      title: Data.data.title,
+      professor_id: Data.data.professor_id,
+      target: Data.data.target,
+    })
+    return res.data
+  } catch (e) {
+    errorMsg(e)
+  }
+}
+// ---------------------------------------------------------------
+// 시간표 등록
+// ---------------------------------------------------------------
+export const putTimetable = async (Data) => {
+  try {
+    await api.post(`/timetables/registerTimetable/${Data.timetable_id}`, {
+      classroom_id: Data.data.room_id,
+      course_id: Data.course_id,
+      day_of_week: Data.data.day,
+      start_period: Data.data.start_period,
+      end_period: Data.data.end_period,
+    })
+  } catch (e) {
+    errorMsg(e)
+  }
+}
 
 // ========================== DEL ===============================
 // ---------------------------------------------------------------
