@@ -9,3 +9,17 @@ export const getCleaningRoster = async (formData) => {
 
   return cleaningRoster.data
 }
+
+// 학기 목록 조회
+export const getSections = async () => {
+  const section = await apiClient.get('/modal/setctions')
+
+  return section.data
+}
+
+// 강의실 목록 조회
+export const getClassRooms = async () => {
+  const classRooms = await apiClient.get('/modal/common/classrooms')
+
+  return classRooms.data
+}
