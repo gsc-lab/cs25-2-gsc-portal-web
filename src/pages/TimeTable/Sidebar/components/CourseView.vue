@@ -4,7 +4,7 @@ import { useTimetableStore } from '@/stores/timetable'
 import { useProfessorStore } from '@/stores/auth'
 import { useClassroomStore } from '@/stores/classroom'
 import { setTarget, day } from '@/utils/reName'
-import { putCourse, putTimetable, delCourse } from '@/api/timetableApi'
+import { putCourse, putTimetable, delCourse, delTimetable } from '@/api/timetableApi'
 
 const Tstore = useTimetableStore() // 시간표 store
 const Pstore = useProfessorStore() // 교수 store
@@ -48,17 +48,22 @@ async function setOriginCourses() {
   console.log('originCourses.value', originCourses.value)
 }
 
+// set originCourses, courses
+async function setCourses() {
+  await Tstore.setCourses()
+  await setOriginCourses()
+  courses.value = await Tstore.courseFilter(target.value)
+  console.log('courses.value', courses.value)
+}
+
 // ================================= target 감시 =================================
 // target 바뀌면 해당 과목 필터링
 watch(
   () => target.value,
   async (newTarget) => {
     // 전체일 때 origin대입
-    if (newTarget == '0') {
-      if (originCourses.value == null) await setOriginCourses()
-      courses.value = originCourses.value // 0: 초기화
-    } else courses.value = await Tstore.courseFilter(newTarget) // target: 필터링
-
+    if (originCourses.value == null) await setOriginCourses()
+    courses.value = await Tstore.courseFilter(newTarget) // target: 필터링
     console.log(courses.value)
   },
   { immediate: true },
@@ -105,16 +110,29 @@ const handleSubmit = async () => {
   } else {
     await putTimetable(putData.value)
   }
+  // 초기화
+  putData.value.course_id = null
+  putData.value.timetable_id = null
+  setCourses()
 }
 // ================================= 삭제 =================================
 // 과목
 const handleCourseDel = async (course_id) => {
-  const res = await delCourse(course_id)
-  console.log(res)
+  console.log(course_id)
+  if (confirm('정말 삭제하시겠습니까?')) {
+    const res = await delCourse(course_id)
+    console.log(res)
+    // 초기화
+    setCourses()
+  }
 }
-const handleTimetableDel = async (course_id) => {
-  const res = await delCourse(course_id)
-  console.log(res)
+const handleTimetableDel = async (schedule_id) => {
+  if (confirm('정말 삭제하시겠습니까?')) {
+    const res = await delTimetable(schedule_id)
+    console.log(res)
+    // 초기화
+    setCourses()
+  }
 }
 </script>
 
