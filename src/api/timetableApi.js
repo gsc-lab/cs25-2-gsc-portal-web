@@ -57,6 +57,20 @@ export const postEvent = async (SpecialData) => {
   }
 }
 
+// ---------------------------------------------------------------
+// 분반 학생 등록
+// ---------------------------------------------------------------
+export const postClassStudents = async (class_id, student_ids) => {
+  try {
+    await api.post(`/timetables/classes/${class_id}/assign`, {
+      student_ids: student_ids,
+    })
+    alert('등록 완료')
+  } catch (e) {
+    errorMsg(e)
+  }
+}
+
 // ========================== GET ===============================
 // ---------------------------------------------------------------
 // 과목 정보 조회
@@ -153,7 +167,7 @@ export const getSpecialClasses = async () => {
   try {
     const res = await api.get(`/modal/subjects/courses/special/classes`)
     console.log('Special 반 : ', res.data)
-    return res.data.result
+    return res.data
   } catch (e) {
     errorMsg(e)
   }
@@ -164,9 +178,9 @@ export const getSpecialClasses = async () => {
 // ---------------------------------------------------------------
 export const getKoreanClasses = async () => {
   try {
-    const res = await api.get(`/modal/subjects/courses/special/classes`)
+    const res = await api.get(`/modal/subjects/courses/korean/classes`)
     console.log('Korean 반 : ', res.data)
-    return res.data.result
+    return res.data
   } catch (e) {
     errorMsg(e)
   }
@@ -176,6 +190,12 @@ export const getKoreanClasses = async () => {
 // 분반 학생정보 조회
 // ---------------------------------------------------------------
 export const getClassStudents = async (class_id) => {
+  // try {
+  //   const res = await api.get(`/modal/subjects/courses/${class_id}/students`)
+  //   return res.data
+  // } catch (e) {
+  //   errorMsg(e)
+  // }
   const res = {
     all_students: [
       {
@@ -188,25 +208,25 @@ export const getClassStudents = async (class_id) => {
     ],
     assigned_students: [
       {
-        user_id: '2725001',
-        name: '박지민',
-        grade: '1',
-        email: 'park@g.yju.ac.kr',
+user_id: '2725001',
+      name: '박지민',
+      grade: '1',
+      email: 'park@g.yju.ac.kr',
       },
       {
-        user_id: '2725002',
-        name: '최은비',
-        grade: '1',
-        email: 'choi@g.yju.ac.kr',
+user_id: '2725002',
+      name: '최은비',
+      grade: '1',
+      email: 'choi@g.yju.ac.kr',
       },
       {
-        user_id: '2624003',
-        name: '이도현',
-        grade: '2',
-        email: 'lee@g.yju.ac.kr',
+user_id: '2624003',
+      name: '이도현',
+      grade: '2',
+      email: 'lee@g.yju.ac.kr',
       },
       {
-        user_id: '2524004',
+user_id: '2524004',
         name: '윤하린',
         grade: '2',
         email: 'yoon@g.yju.ac.kr',
@@ -253,12 +273,6 @@ export const getClassStudents = async (class_id) => {
     ],
   }
   return res
-  // try {
-  //   const res = await api.get(`/modal/courses/${class_id}/students`)
-  //   return res.data.result;
-  // } catch (e) {
-  //   errorMsg(e);
-  // }
 }
 // ========================== PUT ===============================
 // ---------------------------------------------------------------
@@ -283,13 +297,27 @@ export const putCourse = async (Data) => {
 // ---------------------------------------------------------------
 export const putTimetable = async (Data) => {
   try {
-    await api.post(`/timetables/registerTimetable/${Data.timetable_id}`, {
+    await api.put(`/timetables/registerTimetable/${Data.timetable_id}`, {
       classroom_id: Data.data.room_id,
       course_id: Data.course_id,
       day_of_week: Data.data.day,
       start_period: Data.data.start_period,
       end_period: Data.data.end_period,
     })
+  } catch (e) {
+    errorMsg(e)
+  }
+}
+
+// ---------------------------------------------------------------
+// 분반 학생 수정
+// ---------------------------------------------------------------
+export const putClassStudents = async (class_id, student_ids) => {
+  try {
+    await api.put(`/timetables/classes/${class_id}/assign`, {
+      student_ids: student_ids,
+    })
+    alert('등록 완료')
   } catch (e) {
     errorMsg(e)
   }
