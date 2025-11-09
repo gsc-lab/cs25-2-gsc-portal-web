@@ -42,7 +42,7 @@ export const postTimetable = async (TimetableData) => {
 export const postEvent = async (SpecialData) => {
   try {
     console.log(SpecialData.event)
-    await api.post(`/timetables/registerHoliday`, {
+    const res = await api.post(`/timetables/registerHoliday`, {
       event_type: SpecialData.event, //  "CANCEL"/ "MAKEUP"
       event_date: SpecialData.date, // "2025-10-05",
       classroom: SpecialData.classroom_label, // "본관-101"
@@ -50,6 +50,44 @@ export const postEvent = async (SpecialData) => {
       end_period: SpecialData.endTime, // [휴] 2
       course_id: SpecialData.course_id, // [휴] "C001"
       cancel_event_ids: SpecialData.course_id, // [보] ["E002", "E003"]
+    })
+    console.log(res.data)
+  } catch (e) {
+    errorMsg(e)
+  }
+}
+
+// ---------------------------------------------------------------
+// 기본 상담 학생 등록
+// ---------------------------------------------------------------
+export const postFukaStudents = async (fukaData) => {
+  try {
+    await api.post(`/timetables/huka/student`, {
+      student_ids: fukaData.student_ids,
+      sec_id: fukaData.section,
+      day_of_week: fukaData.day,
+      start_slot: fukaData.startTime,
+      end_slot: fukaData.endTime,
+      location: fukaData.room,
+    })
+    alert('등록 완료')
+  } catch (e) {
+    errorMsg(e)
+  }
+}
+
+// ---------------------------------------------------------------
+// Custom 상담 학생 등록
+// ---------------------------------------------------------------
+export const postFukaCustomStudents = async (fukaData) => {
+  try {
+    await api.post(`/timetables/huka/student/custom`, {
+      student_ids: fukaData.student_ids,
+      sec_id: fukaData.section,
+      date: fukaData.date,
+      start_slot: fukaData.startTime,
+      end_slot: fukaData.endTime,
+      location: fukaData.room,
     })
     alert('등록 완료')
   } catch (e) {
@@ -71,10 +109,25 @@ export const postClassStudents = async (class_id, student_ids) => {
   }
 }
 
+// ---------------------------------------------------------------
+// 학기 등록
+// ---------------------------------------------------------------
+export const postSection = async (section) => {
+  try {
+    await api.post(`/modal/common/sections`, {
+      year: section.year,
+      semester: section.semester,
+      start_date: section.start_date,
+      end_date: section.end_date,
+    })
+  } catch (e) {
+    errorMsg(e)
+  }
+}
+
 // ========================== GET ===============================
 // ---------------------------------------------------------------
 // 과목 정보 조회
-//
 // ---------------------------------------------------------------
 export const getCourses = async () => {
   try {
@@ -88,13 +141,12 @@ export const getCourses = async () => {
 
 // ---------------------------------------------------------------
 // 시간표 정보 조회
-//
 // ---------------------------------------------------------------
 export const getAdminTimetable = async (today) => {
   try {
     const res = await api.get(`/timetables/admin`, {
       params: {
-        date: '2025-06-01',
+        date: today,
       },
     })
     console.log('시간표 정보 조회', res.data)
@@ -133,27 +185,6 @@ export const getEvent = async () => {
 export const getCancelSchedule = async (grade) => {
   try {
     const res = await api.get(`/modal/subjects/holidays?grade_id=${grade}`)
-    return res.data
-  } catch (e) {
-    errorMsg(e)
-  }
-}
-
-// ---------------------------------------------------------------
-// 휴강 정보 조회
-/* {
-    "event_id": "E001",
-    "event_date": "2025-04-15",
-    "course_title": "인공지능 개론",
-    "grade_id": "2",
-    "period": "1",
-    "start_time": "09:00:00",
-    "end_time": "09:50:00"
-  },*/
-// ---------------------------------------------------------------
-export const getLevels = async () => {
-  try {
-    const res = await api.get(`/modal/levels`)
     return res.data
   } catch (e) {
     errorMsg(e)
@@ -208,25 +239,25 @@ export const getClassStudents = async (class_id) => {
     ],
     assigned_students: [
       {
-user_id: '2725001',
-      name: '박지민',
-      grade: '1',
-      email: 'park@g.yju.ac.kr',
+        user_id: '2725001',
+        name: '박지민',
+        grade: '1',
+        email: 'park@g.yju.ac.kr',
       },
       {
-user_id: '2725002',
-      name: '최은비',
-      grade: '1',
-      email: 'choi@g.yju.ac.kr',
+        user_id: '2725002',
+        name: '최은비',
+        grade: '1',
+        email: 'choi@g.yju.ac.kr',
       },
       {
-user_id: '2624003',
-      name: '이도현',
-      grade: '2',
-      email: 'lee@g.yju.ac.kr',
+        user_id: '2624003',
+        name: '이도현',
+        grade: '2',
+        email: 'lee@g.yju.ac.kr',
       },
       {
-user_id: '2524004',
+        user_id: '2524004',
         name: '윤하린',
         grade: '2',
         email: 'yoon@g.yju.ac.kr',
@@ -274,6 +305,20 @@ user_id: '2524004',
   }
   return res
 }
+
+// ---------------------------------------------------------------
+// 학기 정보 조회
+// ---------------------------------------------------------------
+export const getSections = async () => {
+  try {
+    const res = await api.get(`/modal/common/sections`)
+    console.log('getSections : ', res.data)
+    return res.data
+  } catch (e) {
+    errorMsg(e)
+  }
+}
+
 // ========================== PUT ===============================
 // ---------------------------------------------------------------
 // 과목 수정
@@ -329,7 +374,19 @@ export const putClassStudents = async (class_id, student_ids) => {
 // ---------------------------------------------------------------
 export const delCourse = async (course_id) => {
   try {
-    const res = await api.del(`/timetables/courses/${course_id}`)
+    const res = await api.delete(`/timetables/registerCourses/${course_id}`)
+    return res.data
+  } catch (e) {
+    errorMsg(e)
+  }
+}
+
+// ---------------------------------------------------------------
+// 시간표 삭제
+// ---------------------------------------------------------------
+export const delTimetable = async (schedule_id) => {
+  try {
+    const res = await api.delete(`/timetables/registerTimetable/${schedule_id}`)
     return res.data
   } catch (e) {
     errorMsg(e)
@@ -340,7 +397,7 @@ export const delCourse = async (course_id) => {
 // ---------------------------------------------------------------
 export const delEvent = async (id) => {
   try {
-    const res = await api.del(`/timetables/events/${id}`)
+    const res = await api.delete(`/timetables/registerHoliday/${id}`)
     return res.data
   } catch (e) {
     errorMsg(e)
