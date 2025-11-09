@@ -156,7 +156,7 @@ function endSelection() {
             colspan="5"
             style="border: 1px solid #000; padding: 10px"
           >
-            {{ day(d) }} ({{ searchDate(idx).slice(5) }})
+            {{ day(d) }} ({{ searchDate(idx + 1).slice(5) }})
           </th>
         </tr>
         <!-- 학년 * 5 -->
