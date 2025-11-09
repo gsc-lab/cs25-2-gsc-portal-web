@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue'
-import { setTarget } from '@/utils/reName'
+import { setTarget, day } from '@/utils/reName'
 import { useTimetableStore } from '@/stores/timetable'
 
 const Tstore = useTimetableStore()
@@ -47,15 +47,6 @@ const selectionData = ref([])
 
 // 반환 설정
 const emit = defineEmits(['setRange'])
-
-//  요일 변환
-const day = (enDay) => {
-  if (enDay == 'MON') return '월요일'
-  else if (enDay == 'TUE') return '화요일'
-  else if (enDay == 'WED') return '수요일'
-  else if (enDay == 'THU') return '목요일'
-  else return '금요일'
-}
 
 // adminTimetable 감시 timetableData 갱신
 watch(
@@ -178,7 +169,10 @@ function endSelection() {
         <!-- 교시 1 ~ 12 : hour -->
         <tr v-for="hour in 12" :key="hour">
           <!-- 교시 -->
-          <td style="border: 1px solid #000; padding: 10px; user-select: none">{{ hour }}</td>
+          <td style="border: 1px solid #000; padding: 10px; user-select: none">
+            {{ hour }}교시
+            <p>{{ hour + 8 }}:00~</p>
+          </td>
           <!-- day -->
           <template v-for="(d, idx) in ['MON', 'TUE', 'WED', 'THU', 'FRI']" :key="idx">
             <!-- 학년 -->
