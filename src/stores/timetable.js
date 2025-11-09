@@ -93,7 +93,14 @@ export const useTimetableStore = defineStore('timetable', {
     // --------------------------- courses -----------------------------
     // [ set ] : courses셋팅
     async setCourses() {
-      this.courses = await getCourses()
+      const res = await getCourses()
+      const sorted = Object.fromEntries(
+        Object.entries(res).sort(([, a], [, b]) => {
+          if (a?.section !== b?.section) return a?.section.localeCompare(b?.section)
+          return String(a.target).localeCompare(String(b?.target))
+        }),
+      )
+      this.courses = sorted
       console.log('store: courses', this.courses)
     },
 
@@ -110,6 +117,8 @@ export const useTimetableStore = defineStore('timetable', {
       if (this.courses.length <= 0) {
         await this.setCourses()
       }
+      // 전체 조회
+      if (argTarget == '0') return this.courses
       // 객체로 필터링
       const newCourses = Object.fromEntries(
         Object.entries(this.courses).filter(([, course]) => course.target === argTarget),
