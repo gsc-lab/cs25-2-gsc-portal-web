@@ -2,17 +2,15 @@
 import { ref, watch, onMounted } from 'vue'
 import { useClassroomStore } from '@/stores/classroom'
 import { useTimetableStore } from '@/stores/timetable'
-import { postTimetable } from '@/api/timetableApi'
+import { postTimetable, getSpecialClasses, getKoreanClasses } from '@/api/timetableApi'
 
 const Tstore = useTimetableStore() // 시간표 store
 const Cstore = useClassroomStore() // 장소 store
 const courses = ref() // 필터링 과목
 const classrooms = ref(null) // 원본 교실
-// const classes = ref()                // 분반 클래스 목록
+const classes = ref() // 분반 클래스 목록
 onMounted(async () => {
   classrooms.value = await Cstore.getClassroom() // 원본 교실 정의
-  // classes.value = await getLevels()
-  // console.log("originCourses", originCourses.value);
 })
 
 // 초기화
@@ -66,6 +64,9 @@ watch(
     courses.value = await Tstore.courseFilter(target)
     if (target == 'special') {
       // target에 맞게 classes 정의
+      classes.value = await getSpecialClasses()
+    } else if (target == 'korean') {
+      classes.value = await getKoreanClasses()
     }
   },
   { immediate: true },
@@ -76,6 +77,9 @@ watch(
 const handleSubmit = async () => {
   if (postTimetableData.value.room_id == '') {
     postTimetableData.value.room_id = classroomName.value
+  }
+  if (postTimetableData.value.spClass_id == '') {
+    postTimetableData.value.spClass_id = spClassName.value
   }
   console.log('등록', postTimetableData.value)
   await postTimetable(postTimetableData.value)
@@ -117,12 +121,12 @@ const handleSubmit = async () => {
   </div>
 
   <!-- 특강이면 그룹 저장 / 없으면 등록 -->
-  <div v-if="postTimetableData.target == 'special'">
+  <div v-if="postTimetableData.target == 'special' || postTimetableData.target == 'korean'">
     <label for="">반 : </label>
     <select id="" v-model="postTimetableData.spClass_id">
-      <!-- <option v-for="c in classes" :key="c.class_id" :value="c.class_id">
-        {{ c.name }}
-      </option> -->
+      <option v-for="cls in classes" :key="cls.class_id" :value="cls.class_id">
+        {{ cls.class_group }}
+      </option>
       <option value="">기타</option>
     </select>
     <div v-if="postTimetableData.spClass_id == ''">
