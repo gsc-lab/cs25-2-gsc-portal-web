@@ -20,15 +20,19 @@ const selectMakeup = ref([]) // [보강] 등록할 휴강 스케줄 (event_id)
 const cancelMap = ref([]) // [보강] 과목 필터링 후 휴강 스케줄
 
 // 값 저장
-const postSpecialData = ref({
-  target: null,
-  event: null,
-  course_id: null,
-  date: null,
-  startTime: null,
-  endTime: null,
-  classroom_label: null,
-})
+const setNull = () => {
+  postSpecialData.value = {
+    target: null,
+    event: null,
+    course_id: null,
+    date: null,
+    startTime: null,
+    endTime: null,
+    classroom_label: null,
+  }
+}
+const postSpecialData = ref(setNull)
+
 // ================================= 데이터 초기화 =================================
 // selectTT를 감시하고 timetableData 갱신
 watch(
@@ -46,7 +50,12 @@ watch(
         course_id: timetableData.schedule?.course_id ?? null,
         date: timetableData.date,
         startTime: timetableData.startTime,
-        endTime: timetableData.endTime,
+        endTime:
+          timetableData.schedule == 'CANCEL'
+            ? timetableData.endTime
+            : selectMakeup.value.length > 0
+              ? timetableData.startTime + selectMakeup.value.length - 1
+              : null,
         classroom_label: timetableData.label ?? null,
       }
     } else {
@@ -56,7 +65,7 @@ watch(
   { immediate: true },
 )
 
-// ================================= target 감시 =================================
+// ================================= target, selectMakeup 감시 =================================
 // 보강일 때 학년을 선택하면 해당학년의 휴강정보 조회
 watch(
   () => postSpecialData.value.target,
@@ -72,6 +81,16 @@ watch(
   },
 )
 
+// 휴강 선택 개수에 맞춰서 endTime 저장
+watch(
+  () => selectMakeup.value,
+  () => {
+    postSpecialData.value.endTime =
+      selectMakeup.value.length > 0
+        ? postSpecialData.value.startTime + selectMakeup.value.length - 1
+        : null
+  },
+)
 // ==================================  post  ==================================
 // 저장버튼 누른 후 실행
 const handleSubmit = async () => {
@@ -83,15 +102,18 @@ const handleSubmit = async () => {
     // selectMakeup 대입
     postSpecialData.value.course_id = selectMakeup.value
   }
-  // console.log(postSpecialData.value);
+  // console.log(postSpecialData.value)
   await postEvent(postSpecialData.value)
   await Tstore.setTimetable()
+  // 초기화
+  setNull()
 }
 // ==========================================================================================
 </script>
 
 <template>
   EventsRegister
+  <!-- 예외 입력을 막기 위해 시간표에서 선택해야 값이 들어감 -->
   <!-- Grade 등 선택 -->
   <div>
     <input type="radio" id="1" value="1" v-model="postSpecialData.target" />
@@ -122,7 +144,7 @@ const handleSubmit = async () => {
   <!-- 날짜 (post : "0000-00-00")-->
   <div>
     <label for="date">날짜 : </label>
-    <input type="date" id="date" v-model="postSpecialData.date" />
+    <input type="date" id="date" v-model="postSpecialData.date" readonly />
   </div>
 
   <!-- -------------------------------------- 과목 설정 ---------------------------------------------
@@ -136,7 +158,7 @@ const handleSubmit = async () => {
       <div v-for="course in cancelMap" :key="course.event_id">
         <input type="checkbox" :value="course.event_id" v-model="selectMakeup" />
         <label for="course"
-          >{{ course.course_title }}: {{ course.event_date }}, {{ course.start_time }}교시</label
+          >{{ course.course_title }}: {{ course.event_date }}, {{ course.period }}교시</label
         >
       </div>
     </div>
@@ -148,7 +170,7 @@ const handleSubmit = async () => {
   <!-- --------------  휴강 --------------- -->
   <div v-else>
     <label for="course">과목 : </label>
-    <select id="course" v-model="postSpecialData.course_id">
+    <select id="course" v-model="postSpecialData.course_id" style="pointer-events: none">
       <option v-for="(course, idx) in courses" :value="idx" :key="idx">
         {{ course.title }}
       </option>
@@ -159,12 +181,14 @@ const handleSubmit = async () => {
   <!-- 교시 (post: int형)-->
   <div>
     <label for="time">교시 : </label>
-    <select id="time" v-model="postSpecialData.startTime">
-      <option v-for="startT in 13" :value="startT">{{ startT }}</option>
+    <select id="time" v-model="postSpecialData.startTime" style="pointer-events: none">
+      <option v-for="startT in 13" :value="startT" :key="startT">{{ startT }}</option>
     </select>
     ~
-    <select id="time" v-model="postSpecialData.endTime">
-      <option v-for="endT in 13" :value="endT">{{ endT }}</option>
+    <select id="time" v-model="postSpecialData.endTime" style="pointer-events: none">
+      <option v-for="endT in 13" :value="endT" :key="endT">
+        {{ endT }}
+      </option>
     </select>
     교시
   </div>
@@ -173,7 +197,7 @@ const handleSubmit = async () => {
   <div v-if="postSpecialData.event === 'MAKEUP'">
     <label for="classroom">장소 : </label>
     <select id="classroom" v-model="postSpecialData.classroom_label">
-      <option v-for="classroom in classrooms" :value="classroom.label">
+      <option v-for="classroom in classrooms" :value="classroom.label" :key="classroom">
         {{ classroom.label }}
       </option>
       <option value="">기타</option>
