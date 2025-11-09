@@ -7,7 +7,7 @@ const Tstore = useTimetableStore()
 
 //  학년에 맞는 시간표 조회 ====================================
 const timetableData = ref(null)
-const today = new Date() // 오늘
+const today = new Date('2025-06-05') // 오늘
 const today_day = today.getDay() // 오늘의 요일 (일요일=0)
 const selectDate = ref(today)
 
@@ -80,18 +80,18 @@ watch(
 
 // ===================================== 선택 =====================================
 // 선택 시작
-function startSelection(grade, idx, day, hour, val) {
+function startSelection(grade, idx, day, hour, schedule) {
   // 선택한 날짜 계산
   const searchedDate = searchDate(idx)
   // console.log("searchedDate", searchedDate);
 
   isSelecting.value = true
-  selectionData.value.push({ grade, date: searchedDate, day, hour, schedule: val })
+  selectionData.value.push({ grade, date: searchedDate, day, hour, schedule })
   // console.log(selectionData.value);
 }
 
 // 선택 범위 업데이트 (드래그 중)
-function updateSelection(grade, day, hour, val) {
+function updateSelection(grade, day, hour, schedule) {
   if (isSelecting.value) {
     // 이미 등록되어있는 값과 새로 선택된 값 비교
     // console.log(
@@ -107,13 +107,14 @@ function updateSelection(grade, day, hour, val) {
     if (
       Object.keys(
         selectionData.value.filter(
-          (data) => data.day != day || data.grade != grade || data.schedule?.title != val?.title,
+          (data) =>
+            data.day != day || data.grade != grade || data.schedule?.title != schedule?.title,
         ),
       ).length <= 0
     ) {
       // 같은 시간이면 저장 안함
       if (Object.keys(selectionData.value.filter((d) => d.hour == hour)).length <= 0) {
-        selectionData.value.push({ grade, day, hour, schedule: val })
+        selectionData.value.push({ grade, day, hour, schedule })
       }
     } else {
       endSelection()
@@ -150,19 +151,21 @@ function endSelection() {
         <tr>
           <th style="border: 1px solid #000; padding: 10px"></th>
           <th
-            v-for="(_, idx) in timetableData?.['1']"
+            v-for="(d, idx) in ['MON', 'TUE', 'WED', 'THU', 'FRI']"
+            :key="idx"
             colspan="5"
             style="border: 1px solid #000; padding: 10px"
           >
-            {{ day(idx) }}
+            {{ day(d) }} ({{ searchDate(idx).slice(5) }})
           </th>
         </tr>
         <!-- 학년 * 5 -->
         <tr>
           <th style="border: 1px solid #000; padding: 10px"></th>
-          <template v-for="_ in 5">
+          <template v-for="_ in 5" :key="_">
             <th
               v-for="g in ['1', '2', '3', 'special', 'korean']"
+              :key="g"
               style="border: 1px solid #000; padding: 10px"
             >
               {{ setTarget(String(g)) }}
@@ -183,19 +186,44 @@ function endSelection() {
               v-for="g in ['1', '2', '3', 'special', 'korean']"
               :key="g"
               @mousedown="
-                startSelection(g, idx + 1, d, hour, timetableData?.[String(g)][d][String(hour)][0])
+                timetableData?.[g]?.[d][String(hour)].length > 1 ||
+                timetableData?.[g]?.[d][String(hour)][0]?.event?.status == 'CANCEL'
+                  ? startSelection(g, idx + 1, d, hour)
+                  : startSelection(
+                      g,
+                      idx + 1,
+                      d,
+                      hour,
+                      timetableData?.[String(g)][d][String(hour)][0],
+                    )
               "
               @mouseover="
-                updateSelection(g, d, hour, timetableData?.[String(g)][d][String(hour)][0])
+                timetableData?.[g]?.[d][String(hour)].length > 1 ||
+                timetableData?.[g]?.[d][String(hour)][0]?.event?.status == 'CANCEL'
+                  ? updateSelection(g, d, hour)
+                  : updateSelection(g, d, hour, timetableData?.[String(g)][d][String(hour)][0])
               "
               @mouseup="endSelection"
               style="border: 1px solid #000; padding: 10px; user-select: none"
             >
+              <!-- timetableData?.[String(g)][d][String(hour)] 에 여러개 있으면 과복 데이터 저장 안함  -->
               <!-- 과목 / 교수 / 장소 -->
               <!-- {{g}} -->
-              <p>{{ timetableData?.[g]?.[d][String(hour)][0]?.title }}</p>
-              <p>{{ timetableData?.[g]?.[d][String(hour)][0]?.professor }}</p>
-              <p>{{ timetableData?.[g]?.[d][String(hour)][0]?.room }}</p>
+              <div
+                v-for="schedule in timetableData?.[g]?.[d][String(hour)]"
+                :key="schedule"
+                :style="
+                  timetableData?.[g]?.[d][String(hour)][0]?.event?.status === 'CANCEL'
+                    ? { backgroundColor: 'red' }
+                    : timetableData?.[g]?.[d][String(hour)][0]?.event?.status === 'MAKEUP'
+                      ? { backgroundColor: 'white' }
+                      : { backgroundColor: 'blue', margin: '2px' }
+                "
+              >
+                <p>{{ schedule?.title }}</p>
+                <p>{{ schedule?.professor }}</p>
+                <p>{{ schedule?.room }}</p>
+              </div>
             </td>
           </template>
         </tr>
