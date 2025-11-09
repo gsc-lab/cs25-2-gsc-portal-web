@@ -4,13 +4,21 @@ import { useTimetableStore } from '@/stores/timetable'
 import { useProfessorStore } from '@/stores/auth'
 import { useClassroomStore } from '@/stores/classroom'
 import { setTarget, day } from '@/utils/reName'
-import { putCourse, putTimetable, delCourse, delTimetable } from '@/api/timetableApi'
+import {
+  putCourse,
+  putTimetable,
+  delCourse,
+  delTimetable,
+  getSpecialClasses,
+  getKoreanClasses,
+} from '@/api/timetableApi'
 
 const Tstore = useTimetableStore() // 시간표 store
 const Pstore = useProfessorStore() // 교수 store
 const Cstore = useClassroomStore() // 장소 store
 const professors = ref() // 교수 명단
 const classrooms = ref(null) // 교실
+const classes = ref() // 분반 클래스 목록
 
 onMounted(async () => {
   professors.value = await Pstore.getProfessors()
@@ -65,6 +73,12 @@ watch(
     if (originCourses.value == null) await setOriginCourses()
     courses.value = await Tstore.courseFilter(newTarget) // target: 필터링
     console.log(courses.value)
+    if (newTarget == 'special') {
+      // target에 맞게 classes 정의
+      classes.value = await getSpecialClasses()
+    } else if (newTarget == 'korean') {
+      classes.value = await getKoreanClasses()
+    }
   },
   { immediate: true },
 )
@@ -83,7 +97,7 @@ const toggleSelect = (course_id) => {
   }
 }
 // ================================= 수정 =================================
-const handlePut = async (courseId = null, argDate, timetableId = null) => {
+const handlePut = async (courseId, argDate, timetableId) => {
   console.log(courseId, String(timetableId))
   putData.value = {
     course_id: courseId,
@@ -110,6 +124,7 @@ const handleSubmit = async () => {
   } else {
     await putTimetable(putData.value)
   }
+  // console.log('등록', putData.value)
   // 초기화
   putData.value.course_id = null
   putData.value.timetable_id = null
@@ -247,7 +262,16 @@ const handleTimetableDel = async (schedule_id) => {
             style="background-color: antiquewhite"
           >
             <td style="border: 1px solid #000; padding: 10px; user-select: none"></td>
-            <td style="border: 1px solid #000; padding: 10px; user-select: none"></td>
+            <!-- 분반 존재 시 -->
+            <td style="border: 1px solid #000; padding: 10px; user-select: none">
+              <div v-if="idx == putData?.course_id && i == putData?.timetable_id">
+                <select id="day" v-model="putData.data.class_id">
+                  <option v-for="(cls, idx) in classes" :value="cls.class_id" :key="idx">
+                    {{ cls.class_group }}
+                  </option>
+                </select>
+              </div>
+            </td>
             <!--  요일  -->
             <td style="border: 1px solid #000; padding: 10px; user-select: none">
               <div v-if="idx == putData?.course_id && i == putData?.timetable_id">
