@@ -1,148 +1,201 @@
 <template>
-  <main class="notice-page-wrapper">
-    <div class="notice-page-container">
-      <div class="notice-write-card">
-        <div class="notice-write-header">
-          <h1 class="portal-title">공지사항 작성</h1>
-          <button @click="openTargetModal = true" class="btn btn-secondary">
-            공지사항 알림 대상 설정
-          </button>
-        </div>
-
-        <div class="notice-form-body">
-          <div class="form-row">
-            <label class="form-label" for="notice-title">제목</label>
-            <div class="title-input-group">
-              <input id="notice-title" class="form-input" type="text" placeholder="공지사항 제목을 입력하세요" v-model="title" />
-              <div class="checkbox-group">
-                <input type="checkbox" id="notice-important" v-model="isImportant" @click="handleImportant" />
-                <label for="notice-important">중요</label>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <label class="form-label" for="notice-author">작성자</label>
-            <input id="notice-author" class="form-input" value="author.value" type="text" placeholder="작성자 이름"
-              v-model="author" />
-          </div>
-
-          <div class="form-row">
-            <label class="form-label" for="notice-grade">분류</label>
-            <div class="select-group">
-              <select id="notice-grade" class="form-select" v-model="gradeSelect">
-                <option v-for="grade in grades" :key="grade.grade_id" :value="grade.grade_id">
-                  {{ grade.grade_id === '전체' ? '전체 학년' : grade.grade_id + '학년' }}
-                </option>
-              </select>
-              <select class="form-select" v-model="courseTypeSelect">
-                <option v-for="courseT in courseType" :key="courseT" :value="courseT.course_type">
-                  {{
-                    courseT.course_type === 'general'
-                      ? '전체'
-                      : courseT.course_type === 'regular'
-                        ? '정규'
-                        : courseT.course_type === 'special'
-                          ? '특강'
-                          : '한국어'
-                  }}
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <label class="form-label" for="notice-course">과목</label>
-            <select id="notice-course" class="form-select" v-if="filterCourse.length" v-model="courseSelect">
-              <option value="">과목을 선택하세요</option>
-              <option v-for="course in filterCourse" :key="course.course_id" :value="course.course_id">
-                {{ course.title }}
-              </option>
-            </select>
-            <div v-else class="form-input-placeholder">선택 가능한 과목이 없습니다.</div>
-          </div>
-
-          <div class="form-row">
-            <label class="form-label">첨부파일</label>
-            <div class="file-upload-area">
-              <input type="file" multiple @change="handleFiles" id="file-upload" class="file-input-hidden" />
-              <label for="file-upload" class="file-upload-btn">파일 선택</label>
-              <ul class="file-list">
-                <li v-for="(file, index) in files" :key="index">
-                  <span>{{ file.name }} ( {{ (file.size / 1024).toFixed(1) }} KB)</span>
-                  <button @click="removeFile(index)" class="file-remove-btn">삭제</button>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="form-row content-row">
-            <label class="form-label" for="notice-content">내용</label>
-            <textarea id="notice-content" class="form-textarea" placeholder="내용을 입력하세요" v-model="content"></textarea>
-          </div>
-        </div>
-
-        <div class="notice-write-footer">
-          <button class="btn btn-gray" @click="backPage">뒤로</button>
-          <button class="btn btn-primary" @click="submitNotice">등록하기</button>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="openTargetModal" class="modal-overlay" @click.self="openTargetModal = false">
-      <div class="modal-container">
-        <div class="modal-header">
-          <h3>공지사항 알림 대상 설정</h3>
-          <button class="modal-close" @click="openTargetModal = false">×</button>
-        </div>
-
-        <div class="modal-body">
-          <div class="grade-list">
-            <button v-for="filter in gradeFilters" :key="filter" @click="modalGradeSelect = filter"
-              :class="['filter-btn', { active: modalGradeSelect === filter }]">
-              {{ filter }}
+  <AppLayout pageName="noticeWrite">
+    <main class="notice-page-wrapper">
+      <div class="notice-page-container">
+        <div class="notice-write-card">
+          <div class="notice-write-header">
+            <h1 class="portal-title">공지사항 작성</h1>
+            <button @click="openTargetModal = true" class="btn btn-secondary">
+              공지사항 알림 대상 설정
             </button>
           </div>
-          <div class="student-list-card">
-            <div class="student-list">
-              <div class="student-header">
-                <div class="col-checked">선택</div>
-                <div class="col-grade">학년</div>
-                <div class="col-user_id">학번</div>
-                <div class="col-name">이름</div>
-                <div class="col-phone">전화번호</div>
+
+          <div class="notice-form-body">
+            <div class="form-row">
+              <label class="form-label" for="notice-title">제목</label>
+              <div class="title-input-group">
+                <input
+                  id="notice-title"
+                  class="form-input"
+                  type="text"
+                  placeholder="공지사항 제목을 입력하세요"
+                  v-model="title"
+                />
+                <div class="checkbox-group">
+                  <input
+                    type="checkbox"
+                    id="notice-important"
+                    v-model="isImportant"
+                    @click="handleImportant"
+                  />
+                  <label for="notice-important">중요</label>
+                </div>
               </div>
-              <div class="student-items-container">
-                <template v-for="student in students" :key="student.user_id">
-                  <div v-if="modalGradeSelect === student.grade_name" class="student-item">
-                    <input type="checkbox" class="col-checked" v-model="modalStudentSelect" :value="student.user_id"
-                      :id="`student-${student.user_id}`" />
-                    <label :for="`student-${student.user_id}`" class="student-item-content">
-                      <div class="col-grade">{{ student.grade_name }}</div>
-                      <div class="col-user_id">{{ student.user_id }}</div>
-                      <div class="col-name">{{ student.name }}</div>
-                      <div class="col-phone">{{ student.phone }}</div>
-                    </label>
-                  </div>
-                </template>
+            </div>
+
+            <div class="form-row">
+              <label class="form-label" for="notice-author">작성자</label>
+              <input
+                id="notice-author"
+                class="form-input"
+                value="author.value"
+                type="text"
+                placeholder="작성자 이름"
+                v-model="author"
+              />
+            </div>
+
+            <div class="form-row">
+              <label class="form-label" for="notice-grade">분류</label>
+              <div class="select-group">
+                <select id="notice-grade" class="form-select" v-model="gradeSelect">
+                  <option v-for="grade in grade_id" :key="grade.grade_id" :value="grade.grade_id">
+                    {{ grade.grade_id === '전체' ? '전체 학년' : grade.grade_id + '학년' }}
+                  </option>
+                </select>
+                <select class="form-select" v-model="courseTypeSelect">
+                  <option
+                    v-for="courseT in filterCourseType"
+                    :key="courseT"
+                    :value="courseT.course_type"
+                  >
+                    {{
+                      courseT.course_type === 'general'
+                        ? '전체'
+                        : courseT.course_type === 'regular'
+                          ? '정규'
+                          : courseT.course_type === 'special'
+                            ? '특강'
+                            : '한국어'
+                    }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label class="form-label" for="notice-course">과목</label>
+              <select
+                id="notice-course"
+                class="form-select"
+                v-if="filterCourse.length"
+                v-model="courseSelect"
+              >
+                <option value="">과목을 선택하세요</option>
+                <option
+                  v-for="course in filterCourse"
+                  :key="course.course_id"
+                  :value="course.course_id"
+                >
+                  {{ course.title }}
+                </option>
+              </select>
+              <div v-else class="form-input-placeholder">선택 가능한 과목이 없습니다.</div>
+            </div>
+
+            <div class="form-row">
+              <label class="form-label">첨부파일</label>
+              <div class="file-upload-area">
+                <input
+                  type="file"
+                  multiple
+                  @change="handleFiles"
+                  id="file-upload"
+                  class="file-input-hidden"
+                />
+                <label for="file-upload" class="file-upload-btn">파일 선택</label>
+                <ul class="file-list">
+                  <li v-for="(file, index) in files" :key="index">
+                    <span>{{ file.name }} ( {{ (file.size / 1024).toFixed(1) }} KB)</span>
+                    <button @click="removeFile(index)" class="file-remove-btn">삭제</button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="form-row content-row">
+              <label class="form-label" for="notice-content">내용</label>
+              <textarea
+                id="notice-content"
+                class="form-textarea"
+                placeholder="내용을 입력하세요"
+                v-model="content"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="notice-write-footer">
+            <button class="btn btn-gray" @click="backPage">뒤로</button>
+            <button class="btn btn-primary" @click="submitNotice">등록하기</button>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="openTargetModal" class="modal-overlay" @click.self="openTargetModal = false">
+        <div class="modal-container">
+          <div class="modal-header">
+            <h3>공지사항 알림 대상 설정</h3>
+            <button class="modal-close" @click="openTargetModal = false">×</button>
+          </div>
+
+          <div class="modal-body">
+            <div class="grade-list">
+              <button
+                v-for="filter in gradeFilters"
+                :key="filter"
+                @click="modalGradeSelect = filter"
+                :class="['filter-btn', { active: modalGradeSelect === filter }]"
+              >
+                {{ filter }}
+              </button>
+            </div>
+            <div class="student-list-card">
+              <div class="student-list">
+                <div class="student-header">
+                  <div class="col-checked">선택</div>
+                  <div class="col-grade">학년</div>
+                  <div class="col-user_id">학번</div>
+                  <div class="col-name">이름</div>
+                  <div class="col-phone">전화번호</div>
+                </div>
+                <div class="student-items-container">
+                  <template v-for="student in students" :key="student.user_id">
+                    <div v-if="modalGradeSelect === student.grade_name" class="student-item">
+                      <input
+                        type="checkbox"
+                        class="col-checked"
+                        v-model="modalStudentSelect"
+                        :value="student.user_id"
+                        :id="`student-${student.user_id}`"
+                      />
+                      <label :for="`student-${student.user_id}`" class="student-item-content">
+                        <div class="col-grade">{{ student.grade_name }}</div>
+                        <div class="col-user_id">{{ student.user_id }}</div>
+                        <div class="col-name">{{ student.name }}</div>
+                        <div class="col-phone">{{ student.phone }}</div>
+                      </label>
+                    </div>
+                  </template>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="modal-footer">
-          <button class="btn btn-gray" @click="openTargetModal = false">닫기</button>
-          <button class="btn btn-primary" @click="saveAndClose">저장</button>
+          <div class="modal-footer">
+            <button class="btn btn-gray" @click="openTargetModal = false">닫기</button>
+            <button class="btn btn-primary" @click="saveAndClose">저장</button>
+          </div>
         </div>
       </div>
-    </div>
-  </main>
+    </main>
+  </AppLayout>
 </template>
 
 <script setup>
 import { getCourse, postNotice, getAllUser } from '@/api/apiNotice'
+import AppLayout from '@/layouts/AppLayout.vue'
 import router from '@/router'
-import { useNoticeStore } from '@/stores/NoticeStore'
+import { useNoticeStore } from '@/stores/Notice'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref, watch, watchEffect } from 'vue'
@@ -172,8 +225,6 @@ const modalStudentSelect = ref([]) // 모달) 선택된 학생들
 
 // API 요청받은값 저장
 const courses = ref([]) // 과목 선택 배열
-const grades = ref(grade_id) // 학년 저장 배열
-const courseType = ref(course_type) // 과목 타입 저장 배열 : 'regular' , 'special'
 const students = ref([]) // 학생 목록 배열
 // ======================================================================
 
@@ -197,6 +248,14 @@ const handleImportant = () => {
   // 클릭 시 값 토글 (true -> false, false -> true)
   isImportant.value = !isImportant.value
 }
+
+const filterCourseType = computed(() => {
+  if (gradeSelect.value === '전체') {
+    return course_type.value.filter((type) => type.course_type === 'general')
+  } else {
+    return course_type.value.filter((type) => type.course_type !== 'general')
+  }
+})
 
 // 학년, 과목 유형에 따른 과목 필터링
 const filterCourse = computed(() => {
@@ -276,11 +335,14 @@ const submitNotice = async () => {
   }
 }
 
-watch(courseTypeSelect, (newVal, oldVal) => {
-  if (oldVal !== newVal) {
-    courseSelect.value = ''
+watch(gradeSelect, (newGrade) => {
+  if (newGrade === '전체') {
+    courseTypeSelect.value = 'general'
+  } else {
+    courseTypeSelect.value = 'regular'
   }
 })
+
 watchEffect(() => {
   console.log('선택된 학년: ', gradeSelect.value)
   console.log('선택된 과목 타입: ', courseTypeSelect.value)
