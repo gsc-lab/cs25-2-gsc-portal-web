@@ -238,89 +238,89 @@ export const getKoreanClasses = async () => {
 // 분반 학생정보 조회
 // ---------------------------------------------------------------
 export const getClassStudents = async (class_id) => {
-  // try {
-  //   const res = await api.get(`/modal/subjects/courses/${class_id}/students`)
-  //   return res.data
-  // } catch (e) {
-  //   errorMsg(e)
-  // }
-  const res = {
-    all_students: [
-      {
-        user_id: '2423004',
-        name: '김철수',
-        email: 'kim@g.yju.ac.kr',
-        course_id: 'C003',
-        class_id: null,
-      },
-    ],
-    assigned_students: [
-      {
-        user_id: '2725001',
-        name: '박지민',
-        grade: '1',
-        email: 'park@g.yju.ac.kr',
-      },
-      {
-        user_id: '2725002',
-        name: '최은비',
-        grade: '1',
-        email: 'choi@g.yju.ac.kr',
-      },
-      {
-        user_id: '2624003',
-        name: '이도현',
-        grade: '2',
-        email: 'lee@g.yju.ac.kr',
-      },
-      {
-        user_id: '2524004',
-        name: '윤하린',
-        grade: '2',
-        email: 'yoon@g.yju.ac.kr',
-      },
-      {
-        user_id: '2423005',
-        name: '정하늘',
-        grade: '3',
-        email: 'jung@g.yju.ac.kr',
-      },
-    ],
-
-    unassigned_students: [
-      {
-        user_id: '2423004',
-        name: '김철수',
-        grade: '3',
-        email: 'kim@g.yju.ac.kr',
-      },
-      {
-        user_id: '2725006',
-        name: '홍예린',
-        grade: '1',
-        email: 'hong@g.yju.ac.kr',
-      },
-      {
-        user_id: '2624007',
-        name: '서민재',
-        grade: '2',
-        email: 'seo@g.yju.ac.kr',
-      },
-      {
-        user_id: '2524008',
-        name: '강태현',
-        grade: '2',
-        email: 'kang@g.yju.ac.kr',
-      },
-      {
-        user_id: '2423009',
-        name: '오수빈',
-        grade: '3',
-        email: 'oh@g.yju.ac.kr',
-      },
-    ],
+  try {
+    const res = await api.get(`/modal/subjects/courses/${class_id}/students`)
+    return res.data
+  } catch (e) {
+    errorMsg(e)
   }
-  return res
+  // const res = {
+  //   all_students: [
+  //     {
+  //       user_id: '2423004',
+  //       name: '김철수',
+  //       email: 'kim@g.yju.ac.kr',
+  //       course_id: 'C003',
+  //       class_id: null,
+  //     },
+  //   ],
+  //   assigned_students: [
+  //     {
+  //       user_id: '2725001',
+  //       name: '박지민',
+  //       grade: '1',
+  //       email: 'park@g.yju.ac.kr',
+  //     },
+  //     {
+  //       user_id: '2725002',
+  //       name: '최은비',
+  //       grade: '1',
+  //       email: 'choi@g.yju.ac.kr',
+  //     },
+  //     {
+  //       user_id: '2624003',
+  //       name: '이도현',
+  //       grade: '2',
+  //       email: 'lee@g.yju.ac.kr',
+  //     },
+  //     {
+  //       user_id: '2524004',
+  //       name: '윤하린',
+  //       grade: '2',
+  //       email: 'yoon@g.yju.ac.kr',
+  //     },
+  //     {
+  //       user_id: '2423005',
+  //       name: '정하늘',
+  //       grade: '3',
+  //       email: 'jung@g.yju.ac.kr',
+  //     },
+  //   ],
+
+  //   unassigned_students: [
+  //     {
+  //       user_id: '2423004',
+  //       name: '김철수',
+  //       grade: '3',
+  //       email: 'kim@g.yju.ac.kr',
+  //     },
+  //     {
+  //       user_id: '2725006',
+  //       name: '홍예린',
+  //       grade: '1',
+  //       email: 'hong@g.yju.ac.kr',
+  //     },
+  //     {
+  //       user_id: '2624007',
+  //       name: '서민재',
+  //       grade: '2',
+  //       email: 'seo@g.yju.ac.kr',
+  //     },
+  //     {
+  //       user_id: '2524008',
+  //       name: '강태현',
+  //       grade: '2',
+  //       email: 'kang@g.yju.ac.kr',
+  //     },
+  //     {
+  //       user_id: '2423009',
+  //       name: '오수빈',
+  //       grade: '3',
+  //       email: 'oh@g.yju.ac.kr',
+  //     },
+  //   ],
+  // }
+  // return res
 }
 
 // ---------------------------------------------------------------
@@ -359,12 +359,13 @@ export const putCourse = async (Data) => {
 // ---------------------------------------------------------------
 export const putTimetable = async (Data) => {
   try {
-    await api.put(`/timetables/registerTimetable/${Data.timetable_id}`, {
+    await api.put(`/timetables/registerTimetable/${Data.timetable_ids}`, {
       classroom_id: Data.data.room_id,
       course_id: Data.course_id,
       day_of_week: Data.data.day,
       start_period: Data.data.start_period,
       end_period: Data.data.end_period,
+      class_id: Data.data.class_id,
     })
   } catch (e) {
     errorMsg(e)
@@ -401,9 +402,10 @@ export const delCourse = async (course_id) => {
 // ---------------------------------------------------------------
 // 시간표 삭제
 // ---------------------------------------------------------------
-export const delTimetable = async (schedule_id) => {
+export const delTimetable = async (course_id, day) => {
+  console.log(course_id, day)
   try {
-    const res = await api.delete(`/timetables/registerTimetable/${schedule_id}`)
+    const res = await api.delete(`/timetables/registerTimetable/${course_id}/${day}`)
     return res.data
   } catch (e) {
     errorMsg(e)
