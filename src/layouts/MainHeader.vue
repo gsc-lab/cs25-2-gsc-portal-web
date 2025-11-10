@@ -25,11 +25,11 @@
         </div>
 
         <div class="nav-item">
-          <router-link class="menu" to="/cleaning">청소당번</router-link>
+          <router-link class="menu" to="/cleaningH">청소당번</router-link>
           <ul class="dropdown">
-            <li><router-link to="/cleaning">1학년 청소당번</router-link></li>
-            <li><router-link to="/cleaning">2학년 청소당번</router-link></li>
-            <li><router-link to="/cleaning">3학년 청소당번</router-link></li>
+            <li><router-link to="/cleaningH/grade/1">1학년 청소당번</router-link></li>
+            <li><router-link to="/cleaningH/grade/2">2학년 청소당번</router-link></li>
+            <li><router-link to="/cleaningH/grade/3">3학년 청소당번</router-link></li>
           </ul>
         </div>
 
