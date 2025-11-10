@@ -2,7 +2,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: dev_frontend
     volumes:
       - .:/app
