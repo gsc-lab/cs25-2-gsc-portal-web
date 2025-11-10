@@ -1,5 +1,5 @@
-import api from "./apiClient";
-import { errorMsg } from "./apiClient";
+import api from './apiClient'
+import { errorMsg } from './apiClient'
 
 // ========================== GET ===============================
 // ---------------------------------------------------------------
@@ -16,12 +16,12 @@ import { errorMsg } from "./apiClient";
 //     }, {}]
 // ---------------------------------------------------------------
 export const getApproval = async () => {
-  try{
+  try {
     const res = await api.get(`/admin/users`)
-    console.log(res.data);
-    return res.data;
+    console.log(res.data)
+    return res.data
   } catch (e) {
-    errorMsg(e);
+    errorMsg(e)
   }
 }
 
@@ -29,12 +29,12 @@ export const getApproval = async () => {
 // 등록 되어있는 외부 이메일 조회
 // ---------------------------------------------------------------
 export const getEmail = async () => {
-  try{
+  try {
     const res = await api.get(`/admin/email`)
-    console.log(res.data);
-    return res.data;
+    console.log(res.data)
+    return res.data
   } catch (e) {
-    errorMsg(e);
+    errorMsg(e)
   }
 }
 
@@ -42,35 +42,32 @@ export const getEmail = async () => {
 // 회원정보 조회 (학생)
 // ---------------------------------------------------------------
 export const getUserInfo = async (grade, status) => {
-  try{
+  try {
     const res = await api.get(`/admin/students`, {
       params: {
         grade_name: grade,
-        status: status
-      }
-})
-    console.log(res.data);
-    return res.data;
+        status: status,
+      },
+    })
+    return res.data
   } catch (e) {
-    errorMsg(e);
+    errorMsg(e)
   }
 }
-
 
 // ========================== POST ===============================
 // ---------------------------------------------------------------
 // 승인 / 거절 등록
 // ---------------------------------------------------------------
 export const postApproval = async (user_id, action) => {
-  try{
+  try {
     const res = await api.post(`/admin/users`, {
       user_id: user_id,
-      action: action
+      action: action,
     })
-    console.log(res.data);
-    return res.data;
+    return res.data
   } catch (e) {
-    errorMsg(e);
+    errorMsg(e)
   }
 }
 
@@ -78,15 +75,14 @@ export const postApproval = async (user_id, action) => {
 // Email 등록
 // ---------------------------------------------------------------
 export const postEmail = async (email, reason) => {
-  try{
+  try {
     const res = await api.post(`/admin/email`, {
       email: email,
-      reason: reason
+      reason: reason,
     })
-    console.log(res.data);
-    return res.data;
+    return res.data
   } catch (e) {
-    errorMsg(e);
+    errorMsg(e)
   }
 }
 
@@ -95,49 +91,43 @@ export const postEmail = async (email, reason) => {
 // 승인 / 거절 등록
 // ---------------------------------------------------------------
 export const patchUser = async (user_id, userInfo) => {
-  console.log(user_id, userInfo);
-  try{
+  try {
     const res = await api.patch(`/admin/students/${user_id}`, {
-        name: userInfo.name,
-        phone: userInfo.phone,
-        status: userInfo.status,
-        grade_id: userInfo.grade,
-        language_id: userInfo.language_id,
-        level_name: userInfo.level_name,
-        class_name: userInfo.class_name
-      })
-    console.log(res.data);
-    return res.data;
+      name: userInfo.name,
+      phone: userInfo.phone,
+      status: userInfo.status,
+      grade_id: userInfo.grade,
+      language_id: userInfo.language_id,
+      level_name: userInfo.level_name,
+      class_name: userInfo.class_name,
+    })
+    return res.data
   } catch (e) {
-    errorMsg(e);
+    errorMsg(e)
   }
 }
-
 
 // ========================== DELETE ===============================
 // ---------------------------------------------------------------
 // Email 삭제
 // ---------------------------------------------------------------
 export const delEmail = async (id) => {
-  try{
+  try {
     const res = await api.delete(`/admin/email/${id}`)
-    console.log(res.data);
-    return res.data;
+    return res.data
   } catch (e) {
-    errorMsg(e);
+    errorMsg(e)
   }
 }
-
 
 // ---------------------------------------------------------------
 // 학생 삭제
 // ---------------------------------------------------------------
 export const delUser = async (id) => {
-  try{
+  try {
     const res = await api.delete(`/admin/students/${id}`)
-    console.log(res.data);
-    return res.data;
+    return res.data
   } catch (e) {
-    errorMsg(e);
+    errorMsg(e)
   }
 }
