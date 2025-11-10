@@ -114,7 +114,7 @@
 <script setup>
 import { onMounted, ref, watch, watchEffect } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useNoticeStore } from '@/stores/Notice'
+import { useNoticeStore } from '@/stores/notice'
 import { useCourseStore } from '@/stores/course'
 import router from '@/router'
 import { useRoute } from 'vue-router'

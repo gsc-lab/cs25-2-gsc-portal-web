@@ -195,7 +195,7 @@
 import { getCourse, postNotice, getAllUser } from '@/api/apiNotice'
 import AppLayout from '@/layouts/AppLayout.vue'
 import router from '@/router'
-import { useNoticeStore } from '@/stores/Notice'
+import { useNoticeStore } from '@/stores/notice'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref, watch, watchEffect } from 'vue'

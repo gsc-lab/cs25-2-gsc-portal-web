@@ -178,7 +178,7 @@ import { getNoticeView, getCourse, patchNotice, getAllUser } from '@/api/apiNoti
 import { useRoute } from 'vue-router'
 import router from '@/router'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { useNoticeStore } from '@/stores/Notice'
+import { useNoticeStore } from '@/stores/notice'
 import { storeToRefs } from 'pinia'
 
 const route = useRoute()
