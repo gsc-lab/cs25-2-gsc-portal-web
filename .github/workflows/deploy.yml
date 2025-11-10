@@ -27,7 +27,7 @@ jobs:
       - name: Build project
         run: npm run build
         env:
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }} # 백엔드 주입
 
       # 4. AWS 자격 증명 설정
       - name: Configure AWS Credentials
