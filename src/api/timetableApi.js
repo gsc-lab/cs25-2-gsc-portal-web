@@ -142,6 +142,23 @@ export const getCourses = async () => {
 // ---------------------------------------------------------------
 // 시간표 정보 조회
 // ---------------------------------------------------------------
+export const getStudentTimetable = async (today) => {
+  try {
+    const res = await api.get(`/timetables/student`, {
+      params: {
+        date: today,
+      },
+    })
+    console.log('학생 시간표 정보 조회', res.data)
+    return res.data
+  } catch (e) {
+    errorMsg(e)
+  }
+}
+
+// ---------------------------------------------------------------
+// 시간표 정보 조회
+// ---------------------------------------------------------------
 export const getAdminTimetable = async (today) => {
   try {
     const res = await api.get(`/timetables/admin`, {

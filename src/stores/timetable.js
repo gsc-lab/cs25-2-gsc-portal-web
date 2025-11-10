@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia'
 import { lengthHour } from '@/utils/lengthHour'
 import { useClassroomStore } from '@/stores/classroom'
-import { useProfessorStore } from '@/stores/auth'
-import { getAdminTimetable, getCourses } from '@/api/timetableApi'
+import { useProfessorStore } from '@/stores/professor'
+import { getStudentTimetable, getAdminTimetable, getCourses } from '@/api/timetableApi'
 
 export const useTimetableStore = defineStore('timetable', {
   state: () => ({
+    // 학생 Timetable
+    studentTimetable: [],
     // 관리자 Timetable / 기준 date
     adminTimetable: [],
     date: null,
@@ -34,9 +36,27 @@ export const useTimetableStore = defineStore('timetable', {
     courses: [],
   }),
   actions: {
+    // ------------------------ studentTimetable --------------------------
+    // [ set ] : studentTimetable 셋팅
+    async setStdTimetable(day = this.selectTT.date) {
+      if (day == null) day = new Date().toISOString().split('T')[0]
+      this.studentTimetable = await getStudentTimetable(day)
+      this.date = day
+      // console.log('store: studentTimetable', this.studentTimetable)
+    },
+
+    // [ get ] : studentTimetable 반환
+    async getStdTimetable(day) {
+      if (this.date != day) {
+        await this.setStdTimetable(day)
+      }
+      return this.studentTimetable
+    },
+
     // ------------------------ adminTimetable --------------------------
     // [ set ] : Timetable 셋팅
     async setTimetable(day = this.selectTT.date) {
+      console.log('log')
       if (day == null) day = new Date().toISOString().split('T')[0]
       this.adminTimetable = await getAdminTimetable(day)
       this.date = day
