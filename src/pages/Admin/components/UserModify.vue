@@ -1,6 +1,6 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue'
-import { getClass } from '@/api/timetaleApi'
+import { ref, watch } from 'vue'
+import { getKoreanClasses, getSpecialClasses } from '@/api/timetableApi'
 import { patchUser } from '@/api/adminApi'
 
 const user_id = ref(null)
@@ -14,40 +14,44 @@ const selectUser = ref({
   class_name: null,
 })
 
-const classes = ref(null);
-
-onMounted(async () =>  {
-  classes.value = await getClass()
-})
-
+const classes = ref(null)
 
 const user = defineModel()
-console.log(user.value);
+console.log(user.value)
 
-watch(() => user, () => {
+watch(
+  () => user,
+  async () => {
+    if (user.value.language_name == '한국어') {
+      classes.value = await getKoreanClasses()
+    } else {
+      classes.value = getSpecialClasses()
+    }
+
     user_id.value = user.value.user_id
     selectUser.value = {
       name: user.value.name,
       phone: user.value.phone,
       status: user.value.status,
       grade: user.value.grade_name.slice(0, 1),
-      language_id: user.value.language_name == "한국어" ? "KR" : "JP",
+      language_id: user.value.language_name == '한국어' ? 'KR' : 'JP',
       // level_name: user.value.level_name,
       class_name: user.value.class_name,
     }
-}, { immediate: true })
-
+  },
+  { immediate: true },
+)
 
 const handleSubmit = async () => {
-  console.log(user_id.value, selectUser.value);
+  console.log(user_id.value, selectUser.value)
   await patchUser(user_id.value, selectUser.value)
 }
 </script>
 
 <template>
-UserModify
+  UserModify
 
-<!-- 정보 수정 -->
+  <!-- 정보 수정 -->
   <div>
     <div>
       <label for="name">이름 : </label>
@@ -92,7 +96,9 @@ UserModify
     <div>
       <label for="class_name">반 이름 : </label>
       <select id="class_name" v-model="selectUser.class_name">
-        <option v-for="cls in classes" :value="cls.class_id">{{cls.course_name}} {{"-"}} {{cls.class_group}}</option>
+        <option v-for="cls in classes" :value="cls.class_id" :key="cls">
+          {{ cls.course_name }} {{ '-' }} {{ cls.class_group }}
+        </option>
       </select>
     </div>
 
