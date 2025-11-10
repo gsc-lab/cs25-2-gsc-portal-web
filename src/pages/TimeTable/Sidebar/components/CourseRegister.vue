@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import { useTimetableStore } from '@/stores/timetable'
-import { useProfessorStore } from '@/stores/auth'
+import { useProfessorStore } from '@/stores/professor'
 import { postCourse, getSections, postSection } from '@/api/timetableApi'
 
 const Tstore = useTimetableStore()
@@ -17,7 +17,6 @@ onMounted(async () => {
 // 값 저장
 const postCourseData = ref({
   target: null,
-  course_id: null,
   course: null,
   professor_id: null,
   section: null,
@@ -29,6 +28,7 @@ const newSection = ref({
   start_date: null,
   end_date: null,
 })
+const newSemesterName = ref('')
 
 // ================================= 데이터 초기화 =================================
 // selectTT를 감시하고 timetableData 갱신
@@ -41,7 +41,6 @@ watch(
       // 값 세팅
       postCourseData.value = {
         target: timetableData.target,
-        course_id: timetableData.schedule?.course_id ?? null,
         course: timetableData.schedule?.title ?? null,
         professor_id: timetableData.schedule?.professor_id ?? null,
       }
@@ -55,15 +54,19 @@ watch(
 // ================================= Submit =================================
 // 저장버튼 누른 후 실행
 const handleSubmit = async () => {
+  // 학기 추가
   if (postCourseData.value.section == 'new') {
+    // 1, 2, s, w외의 학기
+    if (postCourseData.value.section.semester == 'new') {
+      postCourseData.value.section.semester = newSemesterName.value
+    }
     // 새로운 학기 등록
     await postSection(newSection.value)
     // sec_id 생성 -> postCourseData에 대입
-    console.log('newSection.value', newSection.value)
     postCourseData.value.section = `${newSection.value.year}-${newSection.value.semester}`
     console.log('OK', postCourseData.value.section)
   }
-
+  // 과목 등록
   await postCourse(postCourseData.value)
   await Tstore.setCourses()
 }
@@ -125,9 +128,14 @@ const handleSubmit = async () => {
         <select id="semester" v-model="newSection.semester">
           <option value="1">1학기</option>
           <option value="2">2학기</option>
-          <option value="10">여름방학</option>
-          <option value="20">겨울방학</option>
+          <option value="s">여름방학</option>
+          <option value="w">겨울방학</option>
+          <option value="new">기타</option>
         </select>
+        <div v-if="newSection.semester == 'new'">
+          <label for="semesterName">학기 이름:</label>
+          <input id="semesterName" v-model="newSemesterName" />
+        </div>
       </div>
       <div>
         <label for="date">학기 시작일 : </label>
