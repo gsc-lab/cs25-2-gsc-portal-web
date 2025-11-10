@@ -26,6 +26,8 @@ jobs:
         run: npm ci # package-lock.json을 사용해 빠르게 설치
       - name: Build project
         run: npm run build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
       # 4. AWS 자격 증명 설정
       - name: Configure AWS Credentials
