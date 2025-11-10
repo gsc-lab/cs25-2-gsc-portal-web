@@ -39,7 +39,7 @@ const handleDel = async (event_ids) => {
       console.log(res)
     }
     // 초기화
-    events.value = setEvents()
+    events.value = await setEvents()
   }
 }
 </script>
@@ -75,34 +75,44 @@ const handleDel = async (event_ids) => {
         <th style="border: 1px solid #000; padding: 10px">과목</th>
         <th style="border: 1px solid #000; padding: 10px">날짜</th>
         <th style="border: 1px solid #000; padding: 10px">교시</th>
-        <!-- <th style="border: 1px solid #000; padding: 10px">수정</th> -->
         <th style="border: 1px solid #000; padding: 10px">삭제</th>
       </tr>
     </thead>
     <tbody>
-      <template v-for="(E, idx) in events" :key="idx">
-        <template v-for="event in E" :key="event">
-          <tr v-if="event">
+      <template v-for="event in events" :key="event">
+        <!-- 휴강 -->
+        <tr>
+          <td style="border: 1px solid #000; padding: 10px; user-select: none">
+            {{ event['cancel'].grade_name }}
+          </td>
+          <td style="border: 1px solid #000; padding: 10px; user-select: none">휴강</td>
+          <td style="border: 1px solid #000; padding: 10px; user-select: none">
+            {{ event['cancel'].course_title }}
+          </td>
+          <td style="border: 1px solid #000; padding: 10px; user-select: none">
+            {{ event['cancel'].event_date }}
+          </td>
+          <td style="border: 1px solid #000; padding: 10px; user-select: none">
+            {{ event['cancel'].start_period }} ~ {{ event['cancel'].end_period }} 교시
+          </td>
+          <td style="border: 1px solid #000; padding: 10px; user-select: none">
+            <button @click="handleDel(event['cancel'].event_id)">삭제</button>
+          </td>
+        </tr>
+        <!-- 보강 -->
+        <template v-if="event['makeup']?.length > 0">
+          <tr v-for="(mu, idx) in event['makeup']" :key="idx">
+            <td style="border: 1px solid #000; padding: 10px; user-select: none"></td>
+            <td style="border: 1px solid #000; padding: 10px; user-select: none">보강</td>
+            <td style="border: 1px solid #000; padding: 10px; user-select: none"></td>
             <td style="border: 1px solid #000; padding: 10px; user-select: none">
-              {{ event.event_status == 'CANCEL' ? event.grade_name : '' }}
+              {{ mu.event_date }}
             </td>
             <td style="border: 1px solid #000; padding: 10px; user-select: none">
-              {{ event.event_status == 'CANCEL' ? '휴강' : '보강' }}
+              {{ mu.start_period }} ~ {{ mu.end_period }} 교시
             </td>
             <td style="border: 1px solid #000; padding: 10px; user-select: none">
-              {{ event.event_status == 'CANCEL' ? event.course_title : '' }}
-            </td>
-            <td style="border: 1px solid #000; padding: 10px; user-select: none">
-              {{ event.event_date }}
-            </td>
-            <td style="border: 1px solid #000; padding: 10px; user-select: none">
-              {{ event.start_period }} ~ {{ event.end_period }} 교시
-            </td>
-            <!-- <td style="border: 1px solid #000; padding: 10px; user-select: none">
-              <button @click="handlePut(idx)">수정</button>
-            </td> -->
-            <td style="border: 1px solid #000; padding: 10px; user-select: none">
-              <button @click="handleDel(event.event_id)">삭제</button>
+              <button @click="handleDel(mu.event_id)">삭제</button>
             </td>
           </tr>
         </template>
