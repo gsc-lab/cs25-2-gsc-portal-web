@@ -1,72 +1,66 @@
 <template>
-  <div class="register-container">
-    <h1 class="register-title">GSC_Portal</h1>
+  <AppLayout pageName="register">
+    <div class="register-container">
+      <h1 class="register-title">GSC_Portal</h1>
 
-    <div class="form-group">
-      <label class="form-label">이름:</label>
-      <input
-        v-model="userInfo.name"
-        type="text"
-        class="form-input"
-        placeholder="이름을 입력하세요"
-      />
+      <div class="form-group">
+        <label class="form-label">이름:</label>
+        <input
+          v-model="userInfo.name"
+          type="text"
+          class="form-input"
+          placeholder="이름을 입력하세요"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">학번:</label>
+        <input
+          v-model="userInfo.studentId"
+          type="text"
+          class="form-input"
+          placeholder="학번을 입력하세요"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">전화번호:</label>
+        <input
+          v-model="userInfo.phoneNumber"
+          type="tel"
+          class="form-input"
+          placeholder="010-xxxx-xxxx"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">이메일:</label>
+        <input
+          v-model="userInfo.email"
+          type="email"
+          class="form-input"
+          placeholder="abcdef@gmail.com"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">학생 여부</label>
+        <input v-model="userInfo.is_student" type="checkbox" class="form-checkbox" />
+      </div>
+
+      <button class="btn-submit" @click="submitRegister">회원가입</button>
+
+      <!-- 등록된 유저 정보 확인 -->
+      <!-- <pre class="result-box">{{ userInfo }}</pre> -->
     </div>
-
-    <div class="form-group">
-      <label class="form-label">학번:</label>
-      <input
-        v-model="userInfo.studentId"
-        type="text"
-        class="form-input"
-        placeholder="학번을 입력하세요"
-      />
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">전화번호:</label>
-      <input
-        v-model="userInfo.phoneNumber"
-        type="tel"
-        class="form-input"
-        placeholder="010-xxxx-xxxx"
-      />
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">이메일:</label>
-      <input
-        v-model="userInfo.email"
-        type="email"
-        class="form-input"
-        placeholder="abcdef@gmail.com"
-      />
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">학생 여부</label>
-      <input
-        v-model="userInfo.is_student"
-        type="checkbox"
-        class="form-checkbox"
-      />
-    </div>
-
-    <button
-      class="btn-submit"
-      @click="submitRegister"
-    >
-      회원가입
-    </button>
-
-    <!-- 등록된 유저 정보 확인 -->
-    <pre class="result-box">{{ userInfo }}</pre>
-  </div>
+  </AppLayout>
 </template>
 
 <script setup>
 import router from '@/router'
 import { userRegister } from '@/api/auth'
 import { reactive } from 'vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 
 const userInfo = reactive({
   name: '',
@@ -81,8 +75,13 @@ const userInfo = reactive({
 // }
 
 const submitRegister = async () => {
-  if (userInfo.name === '' || userInfo.studentId === '' || userInfo.phoneNumber === '' || userInfo.email === '') {
-    alert("회원입력 정보를 입력해주세요")
+  if (
+    userInfo.name === '' ||
+    userInfo.studentId === '' ||
+    userInfo.phoneNumber === '' ||
+    userInfo.email === ''
+  ) {
+    alert('회원입력 정보를 입력해주세요')
   }
   const userData = {
     name: userInfo.name,
@@ -93,11 +92,11 @@ const submitRegister = async () => {
   }
   try {
     await userRegister(userData)
-    alert("회원가입 요청이 완료되었습니다.")
+    alert('회원가입 요청이 완료되었습니다.')
     router.push({ path: '/registerWait' })
   } catch (err) {
     console.error(err)
-    alert("회원가입 요청이 실패했습니다.")
+    alert('회원가입 요청이 실패했습니다.')
   }
 }
 </script>
@@ -143,7 +142,9 @@ const submitRegister = async () => {
   border: 1px solid #bbb;
   border-radius: 4px;
   font-size: 14px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .form-input:focus {

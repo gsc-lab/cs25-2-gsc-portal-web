@@ -1,20 +1,23 @@
 <template>
-  <main class="cleaning-home-wrapper">
-    <div class="cleaning-home-container">
-      <div class="action-bar">
-        <router-link to="/cleaningH/cleaningRosterCreate" class="btn btn-primary">
-          + 청소 로스터 생성
-        </router-link>
-      </div>
+  <AppLayout pageName="cleaningPage">
+    <main class="cleaning-home-wrapper">
+      <div class="cleaning-home-container">
+        <div class="action-bar">
+          <router-link to="/cleaningH/cleaningRosterCreate" class="btn btn-primary">
+            + 청소 로스터 생성
+          </router-link>
+        </div>
 
-      <section class="content-area">
-        <CleaningMemberList />
-      </section>
-    </div>
-  </main>
+        <section class="content-area">
+          <CleaningMemberList />
+        </section>
+      </div>
+    </main>
+  </AppLayout>
 </template>
 
 <script setup>
+import AppLayout from '@/layouts/AppLayout.vue'
 import CleaningMemberList from './CleaningMemberList.vue'
 </script>
 

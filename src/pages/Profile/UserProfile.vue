@@ -1,42 +1,45 @@
 <template>
-  <main class="user-info-wrapper">
-    <div class="user-info-container">
-      <div class="user-info-card">
-        <h1 class="portal-title">사용자 정보</h1>
+  <AppLayout pageName="Profile">
+    <main class="user-info-wrapper">
+      <div class="user-info-container">
+        <div class="user-info-card">
+          <h1 class="portal-title">사용자 정보</h1>
 
-        <div class="info-row">
-          <span class="label">학번</span>
-          <span class="value">{{ user.userInfo?.user_id }}</span>
-        </div>
+          <div class="info-row">
+            <span class="label">학번</span>
+            <span class="value">{{ user.userInfo?.user_id }}</span>
+          </div>
 
-        <div class="info-row">
-          <span class="label">이메일</span>
-          <span class="value">{{ user.userInfo?.email }}</span>
-        </div>
+          <div class="info-row">
+            <span class="label">이메일</span>
+            <span class="value">{{ user.userInfo?.email }}</span>
+          </div>
 
-        <div class="info-row">
-          <span class="label">전화번호</span>
-          <span class="value">{{ user.userInfo?.phone }}</span>
-        </div>
+          <div class="info-row">
+            <span class="label">전화번호</span>
+            <span class="value">{{ user.userInfo?.phone }}</span>
+          </div>
 
-        <div class="info-row">
-          <span class="label">권한</span>
-          <span class="value role" :class="user.userInfo?.role_type">
-            {{ user.userInfo?.role_type }}
-          </span>
-        </div>
-        <div v-if="user.userInfo?.grade_id" class="info-row">
-          <span class="label">학년</span>
-          <span class="value role" :class="user.userInfo?.grade_id">
-            {{ user.userInfo?.grade_id }}
-          </span>
+          <div class="info-row">
+            <span class="label">권한</span>
+            <span class="value role" :class="user.userInfo?.role_type">
+              {{ user.userInfo?.role_type }}
+            </span>
+          </div>
+          <div v-if="user.userInfo?.grade_id" class="info-row">
+            <span class="label">학년</span>
+            <span class="value role" :class="user.userInfo?.grade_id">
+              {{ user.userInfo?.grade_id }}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
-  </main>
+    </main>
+  </AppLayout>
 </template>
 
 <script setup>
+import AppLayout from '@/layouts/AppLayout.vue'
 import { useUserStore } from '@/stores/user'
 
 // user store ( user.userInfo ) 불러오기

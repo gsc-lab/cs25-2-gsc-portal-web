@@ -1,85 +1,87 @@
 <template>
-  <main class="dashboard-wrapper">
-    <div class="dashboard-container">
-      <header class="dashboard-header">
-        <h1 class="portal-title">GSC_Portal</h1>
-        <div class="today">{{ new Date().toLocaleDateString() }}</div>
-      </header>
+  <AppLayout pageName="dashBoard">
+    <main class="dashboard-wrapper">
+      <div class="dashboard-container">
+        <header class="dashboard-header">
+          <h1 class="portal-title">GSC_Portal</h1>
+          <div class="today">{{ new Date().toLocaleDateString() }}</div>
+        </header>
 
-      <section class="dashboard-grid">
-        <div class="card timetable">
-          <h2 class="card-title">오늘의 시간표 {{}}</h2>
-          <div class="card-content">
-            <div class="dummy-box">
-              <span>시간표 데이터</span>
+        <section class="dashboard-grid">
+          <div class="card timetable">
+            <h2 class="card-title">오늘의 시간표 {{}}</h2>
+            <div class="card-content">
+              <div class="dummy-box">
+                <span>시간표 데이터</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="card notice">
-          <div class="card-header">
-            <h2 class="card-title">공지사항</h2>
-            <button @click="HandleNoticeMove" class="btn btn-secondary">더보기</button>
-          </div>
-          <div class="card-content">
-            <div
-              class="notice-item"
-              v-for="notice in dashBoard.notices?.notices"
-              :key="notice.notice_id"
-              @click="HandleNoticeClick(notice.notice_id)"
-            >
-              <p class="notice-title">
-                <span v-if="notice.is_pinned" class="pinned">♥ 중요</span>
-                {{ notice.title }}
-              </p>
+          <div class="card notice">
+            <div class="card-header">
+              <h2 class="card-title">공지사항</h2>
+              <button @click="HandleNoticeMove" class="btn btn-secondary">더보기</button>
             </div>
-          </div>
-        </div>
-
-        <div class="card cleaning">
-          <h2 class="card-title">이번주 청소 당번</h2>
-          <div class="card-content">
-            <div v-for="clean in dashBoard.cleaning_duty" :key="clean.grade_id">
-              <h3>{{ clean.grade_id + '학년' }}</h3>
-              <p>
-                교실:
-                {{ clean.classroom_name }}
-              </p>
-              <div v-for="member in clean.members" :key="member">
-                <p>
-                  {{ member }}
+            <div class="card-content">
+              <div
+                class="notice-item"
+                v-for="notice in dashBoard.notices?.notices"
+                :key="notice.notice_id"
+                @click="HandleNoticeClick(notice.notice_id)"
+              >
+                <p class="notice-title">
+                  <span v-if="notice.is_pinned" class="pinned">♥ 중요</span>
+                  {{ notice.title }}
                 </p>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="card huka">
-          <div class="card-header">
-            <h2 class="card-title">후까 교수님</h2>
-            <button class="btn btn-primary">
-              <router-link to="huka">일정 상세보기</router-link>
-            </button>
+          <div class="card cleaning">
+            <h2 class="card-title">이번주 청소 당번</h2>
+            <div class="card-content">
+              <div v-for="clean in dashBoard.cleaning_duty" :key="clean.grade_id">
+                <h3>{{ clean.grade_id + '학년' }}</h3>
+                <p>
+                  교실:
+                  {{ clean.classroom_name }}
+                </p>
+                <div v-for="member in clean.members" :key="member">
+                  <p>
+                    {{ member }}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="card-content">
-            <p>1학년 일정</p>
-          </div>
-        </div>
 
-        <div class="card pool">
-          <div class="card-header">
-            <h2 class="card-title">강의실 개방 투표</h2>
-            <button class="btn btn-primary">
-              <router-link to="weekendAttendance">신청</router-link>
-            </button>
+          <div class="card huka">
+            <div class="card-header">
+              <h2 class="card-title">후까 교수님</h2>
+              <button class="btn btn-primary">
+                <router-link to="huka">일정 상세보기</router-link>
+              </button>
+            </div>
+            <div class="card-content">
+              <p>1학년 일정</p>
+            </div>
           </div>
-          <div class="card-content">
-            <p>000호</p>
+
+          <div class="card pool">
+            <div class="card-header">
+              <h2 class="card-title">강의실 개방 투표</h2>
+              <button class="btn btn-primary">
+                <router-link to="weekendAttendance">신청</router-link>
+              </button>
+            </div>
+            <div class="card-content">
+              <p>000호</p>
+            </div>
           </div>
-        </div>
-      </section>
-    </div>
-  </main>
+        </section>
+      </div>
+    </main>
+  </AppLayout>
 </template>
 
 <script setup>
@@ -88,6 +90,7 @@ import { getDashBoard } from '@/api/apiDashBoard'
 import router from '@/router'
 import { useUserStore } from '@/stores/user'
 import { getAllUser } from '@/api/apiNotice'
+import AppLayout from '@/layouts/AppLayout.vue'
 
 // user store ( user.userInfo ) 불러오기
 const user = useUserStore()

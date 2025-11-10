@@ -1,110 +1,115 @@
 <template>
-  <main class="roster-page-wrapper">
-    <div class="roster-page-container">
-      <div class="roster-create-card">
-        <div class="card-header">
-          <h1 class="portal-title">청소 멤버 자동 생성</h1>
-        </div>
+  <AppLayout pageName="cleaningRoster">
+    <main class="roster-page-wrapper">
+      <div class="roster-page-container">
+        <div class="roster-create-card">
+          <div class="card-header">
+            <h1 class="portal-title">청소 멤버 자동 생성</h1>
+          </div>
 
-        <div class="card-body">
-          <section class="form-section">
-            <h2 class="section-title">학기 선택</h2>
-            <div class="radio-group">
-              <div v-for="section in sections" :key="section?.sec_id" class="radio-item">
-                <input
-                  type="radio"
-                  name="section"
-                  :id="`section-${section?.sec_id}`"
-                  :value="section?.sec_id"
-                  v-model="sectionSelect"
-                />
-                <label :for="`section-${section?.sec_id}`">{{ section?.sec_id + '학기' }}</label>
-              </div>
-            </div>
-          </section>
-
-          <section class="form-section">
-            <h2 class="section-title">요일 선택</h2>
-            <div class="radio-group">
-              <div v-for="day in weekDays" :key="day" class="radio-item">
-                <input
-                  type="radio"
-                  name="day"
-                  :id="`day-${day}`"
-                  :value="day"
-                  v-model="daySelect"
-                />
-                <label :for="`day-${day}`">{{ day }}</label>
-              </div>
-            </div>
-          </section>
-
-          <section class="form-section">
-            <h2 class="section-title">인원 수</h2>
-            <div class="radio-group">
-              <div v-for="member in [1, 2, 3, 4]" :key="member" class="radio-item">
-                <input
-                  type="radio"
-                  name="member"
-                  :id="'member-' + member"
-                  :value="member"
-                  v-model="team_size"
-                />
-                <label :for="'member-' + member">{{ member + '명' }}</label>
-              </div>
-            </div>
-          </section>
-
-          <div class="grid-row">
+          <div class="card-body">
             <section class="form-section">
-              <h2 class="section-title">학년 선택</h2>
-              <div class="radio-group vertical">
-                <div v-for="grade in ['1', '2', '3']" :key="grade" class="radio-item">
+              <h2 class="section-title">학기 선택</h2>
+              <div class="radio-group">
+                <div v-for="section in sections" :key="section?.sec_id" class="radio-item">
                   <input
                     type="radio"
-                    name="grade"
-                    :id="'grade-' + grade"
-                    :value="grade"
-                    v-model="gradeSelect"
+                    name="section"
+                    :id="`section-${section?.sec_id}`"
+                    :value="section?.sec_id"
+                    v-model="sectionSelect"
                   />
-                  <label :for="'grade-' + grade">{{ grade + '학년' }}</label>
+                  <label :for="`section-${section?.sec_id}`">{{ section?.sec_id + '학기' }}</label>
                 </div>
               </div>
             </section>
 
             <section class="form-section">
-              <h2 class="section-title">교실 정보</h2>
-              <div class="radio-group grid-layout">
-                <div
-                  v-for="classroom in classRooms"
-                  :key="classroom.classroom_id"
-                  class="radio-item"
-                >
+              <h2 class="section-title">요일 선택</h2>
+              <div class="radio-group">
+                <div v-for="day in weekDays" :key="day" class="radio-item">
                   <input
                     type="radio"
-                    name="classroom"
-                    :id="'classroom-' + classroom.classroom_id"
-                    :value="classroom.classroom_id"
-                    v-model="classroomSelect"
+                    name="day"
+                    :id="`day-${day}`"
+                    :value="day"
+                    v-model="daySelect"
                   />
-                  <label :for="'classroom-' + classroom.classroom_id">{{ classroom.label }}</label>
+                  <label :for="`day-${day}`">{{ day }}</label>
                 </div>
               </div>
             </section>
+
+            <section class="form-section">
+              <h2 class="section-title">인원 수</h2>
+              <div class="radio-group">
+                <div v-for="member in [1, 2, 3, 4]" :key="member" class="radio-item">
+                  <input
+                    type="radio"
+                    name="member"
+                    :id="'member-' + member"
+                    :value="member"
+                    v-model="team_size"
+                  />
+                  <label :for="'member-' + member">{{ member + '명' }}</label>
+                </div>
+              </div>
+            </section>
+
+            <div class="grid-row">
+              <section class="form-section">
+                <h2 class="section-title">학년 선택</h2>
+                <div class="radio-group vertical">
+                  <div v-for="grade in ['1', '2', '3']" :key="grade" class="radio-item">
+                    <input
+                      type="radio"
+                      name="grade"
+                      :id="'grade-' + grade"
+                      :value="grade"
+                      v-model="gradeSelect"
+                    />
+                    <label :for="'grade-' + grade">{{ grade + '학년' }}</label>
+                  </div>
+                </div>
+              </section>
+
+              <section class="form-section">
+                <h2 class="section-title">교실 정보</h2>
+                <div class="radio-group grid-layout">
+                  <div
+                    v-for="classroom in classRooms"
+                    :key="classroom.classroom_id"
+                    class="radio-item"
+                  >
+                    <input
+                      type="radio"
+                      name="classroom"
+                      :id="'classroom-' + classroom.classroom_id"
+                      :value="classroom.classroom_id"
+                      v-model="classroomSelect"
+                    />
+                    <label :for="'classroom-' + classroom.classroom_id">
+                      {{ classroom.label }}
+                    </label>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+
+          <div class="card-footer">
+            <button class="btn btn-primary" @click="HandleCreateRoster">생성하기</button>
           </div>
         </div>
-
-        <div class="card-footer">
-          <button class="btn btn-primary" @click="HandleCreateRoster">생성하기</button>
-        </div>
       </div>
-    </div>
-  </main>
+    </main>
+  </AppLayout>
 </template>
 
 <script setup>
 import { getClassRooms, postCleaningRoster } from '@/api/apiCleaning'
 import { getSection } from '@/api/jobApi'
+import AppLayout from '@/layouts/AppLayout.vue'
 import router from '@/router'
 import { onMounted, ref, watch, watchEffect } from 'vue'
 

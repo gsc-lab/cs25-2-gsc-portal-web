@@ -1,18 +1,21 @@
 <template>
-  <main class="notice-page-wrapper">
-    <div class="notice-page-container">
-      <div v-if="user.userInfo.role_type !== 'student'" class="header-bar">
-        <router-link to="/notice/write" class="write-btn">공지사항 작성</router-link>
-      </div>
+  <AppLayout pageName="noticePage">
+    <main class="notice-page-wrapper">
+      <div class="notice-page-container">
+        <div v-if="user.userInfo.role_type !== 'student'" class="header-bar">
+          <router-link to="/notice/write" class="write-btn">공지사항 작성</router-link>
+        </div>
 
-      <NoticeListComponent class="ListComponent" />
-    </div>
-  </main>
+        <NoticeListComponent class="ListComponent" />
+      </div>
+    </main>
+  </AppLayout>
 </template>
 
 <script setup>
 import { useUserStore } from '@/stores/user'
 import NoticeListComponent from './NoticeListComponent.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 
 // user store ( user.userInfo ) 불러오기
 const user = useUserStore()

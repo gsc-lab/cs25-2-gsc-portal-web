@@ -1,71 +1,75 @@
 <template>
-  <main class="notice-page-wrapper">
-    <div class="notice-page-container">
-      <div class="notice-view-layout">
-        <aside v-show="noticeTargetAside" class="notice-sidebar">
-          <div class="sidebar-header">공지 확인 명단</div>
-          <ul class="target-list">
-            <li v-for="target in target" :key="target.student_name" class="target-item">
-              <span class="student-name">{{ target.student_name }}</span>
-              <span v-if="!target.read_at">미확인</span>
-              <span v-else>확인</span>
-            </li>
-            <li v-if="!target.length" class="target-item-empty">알림 대상자가 없습니다.</li>
-          </ul>
-        </aside>
-
-        <div class="notice-view-card">
-          <div v-if="user.userInfo.role_type !== 'student'" class="notice-view-header">
-            <button
-              v-if="user.userInfo.role_type !== 'student'"
-              class="btn btn-secondary"
-              @click="noticeTargetAside = !noticeTargetAside"
-            >
-              공지 확인 명단 확인
-            </button>
-            <h1 class="portal-title"></h1>
-            <div class="header-button">
-              <button @click="HandleAlarm(notice.notice_id)" class="btn btn-secondary">
-                알림 전송
-              </button>
-              <button @click="HandleEdit(notice.notice_id)" class="btn btn-secondary">수정</button>
-              <button @click="HandleDelete(notice.notice_id)" class="btn btn-danger">삭제</button>
-            </div>
-          </div>
-
-          <div class="notice-view-info">
-            <h2 class="notice-title">{{ notice?.title }}</h2>
-            <div class="meta-group">
-              <span class="author">{{ notice?.author?.name }}</span>
-              <span class="separator">|</span>
-              <span class="date">{{ formatDate }}</span>
-              <span class="badge">{{ courseTypeName }}</span>
-              <span class="badge">{{ notice?.course_title }}</span>
-            </div>
-          </div>
-
-          <div class="notice-view-files" v-if="notice?.attachments?.length">
-            <span class="file-label">첨부파일</span>
-            <ul>
-              <li v-for="file in notice.attachments" :key="file.file_id">
-                <a href="#" @click.prevent.stop="fileDownLoad(file.file_id, file.file_name)">
-                  {{ fixFileName(file.file_name) }}
-                </a>
+  <AppLayout>
+    <main class="notice-page-wrapper">
+      <div class="notice-page-container">
+        <div class="notice-view-layout">
+          <aside v-show="noticeTargetAside" class="notice-sidebar">
+            <div class="sidebar-header">공지 확인 명단</div>
+            <ul class="target-list">
+              <li v-for="target in target" :key="target.student_name" class="target-item">
+                <span class="student-name">{{ target.student_name }}</span>
+                <span v-if="!target.read_at">미확인</span>
+                <span v-else>확인</span>
               </li>
+              <li v-if="!target.length" class="target-item-empty">알림 대상자가 없습니다.</li>
             </ul>
-          </div>
+          </aside>
 
-          <div class="notice-view-content">
-            <div class="content-body">{{ notice?.content }}</div>
-          </div>
+          <div class="notice-view-card">
+            <div v-if="user.userInfo.role_type !== 'student'" class="notice-view-header">
+              <button
+                v-if="user.userInfo.role_type !== 'student'"
+                class="btn btn-secondary"
+                @click="noticeTargetAside = !noticeTargetAside"
+              >
+                공지 확인 명단 확인
+              </button>
+              <h1 class="portal-title"></h1>
+              <div class="header-button">
+                <button @click="HandleAlarm(notice.notice_id)" class="btn btn-secondary">
+                  알림 전송
+                </button>
+                <button @click="HandleEdit(notice.notice_id)" class="btn btn-secondary">
+                  수정
+                </button>
+                <button @click="HandleDelete(notice.notice_id)" class="btn btn-danger">삭제</button>
+              </div>
+            </div>
 
-          <div class="notice-view-footer">
-            <button class="btn btn-gray" @click="backPage">목록으로</button>
+            <div class="notice-view-info">
+              <h2 class="notice-title">{{ notice?.title }}</h2>
+              <div class="meta-group">
+                <span class="author">{{ notice?.author?.name }}</span>
+                <span class="separator">|</span>
+                <span class="date">{{ formatDate }}</span>
+                <span class="badge">{{ courseTypeName }}</span>
+                <span class="badge">{{ notice?.course_title }}</span>
+              </div>
+            </div>
+
+            <div class="notice-view-files" v-if="notice?.attachments?.length">
+              <span class="file-label">첨부파일</span>
+              <ul>
+                <li v-for="file in notice.attachments" :key="file.file_id">
+                  <a href="#" @click.prevent.stop="fileDownLoad(file.file_id, file.file_name)">
+                    {{ fixFileName(file.file_name) }}
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div class="notice-view-content">
+              <div class="content-body">{{ notice?.content }}</div>
+            </div>
+
+            <div class="notice-view-footer">
+              <button class="btn btn-gray" @click="backPage">목록으로</button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </main>
+    </main>
+  </AppLayout>
 </template>
 
 <script setup>
@@ -81,6 +85,7 @@ import {
 import { useRoute } from 'vue-router'
 import router from '@/router'
 import { useUserStore } from '@/stores/user'
+import AppLayout from '@/layouts/AppLayout.vue'
 
 const route = useRoute()
 const notice = ref(null)
