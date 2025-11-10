@@ -20,7 +20,6 @@ const routes = [
   { path: '/cleaning-rosters/generator', name: 'CleaningGeneratorPage', component: () => import('@/pages/Cleaning/components/CleaningPost.vue') },
   { path: '/cleaning-rosters/delete', name: 'CleaningDeletePage', component: () => import('@/pages/Cleaning/components/CleaningDelete.vue') },
   { path: '/weekendAttendance', name: 'weekendAttendance', component: () => import('@/pages/AttendanceRoom/WeekendAttendance.vue') },
-  // { path: '/profile', name: 'profile', component }
   { path: '/profile', name: 'profile', component: () => import('@/pages/Profile/UserProfile.vue') },
   { path: '/:pathMatch(.*)', name: 'NotFound', component: () => import('@/pages/NotFound/NotFound.vue') }
 ]
