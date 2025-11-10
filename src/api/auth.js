@@ -1,8 +1,8 @@
-import apiClient from "./index";
+import api from "./apiClient";
 
 // google 로그인 요청
 export const googleLogin = () => {
-  window.location.href = `${apiClient.defaults.baseURL}/auth`
+  window.location.href = `${api.defaults.baseURL}/auth`
 }
 
 // 회원가입 요청 API
@@ -20,7 +20,7 @@ export const userRegister = async (data) => {
 
   console.log([...formData.entries()])
 
-  const response = await apiClient.post('auth/register', formData, {
+  const response = await api.post('auth/register', formData, {
     headers: {
       "content-Type": "application/json"
     }
@@ -31,14 +31,14 @@ export const userRegister = async (data) => {
 // 사용자 정보 요청 API
 
 export const getUserInfo = async () => {
-  const userInfo = await apiClient.get('/auth/me')
+  const userInfo = await api.get('/auth/me')
 
   return userInfo.data
 }
 
 // 사용자 로그아웃 요청 API
 export const postuserInfo = async () => {
-  const userInfo = await apiClient.post('/auth/logout')
+  const userInfo = await api.post('/auth/logout')
 
   return userInfo.data
 }
