@@ -50,12 +50,11 @@ watch(
         course_id: timetableData.schedule?.course_id ?? null,
         date: timetableData.date,
         startTime: timetableData.startTime,
-        endTime:
-          timetableData.schedule == 'CANCEL'
-            ? timetableData.endTime
-            : selectMakeup.value.length > 0
-              ? timetableData.startTime + selectMakeup.value.length - 1
-              : null,
+        endTime: timetableData.schedule
+          ? timetableData.endTime
+          : selectMakeup.value.length > 0
+            ? timetableData.startTime + selectMakeup.value.length - 1
+            : null,
         classroom_label: timetableData.label ?? null,
       }
     } else {
