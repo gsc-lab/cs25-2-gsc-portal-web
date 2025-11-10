@@ -1,73 +1,49 @@
-name: Deploy Frontend
-
-permissions:
-  contents: read
-  packages: write
+name: Deploy Frontend to S3
 
 on:
   push:
-    branches: ["infra"]
+    branches: ["infra"] # 1. 이 브랜치 이름을 'main' 등 실제 사용하는 브랜치로 변경하세요.
   release:
     types: ["published"]
 
 jobs:
-  build-push-and-deploy:
+  build-and-deploy-to-s3:
     runs-on: ubuntu-latest
-
-    env:
-      IMAGE_NAME: gsc-portal-frontend
-      DOCKERHUB_USERNAME: sgwar
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v3
+      # 2. Node.js LTS 20.x 버전으로 설정
+      - name: Set up Node.js LTS
+        uses: actions/setup-node@v4
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          node-version: '20.x' # LTS 버전 명시
+          cache: 'npm'
 
-      - name: Extract Git metadata
-        id: vars
+      # 3. 의존성 설치 및 프로젝트 빌드
+      - name: Install dependencies
+        run: npm ci # package-lock.json을 사용해 빠르게 설치
+      - name: Build project
+        run: npm run build
+
+      # 4. AWS 자격 증명 설정
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2 # S3 버킷이 있는 리전
+
+      # 5. S3 버킷으로 빌드 결과물 업로드 (Sync)
+      #    빌드 폴더가 './dist'가 아니라면 (예: './build') 경로 수정
+      - name: Sync build folder to S3
         run: |
-          echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
-          echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          aws s3 sync ./dist s3://${{ secrets.S3_BUCKET_NAME }} --delete
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: |
-            sgwar/gsc-portal-frontend:latest
-            sgwar/gsc-portal-frontend:${{ env.BRANCH }}-${{ env.SHORT_SHA }}
-          cache-from: type=registry,ref=sgwar/gsc-portal-frontend:buildcache
-          cache-to: type=registry,ref=sgwar/gsc-portal-frontend:buildcache,mode=max
-
-      - name: Image deployed
+      # 6. (필수) CloudFront 캐시 무효화
+      - name: Invalidate CloudFront Cache
         run: |
-          echo "🚀 Docker image pushed to Docker Hub!"
-          echo "📦 Image: sgwar/gsc-portal-frontend:${{ env.BRANCH }}-${{ env.SHORT_SHA }}"
-
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_KEY }}
-          script: |
-            sudo docker compose -f docker-compose.prod.yml pull
-            sudo docker compose -f docker-compose.prod.yml up -d
-            
-            echo "🚀 Starting Zero-Downtime deployment on EC2..."
-            
-            cd ~/gsc-portal-infra
-            # 이전에 만든 Blue/Green 스크립트 실행
-            
-            # sudo ./deploy.sh
-            echo "✅ Zero-Downtime deployment completed!"
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
