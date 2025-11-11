@@ -1,4 +1,3 @@
-import { useUserStore } from '@/stores/user'
 import { createWebHistory, createRouter } from 'vue-router'
 
 const routes = [
@@ -27,27 +26,6 @@ const routes = [
 export const router = createRouter({
   history: createWebHistory(),
   routes,
-})
-
-router.beforeEach(async (to, from, next) => {
-  const userStore = useUserStore()
-
-  // 비로그인 사용자가 접근할 수 있는 페이지 목록
-  const publicPaths = ['/login', '/register', '/registerWait'];
-
-  // 1. 비로그인 상태(userInfo 없음) + 가려는 곳이 publicPaths에 *포ham되지 않은* 경우
-  if (!userStore.userInfo && !publicPaths.includes(to.path)) {
-    // /login으로 리다이렉트
-    return next('/login');
-  }
-
-  // 2. 로그인 상태(userInfo 있음) + 가려는 곳이 /login인 경우
-  if (userStore.userInfo && to.path === '/login') {
-    // 대시보드로 리다이렉트
-    return next('/dashboard');
-  }
-
-  next();
 })
 
 export default router;
