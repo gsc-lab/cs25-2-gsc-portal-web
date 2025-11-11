@@ -37,8 +37,8 @@ router.beforeEach(async (to, from, next) => {
 
   // 1. 비로그인 상태(userInfo 없음) + 가려는 곳이 publicPaths에 *포함되지 않은* 경우
   if (!userStore.userInfo && !publicPaths.includes(to.path)) {
-    // /register로 리다이렉트
-    return next('/register');
+    // /login 리다이렉트
+    return next('/login');
   }
 
   // 2. 로그인 상태(userInfo 있음) + 가려는 곳이 /login인 경우
