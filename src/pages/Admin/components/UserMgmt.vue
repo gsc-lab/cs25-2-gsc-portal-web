@@ -61,23 +61,23 @@ const handleDelete = async (id) => {
     <!-- 필터링 -->
     <div>
       <div>
-        <label for="grade">학년 선택 : </label>
+        <label for="grade">학년 선택 :</label>
         <select id="grade" v-model="selectGrade">
           <option :value="null">전체</option>
-          <option value="1학년">1학년</option>
-          <option value="2학년">2학년</option>
-          <option value="3학년">3학년</option>
+          <option value="1">1학년</option>
+          <option value="2">2학년</option>
+          <option value="3">3학년</option>
         </select>
       </div>
 
       <div>
-        <label for="status">상태 : </label>
+        <label for="status">상태 :</label>
         <select id="status" v-model="selectStatus">
           <option :value="null">전체</option>
           <option value="enrolled">재학</option>
           <option value="leave">휴학</option>
           <option value="dropped">자퇴</option>
-          <option value="dropped">졸업</option>
+          <option value="graduated">졸업</option>
         </select>
       </div>
     </div>
