@@ -22,7 +22,7 @@ jobs:
           cache: 'npm'
 
       # 3. env 적용
-      - name: Create .env file
+      - name: Create .env.production
         run: |
           echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env.production
           echo "VITE_ENV=production" >> .env.production
@@ -30,10 +30,9 @@ jobs:
       # 3. 의존성 설치 및 프로젝트 빌드
       - name: Install dependencies
         run: npm ci # package-lock.json을 사용해 빠르게 설치
+
       - name: Build project
-        run: npm run build
-        env:
-          VITE_API_URL: ${{ secrets.VITE_API_URL }} # 백엔드 주입
+        run: npm run build --mode production
 
       # 4. AWS 자격 증명 설정
       - name: Configure AWS Credentials
