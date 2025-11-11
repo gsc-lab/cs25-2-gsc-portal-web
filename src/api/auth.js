@@ -2,7 +2,7 @@ import api from "./apiClient";
 
 // google 로그인 요청
 export const googleLogin = () => {
-  window.location.href = `${api.defaults.baseURL}/auth`
+  window.location.href = `${api.defaults.baseURL}/api/auth`
 }
 
 // 회원가입 요청 API
@@ -20,7 +20,7 @@ export const userRegister = async (data) => {
 
   console.log([...formData.entries()])
 
-  const response = await api.post('auth/register', formData, {
+  const response = await api.post('api/auth/register', formData, {
     headers: {
       "content-Type": "application/json"
     }

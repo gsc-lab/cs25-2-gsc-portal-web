@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://d3suqqci6r6g4n.cloudfront.net/api",
+  baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true,
 });
 

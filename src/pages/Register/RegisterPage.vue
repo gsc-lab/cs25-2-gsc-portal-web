@@ -60,19 +60,20 @@
 import router from '@/router'
 import { userRegister } from '@/api/auth'
 import { reactive } from 'vue'
+import { useRoute } from 'vue-router'
 import AppLayout from '@/layouts/AppLayout.vue'
+
+// URL의 쿼리 파라미터에서 토큰을 읽어옴
+const route = useRoute()
+const token = route.query.token
 
 const userInfo = reactive({
   name: '',
   studentId: '',
   phoneNumber: '',
   email: '',
-  is_student: false,
+  is_student: false
 })
-
-// function registerUser() {
-//   console.log("등록된 유저:", userInfo)
-// }
 
 const submitRegister = async () => {
   if (
@@ -82,14 +83,25 @@ const submitRegister = async () => {
     userInfo.email === ''
   ) {
     alert('회원입력 정보를 입력해주세요')
+    return
   }
+
   const userData = {
     name: userInfo.name,
     user_id: userInfo.studentId,
     phone: userInfo.phoneNumber,
     email: userInfo.email,
     is_student: userInfo.is_student,
+    token: token // 읽어온 토큰을 데이터에 포함
   }
+
+  // 토큰이 없는 경우 예외 처리
+  if (!userData.token) {
+    alert('유효하지 않은 접근입니다. 다시 로그인해주세요.')
+    router.push('/login')
+    return
+  }
+
   try {
     await userRegister(userData)
     alert('회원가입 요청이 완료되었습니다.')
