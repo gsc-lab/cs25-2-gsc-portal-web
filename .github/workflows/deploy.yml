@@ -32,7 +32,7 @@ jobs:
         run: npm ci # package-lock.json을 사용해 빠르게 설치
 
       - name: Build project
-        run: npm run build --mode production
+        run: npm run build -- --mode production
 
       # 4. AWS 자격 증명 설정
       - name: Configure AWS Credentials
