@@ -7,9 +7,10 @@ import { useUserStore } from '@/stores/user'
 import pinia from '@/stores'
 
 const app = createApp(App)
+app.use(pinia)
 
+// 로그인 상태 확인
 const user = useUserStore()
-
 try {
   await user.fetchUser()
 } catch (err) {
@@ -17,5 +18,4 @@ try {
 }
 
 app.use(router)
-app.use(pinia)
 app.mount('#app')
