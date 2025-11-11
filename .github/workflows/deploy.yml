@@ -2,9 +2,9 @@ name: Deploy Frontend to S3
 
 on:
   push:
-    branches: ["develop"] # 1. 이 브랜치 이름을 'main' 등 실제 사용하는 브랜치로 변경하세요.
+    branches: ['merge-test'] # 1. 이 브랜치 이름을 'main' 등 실제 사용하는 브랜치로 변경하세요.
   release:
-    types: ["published"]
+    types: ['published']
 
 jobs:
   build-and-deploy-to-s3:
