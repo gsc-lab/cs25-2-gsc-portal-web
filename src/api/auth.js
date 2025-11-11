@@ -1,4 +1,4 @@
-import api from "./apiClient";
+import api from '@/api/apiClient'
 
 // google 로그인 요청
 export const googleLogin = () => {
@@ -7,8 +7,7 @@ export const googleLogin = () => {
 
 // 회원가입 요청 API
 export const userRegister = async (data) => {
-
-  const formData = new FormData();
+  const formData = new FormData()
 
   Object.entries(data).forEach(([key, value]) => {
     if (typeof value === 'object' && value !== null) {
@@ -22,8 +21,8 @@ export const userRegister = async (data) => {
 
   const response = await api.post('auth/register', formData, {
     headers: {
-      "content-Type": "application/json"
-    }
+      'content-Type': 'application/json',
+    },
   })
   return response.data
 }

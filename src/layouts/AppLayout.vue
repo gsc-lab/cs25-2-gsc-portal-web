@@ -1,11 +1,3 @@
-<template>
-  <MainHeader />
-  <main>
-    <h1>{{ title }}</h1>
-    <slot></slot>
-  </main>
-</template>
-
 <script setup>
 import MainHeader from '@/layouts/MainHeader.vue'
 import { ref, watchEffect } from 'vue'
@@ -20,3 +12,11 @@ watchEffect(() => {
   console.log('slot:', pageName)
 })
 </script>
+
+<template>
+  <MainHeader />
+  <main>
+    <h1>{{ title }}</h1>
+    <slot></slot>
+  </main>
+</template>

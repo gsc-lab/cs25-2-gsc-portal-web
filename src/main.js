@@ -2,12 +2,11 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router/index'
 import './styles/index.css'
-import { createPinia } from 'pinia'
 import { useUserStore } from '@/stores/user'
 
+import pinia from '@/stores'
+
 const app = createApp(App)
-const pinia = createPinia()
-app.use(pinia)
 
 const user = useUserStore()
 
@@ -18,4 +17,5 @@ try {
 }
 
 app.use(router)
+app.use(pinia)
 app.mount('#app')

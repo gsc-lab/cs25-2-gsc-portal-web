@@ -1,11 +1,11 @@
-import { getUserInfo } from "@/api/auth";
-import { defineStore } from "pinia";
-import { ref } from "vue";
+import { getUserInfo } from '@/api/auth.js'
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
 
 export const useUserStore = defineStore('user', () => {
-
   // 유저 정보 저장
   const userInfo = ref(null)
+
   const isLoading = ref(false)
   const error = ref('')
 
@@ -16,7 +16,8 @@ export const useUserStore = defineStore('user', () => {
       const response = await getUserInfo()
       userInfo.value = response
     } catch (err) {
-      console.warn("유저 정보 불러오기 실패", err)
+      console.warn('유저 정보 불러오기 실패', err)
+
       userInfo.value = null
     } finally {
       isLoading.value = false
