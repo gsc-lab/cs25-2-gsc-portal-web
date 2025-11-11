@@ -207,15 +207,6 @@ watchEffect(() => {
 })
 
 watch(
-  () => route.params.gradeId,
-  async (newGrade) => {
-    if (newGrade) {
-      gradeSelect.value = newGrade
-    }
-  },
-)
-
-watch(
   [gradeSelect, date, periodSelect],
   async ([newGrade, newDate, newPeriod], [oldGrade, oldDate, oldPeriod]) => {
     if (newGrade !== oldGrade || newDate !== oldDate || newPeriod !== oldPeriod) {
@@ -244,6 +235,17 @@ watch(
           console.error('월간 청소 당번 호출: ', err)
         }
       }
+    }
+  },
+)
+watch(
+  () => route.params.gradeId,
+  async (newGrade) => {
+    if (newGrade) {
+      gradeSelect.value = newGrade
+    } else {
+      gradeSelect.value = ''
+      router.push({ path: '/cleaningH' })
     }
   },
 )
