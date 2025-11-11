@@ -9,7 +9,7 @@
 
         <section class="dashboard-grid">
           <div class="card timetable">
-            <h2 class="card-title">오늘의 시간표 {{}}</h2>
+            <h2 class="card-title">오늘의 시간표</h2>
             <div class="card-content">
               <div class="dummy-box">
                 <span>시간표 데이터</span>
@@ -30,27 +30,39 @@
                 @click="HandleNoticeClick(notice.notice_id)"
               >
                 <p class="notice-title">
-                  <span v-if="notice.is_pinned" class="pinned">♥ 중요</span>
+                  <span v-if="notice.is_pinned" class="pinned">중요</span>
                   {{ notice.title }}
                 </p>
+              </div>
+              <div v-if="!dashBoard.notices?.notices?.length" class="no-data">
+                등록된 공지사항이 없습니다.
               </div>
             </div>
           </div>
 
           <div class="card cleaning">
-            <h2 class="card-title">이번주 청소 당번</h2>
-            <div class="card-content">
-              <div v-for="clean in dashBoard.cleaning_duty" :key="clean.grade_id">
-                <h3>{{ clean.grade_id + '학년' }}</h3>
-                <p>
-                  교실:
-                  {{ clean.classroom_name }}
-                </p>
-                <div v-for="member in clean.members" :key="member">
-                  <p>
-                    {{ member }}
-                  </p>
+            <div class="card-header">
+              <h2 class="card-title">이번주 청소 당번</h2>
+              <button @click="HandleCleaningMove" class="btn btn-secondary">더보기</button>
+            </div>
+            <div class="card-content cleaning-content">
+              <div
+                v-for="clean in dashBoard.cleaning_duty"
+                :key="clean.grade_id"
+                class="cleaning-info-group"
+              >
+                <div class="group-header">
+                  <span class="grade-badge">{{ clean.grade_id }}학년</span>
+                  <span class="room-info">{{ clean.classroom_name }}</span>
                 </div>
+                <div class="member-list">
+                  <span v-for="member in clean.members" :key="member" class="member-tag">
+                    {{ member }}
+                  </span>
+                </div>
+              </div>
+              <div v-if="!dashBoard.cleaning_duty?.length" class="no-data">
+                청소 당번 정보가 없습니다.
               </div>
             </div>
           </div>
@@ -59,11 +71,11 @@
             <div class="card-header">
               <h2 class="card-title">후까 교수님</h2>
               <button class="btn btn-primary">
-                <router-link to="huka">일정 상세보기</router-link>
+                <router-link to="huka" class="btn-link">일정 상세보기</router-link>
               </button>
             </div>
             <div class="card-content">
-              <p>1학년 일정</p>
+              <p>1학년 일정 데이터</p>
             </div>
           </div>
 
@@ -71,11 +83,11 @@
             <div class="card-header">
               <h2 class="card-title">강의실 개방 투표</h2>
               <button class="btn btn-primary">
-                <router-link to="weekendAttendance">신청</router-link>
+                <router-link to="weekendAttendance" class="btn-link">신청</router-link>
               </button>
             </div>
             <div class="card-content">
-              <p>000호</p>
+              <p class="room-number">000호</p>
             </div>
           </div>
         </section>
@@ -89,24 +101,18 @@ import { ref, onMounted } from 'vue'
 import { getDashBoard } from '@/api/apiDashBoard'
 import router from '@/router'
 import { useUserStore } from '@/stores/user'
-import { getAllUser } from '@/api/apiNotice'
 import AppLayout from '@/layouts/AppLayout.vue'
 
-// user store ( user.userInfo ) 불러오기
 const user = useUserStore()
-
 const dashBoard = ref({})
-
 const Today = new Date().toISOString().split('T')[0]
 
 onMounted(async () => {
   const response = await getDashBoard({ date: Today })
   dashBoard.value = response
-  const res = await getAllUser()
+  // const res = await getAllUser()
   await user.fetchUser()
-  console.log('현재 로그인 사용자 정보: ', user.userInfo)
-  console.log('메인 대시보드 정보: ', dashBoard.value)
-  console.log('모든 학생 정보: ', res)
+  console.log(user.userInfo)
 })
 
 const HandleNoticeMove = () => {
@@ -118,27 +124,36 @@ const HandleNoticeMove = () => {
 }
 
 const HandleNoticeClick = (notice_id) => {
-  router.push({ path: `/noticeView/${notice_id}` })
+  router.push({ path: `/noticeView/grade/${notice_id}` })
+}
+
+const HandleCleaningMove = () => {
+  router.push({ path: `/cleaningH/grade/${user.userInfo.grade_id}` })
 }
 </script>
 
 <style scoped>
-/* ===== 폰트 ===== */
-/* Pretendard와 Montserrat 폰트가 프로젝트에 로드되어 있어야 합니다. */
 :root {
   font-family: 'Pretendard Variable', Pretendard, sans-serif;
+}
+
+a.btn-link {
+  color: inherit;
+  text-decoration: none;
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 /* ===== 전체 레이아웃 ===== */
 .dashboard-wrapper {
   width: 100%;
-  min-height: calc(100vh - 80px); /* (100vh - 헤더 높이) */
-  background-color: #f9fafb; /* ✅ 매우 연한 회색 배경 */
+  min-height: calc(100vh - 80px);
+  background-color: #f9fafb;
   padding-bottom: 3rem;
 }
 
 .dashboard-container {
-  /* ✅ 고정 폭 레이아웃 (헤더와 동일하게) */
   width: 1440px;
   max-width: 1440px;
   margin: 0 auto;
@@ -149,12 +164,11 @@ const HandleNoticeClick = (notice_id) => {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  padding: 2.5rem 0.5rem 1.5rem; /* ✅ 상단 여백 추가 */
-  border-bottom: none; /* ✅ 하단 테두리 제거 */
+  padding: 2.5rem 0.5rem 1.5rem;
+  border-bottom: none;
 }
 
 .portal-title {
-  /* ✅ 로그인/헤더 스타일과 통일 */
   font-size: 2.5rem;
   font-weight: 800;
   font-family: 'Montserrat', sans-serif;
@@ -162,12 +176,13 @@ const HandleNoticeClick = (notice_id) => {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+  margin: 0;
 }
 
 .today {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #6b7280; /* ✅ 부드러운 회색 */
+  color: #6b7280;
 }
 
 /* ===== 카드형 그리드 ===== */
@@ -178,18 +193,17 @@ const HandleNoticeClick = (notice_id) => {
     'cleaning notice'
     'huka pool';
   grid-template-columns: 1.5fr 2fr;
-  grid-gap: 1.5rem; /* ✅ 카드 간격 증가 */
+  grid-gap: 1.5rem;
   margin-top: 1rem;
 }
 
 /* ===== 카드 공통 ===== */
 .card {
-  /* ✅ 로그인 카드 스타일 적용 */
   background: #fff;
-  border-radius: 1.25rem; /* 20px */
+  border-radius: 1.25rem;
   box-shadow:
     0 10px 15px -3px rgba(0, 0, 0, 0.07),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -197,34 +211,32 @@ const HandleNoticeClick = (notice_id) => {
 }
 
 .card:hover {
-  /* ✅ 동적 호버 효과 */
   box-shadow:
     0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-2xl */
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
   transform: translateY(-4px);
 }
 
 .card-title {
-  font-size: 1.3rem; /* ✅ 제목 크기 증가 */
+  font-size: 1.3rem;
   font-weight: 700;
   color: #1f2937;
   margin-bottom: 1rem;
+  margin-top: 0;
 }
 
 .card-header {
-  /* ✅ 카드 내 헤더 (공지, 투표) */
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem; /* 제목과 겹치므로 마진 조정 */
+  margin-bottom: 1rem;
 }
 
 .card-header .card-title {
-  margin-bottom: 0; /* 헤더 사용 시 제목 마진 제거 */
+  margin-bottom: 0;
 }
 
 .card-content {
-  /* ✅ .card-body 스타일 제거 -> .card-content로 변경 */
   flex: 1;
   font-size: 1rem;
   color: #374151;
@@ -249,27 +261,96 @@ const HandleNoticeClick = (notice_id) => {
 
 /* ===== 공지사항 카드 ===== */
 .notice-item {
-  padding: 0.6rem 0.2rem;
+  padding: 0.7rem 0.5rem;
   border-bottom: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 .notice-item:last-child {
   border-bottom: none;
+}
+.notice-item:hover {
+  background-color: #f9fafb;
 }
 
 .notice-title {
   font-size: 1rem;
   color: #333;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .pinned {
-  margin-right: 5px;
-  /* 핀 이모티콘은 기본 색상을 사용해도 충분히 강조됩니다 */
+  margin-right: 8px;
+  color: #ff4d4f;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* ===== 청소 당번 카드 ===== */
+.cleaning-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.cleaning-info-group {
+  background-color: #f9fafb;
+  padding: 1rem;
+  border-radius: 12px;
+}
+
+.group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.grade-badge {
+  background-color: #eef2ff;
+  color: #3f2b96;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.room-info {
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.member-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.member-tag {
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+/* ===== 강의실 개방 투표 카드 ===== */
+.room-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #3f2b96;
+  text-align: center;
+  margin-top: 1rem;
 }
 
 /* ===== 버튼 공통 스타일 ===== */
 .btn {
   border: none;
-  border-radius: 999px; /* 둥근 버튼 */
+  border-radius: 999px;
   padding: 0.5rem 1.2rem;
   font-weight: 600;
   font-size: 0.9rem;
@@ -277,6 +358,9 @@ const HandleNoticeClick = (notice_id) => {
   transition: all 0.3s ease;
   text-decoration: none;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn:hover {
@@ -284,7 +368,6 @@ const HandleNoticeClick = (notice_id) => {
   transform: translateY(-2px);
 }
 
-/* ✅ Primary 버튼 (신청) */
 .btn-primary {
   background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
   color: white;
@@ -293,25 +376,32 @@ const HandleNoticeClick = (notice_id) => {
   opacity: 0.9;
 }
 
-/* ✅ Secondary 버튼 (더보기) */
 .btn-secondary {
   background: #fff;
   color: #3f2b96;
-  border: 1px solid #d1d5db; /* 연한 테두리 */
+  border: 1px solid #d1d5db;
 }
 .btn-secondary:hover {
   background: #f9fafb;
 }
 
-/* ===== 더미 박스 (시간표 자리 표시용) ===== */
+/* ===== 더미 박스 & No Data ===== */
 .dummy-box {
-  background: #eef2ff; /* ✅ 연한 보라색 배경 */
-  border-radius: 8px;
-  height: 150px;
+  background: #eef2ff;
+  border-radius: 12px;
+  height: 100%;
+  min-height: 150px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6366f1; /* ✅ 보라색 텍스트 */
-  font-weight: 500;
+  color: #6366f1;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.no-data {
+  color: #9ca3af;
+  text-align: center;
+  padding: 1rem 0;
 }
 </style>
