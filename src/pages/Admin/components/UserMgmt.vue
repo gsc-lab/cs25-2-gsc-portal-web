@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { getUserInfo, delUser } from '@/api/adminApi'
+import { setTarget } from '@/utils/reName'
 import UserModify from './UserModify.vue'
 
 const users = ref(null) // 학생 데이터
@@ -114,7 +115,7 @@ const handleDelete = async (id) => {
             <td style="border: 1px solid #000; padding: 10px">{{ user.role_type }}</td>
             <td style="border: 1px solid #000; padding: 10px">{{ user.user_id }}</td>
             <td style="border: 1px solid #000; padding: 10px">{{ user.name }}</td>
-            <td style="border: 1px solid #000; padding: 10px">{{ user.grade_name }}</td>
+            <td style="border: 1px solid #000; padding: 10px">{{ setTarget(user.grade_id) }}</td>
             <td style="border: 1px solid #000; padding: 10px">{{ status(user.status) }}</td>
             <td style="border: 1px solid #000; padding: 10px">
               {{ user.is_international = 'korean' ? '한국인' : '외국인' }}

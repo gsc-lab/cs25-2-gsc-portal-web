@@ -25,7 +25,7 @@ watch(
     if (user.value.language_name == '한국어') {
       classes.value = await getKoreanClasses()
     } else {
-      classes.value = getSpecialClasses()
+      classes.value = await getSpecialClasses()
     }
 
     user_id.value = user.value.user_id
@@ -33,7 +33,7 @@ watch(
       name: user.value.name,
       phone: user.value.phone,
       status: user.value.status,
-      grade: user.value.grade_name.slice(0, 1),
+      grade: user.value.grade_id,
       language_id: user.value.language_name == '한국어' ? 'KR' : 'JP',
       // level_name: user.value.level_name,
       class_name: user.value.class_name,
@@ -54,15 +54,15 @@ const handleSubmit = async () => {
   <!-- 정보 수정 -->
   <div>
     <div>
-      <label for="name">이름 : </label>
+      <label for="name">이름 :</label>
       <input type="text" id="name" v-model="selectUser.name" />
     </div>
     <div>
-      <label for="phone">전화번호 : </label>
+      <label for="phone">전화번호 :</label>
       <input type="text" id="phone" v-model="selectUser.phone" />
     </div>
     <div>
-      <label for="status">상태 : </label>
+      <label for="status">상태 :</label>
       <select id="status" v-model="selectUser.status">
         <option value="enrolled">재학</option>
         <option value="leave">휴학</option>
@@ -71,7 +71,7 @@ const handleSubmit = async () => {
       </select>
     </div>
     <div>
-      <label for="grade">학년 : </label>
+      <label for="grade">학년 :</label>
       <select id="grade" v-model="selectUser.grade">
         <option value="1">1학년</option>
         <option value="2">2학년</option>
@@ -79,7 +79,7 @@ const handleSubmit = async () => {
       </select>
     </div>
     <div>
-      <label for="language_id">언어 : </label>
+      <label for="language_id">언어 :</label>
       <select id="language_id" v-model="selectUser.language_id">
         <option value="JP">일본어</option>
         <option value="KR">한국어</option>
@@ -94,7 +94,7 @@ const handleSubmit = async () => {
     </div> -->
 
     <div>
-      <label for="class_name">반 이름 : </label>
+      <label for="class_name">반 이름 :</label>
       <select id="class_name" v-model="selectUser.class_name">
         <option v-for="cls in classes" :value="cls.class_id" :key="cls">
           {{ cls.course_name }} {{ '-' }} {{ cls.class_group }}
