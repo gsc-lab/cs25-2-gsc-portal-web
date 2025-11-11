@@ -2,7 +2,6 @@ import api from "./apiClient";
 
 // google 로그인 요청
 export const googleLogin = () => {
-  // '/api'가 중복되지 않도록 수정
   window.location.href = `${api.defaults.baseURL}/auth`
 }
 
@@ -21,8 +20,7 @@ export const userRegister = async (data) => {
 
   console.log([...formData.entries()])
 
-  // 'api/'가 중복되지 않도록 수정
-  const response = await api.post('/auth/register', formData, {
+  const response = await api.post('auth/register', formData, {
     headers: {
       "content-Type": "application/json"
     }
