@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { getPoll, postPoll } from '@/api/classroomApi'
-import Setting from './Sidebar/components/Setting.vue'
+import Setting from './components/Setting.vue'
 import { useUserStore } from '@/stores/user'
 const Ustore = useUserStore()
 

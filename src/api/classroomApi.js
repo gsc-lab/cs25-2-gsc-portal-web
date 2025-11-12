@@ -1,5 +1,5 @@
-import api from "./apiClient";
-import { errorMsg } from "./apiClient";
+import api from './apiClient'
+import { errorMsg } from './apiClient'
 
 // ========================== GET ===============================
 // ---------------------------------------------------------------
@@ -7,12 +7,12 @@ import { errorMsg } from "./apiClient";
 //     [{ classroom_id: "101", label: "본관-101" },]
 // ---------------------------------------------------------------
 export const getClassrooms = async () => {
-  try{
+  try {
     const res = await api.get(`/modal/common/classrooms`)
-    console.log(res.data);
-    return res.data;
+    console.log(res.data)
+    return res.data
   } catch (e) {
-    errorMsg(e);
+    errorMsg(e)
   }
 }
 
@@ -26,15 +26,14 @@ export const getClassrooms = async () => {
 //    },]
 // ---------------------------------------------------------------
 export const getClassroomsInfo = async () => {
-  try{
+  try {
     const res = await api.get(`/classrooms`)
-    console.log(res.data);
-    return res.data;
+    console.log(res.data)
+    return res.data
   } catch (e) {
-    errorMsg(e);
+    errorMsg(e)
   }
 }
-
 
 // ---------------------------------------------------------------
 // 교실 예약 정보
@@ -49,18 +48,17 @@ export const getClassroomsInfo = async () => {
 //      },{}]
 //    }
 // ---------------------------------------------------------------
-export const getReservation = async (classroom_id) => {
-  try{
+export const getReservation = async (classroom_id, date) => {
+  try {
     const res = await api.get(`/classrooms/${classroom_id}/reservations`, {
-      params: { date: "2025-10-13" }
+      params: { date: date },
     })
-    console.log(res.data);
-    return res.data;
+    console.log(res.data)
+    return res.data
   } catch (e) {
-    errorMsg(e);
+    errorMsg(e)
   }
 }
-
 
 // ---------------------------------------------------------------
 // 주말 투표 현황 데이터
@@ -76,37 +74,34 @@ export const getReservation = async (classroom_id) => {
 //     },{}]
 // ---------------------------------------------------------------
 export const getPoll = async (date) => {
-  console.log("getPoll: " , date);
-  try{
+  try {
     const res = await api.get(`/classrooms/polls`, {
       params: {
-        date: "2025-04-02" // date
-      }
+        date: date,
+      },
     })
-    console.log(res.data);
-    return res.data;
+    console.log(res.data)
+    return res.data
   } catch (e) {
-    errorMsg(e);
+    errorMsg(e)
   }
 }
-
 
 // ========================== POST ===============================
 // ---------------------------------------------------------------
 // 강의실 예약 등록
 // ---------------------------------------------------------------
-export const postReservation = async (reservationData) => {
-  try{
-    const res = await api.post(`/classrooms/${reservationData.classroom_id}/reservations`, {
-      // user_id: '2423001',// reservationData.name,
-      reserve_date: reservationData.reserve_date,
-      start_time: reservationData.start_time,
-      end_time: reservationData.end_time
+export const postReservation = async (classroom_id, data) => {
+  try {
+    const res = await api.post(`/classrooms/${classroom_id}/reservations`, {
+      reserve_date: data.date,
+      start_time: data.start_time,
+      end_time: data.end_time,
     })
-    // console.log(res.data);
-    return res.data;
+    console.log(res.data)
+    return res.data
   } catch (e) {
-    errorMsg(e);
+    errorMsg(e)
   }
 }
 
@@ -114,19 +109,19 @@ export const postReservation = async (reservationData) => {
 // 강의실 등록
 // ---------------------------------------------------------------
 export const postClassroom = async (CRdata) => {
-  try{
+  try {
     const res = await api.post(`/classrooms`, {
       building: CRdata.building,
       room_number: CRdata.room_number,
-      room_type: CRdata.room_type,
+      room_type: String(CRdata.room_type),
 
       // mode: CRdata.mode,
       // limit: CRdata.limit,
     })
     // console.log(res.data);
-    return res.data;
+    return res.data
   } catch (e) {
-    errorMsg(e);
+    errorMsg(e)
   }
 }
 
@@ -134,14 +129,14 @@ export const postClassroom = async (CRdata) => {
 // 신청 등록 / 취소
 // ---------------------------------------------------------------
 export const postPoll = async (poll_id, action) => {
-  try{
+  try {
     const res = await api.post(`/classrooms/polls/${poll_id}/vote`, {
       action: action,
     })
     // console.log(res.data);
-    return res.data;
+    return res.data
   } catch (e) {
-    errorMsg(e);
+    errorMsg(e)
   }
 }
 
@@ -150,7 +145,7 @@ export const postPoll = async (poll_id, action) => {
 // 강의실 수정
 // ---------------------------------------------------------------
 export const patchClassroom = async (CRdata) => {
-  try{
+  try {
     const res = await api.patch(`/classrooms`, {
       building: CRdata.building,
       room_number: CRdata.room_number,
@@ -160,8 +155,22 @@ export const patchClassroom = async (CRdata) => {
       // limit: CRdata.limit,
     })
     // console.log(res.data);
-    return res.data;
+    return res.data
   } catch (e) {
-    errorMsg(e);
+    errorMsg(e)
+  }
+}
+
+// ========================== delete ===============================
+// ---------------------------------------------------------------
+// 강의실 예약 삭제
+// ---------------------------------------------------------------
+export const deleteReservation = async (classroom_id, reservation_id) => {
+  try {
+    const res = await api.delete(`/classrooms/${classroom_id}/reservations/${reservation_id}`)
+    // console.log(res.data);
+    return res.data
+  } catch (e) {
+    errorMsg(e)
   }
 }
