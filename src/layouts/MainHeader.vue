@@ -56,13 +56,14 @@ async function logout() {
   try {
     const response = await postuserInfo()
     console.log('로그아웃 요청완료', response)
+  } catch (err) {
+    console.error('로그아웃 실패', err)
+  } finally {
     const storeLogout = user.logoutUser()
     console.log('store 사용자 정보 삭제', storeLogout)
     console.log('store userinfo', user.userInfo)
 
-    await router.push('/login')
-  } catch (err) {
-    console.error('로그아웃 실패', err)
+    router.push('/login')
   }
 }
 </script>
