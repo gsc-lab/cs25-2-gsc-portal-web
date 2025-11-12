@@ -36,6 +36,43 @@ export const getUserInfo = async () => {
   return userInfo.data
 }
 
+// 사용자 성정 등록
+
+export const postUserGrade = async (scoreData, files) => {
+  let response
+
+  if (files.length > 0) {
+    const formData = new FormData()
+
+    Object.entries(scoreData).forEach(([key, value]) => {
+      if (value === null || value === undefined) return
+      if (typeof value === "object") {
+        formData.append(key, JSON.stringify(value))
+      } else {
+        formData.append(key, value)
+      }
+    })
+
+    if (files && files.length > 0) {
+      for (const file of files) {
+        formData.append("files", file)
+      }
+    }
+    console.log("파일 포함 form Data 전송", formData)
+    response = await api.post('/auth/me', formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    })
+  } else {
+    console.log("파일 x 전송", scoreData)
+    response = await api.post('auth/me', scoreData, {
+      headers: { "Content-Type": "application/json" }
+    })
+  }
+  return response.data
+
+
+}
+
 // 사용자 로그아웃 요청 API
 export const postuserInfo = async () => {
   const userInfo = await api.post('/auth/logout')
