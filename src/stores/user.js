@@ -1,6 +1,7 @@
 import { getUserInfo } from "@/api/auth";
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import api from "@/api/apiClient";
 
 export const useUserStore = defineStore('user', () => {
 
@@ -11,21 +12,21 @@ export const useUserStore = defineStore('user', () => {
 
   async function fetchUser() {
     isLoading.value = true
+    error.value = null
 
-    try {
-      const response = await getUserInfo()
-      userInfo.value = response
-    } catch (err) {
-      console.warn("유저 정보 불러오기 실패", err)
-      userInfo.value = null
-      error.value = err
-    } finally {
-      isLoading.value = false
-    }
+    const response = await getUserInfo()
+
+    userInfo.value = response
+    isLoading.value = false
   }
 
   function logoutUser() {
     userInfo.value = null
+    error.value = null
+    isLoading.value = false
+
+    localStorage.removeItem('accessToken')
+    delete api.defaults.headers.common['Authorization'];
   }
 
   return {
