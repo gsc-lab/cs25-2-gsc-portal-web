@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useClassroomStore } from '@/stores/classroom'
-import { time } from '@/util/time'
+import { time } from '@/utils/time'
 import { useUserStore } from '@/stores/user'
 import { deleteReservation, postReservation } from '@/api/classroomApi'
 const Ustore = useUserStore()
