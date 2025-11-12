@@ -19,12 +19,15 @@ const Pstore = useProfessorStore() // 교수 store
 const Cstore = useClassroomStore() // 장소 store
 const professors = ref() // 교수 명단
 const classrooms = ref(null) // 교실
-const classes = ref() // 분반 클래스 목록
+const specialClasses = ref() // 분반 클래스 목록
+const KoreanClasses = ref()
 const sections = ref(null)
 onMounted(async () => {
   professors.value = await Pstore.getProfessors()
   classrooms.value = await Cstore.getClassroom()
   sections.value = await getSections()
+  specialClasses.value = await getSpecialClasses()
+  KoreanClasses.value = await getKoreanClasses()
   console.log('professors', professors.value)
   console.log('classrooms', classrooms.value)
 })
@@ -76,12 +79,6 @@ watch(
     if (originCourses.value == null) await setOriginCourses()
     courses.value = await Tstore.courseFilter(newTarget) // target: 필터링
     console.log(courses.value)
-    if (newTarget == 'special') {
-      // target에 맞게 classes 정의
-      classes.value = await getSpecialClasses()
-    } else if (newTarget == 'korean') {
-      classes.value = await getKoreanClasses()
-    }
   },
   { immediate: true },
 )
@@ -101,13 +98,13 @@ const toggleSelect = (course_id) => {
 }
 // ================================= 수정 =================================
 const handlePut = async (courseId, argDate, timetableIds) => {
-  console.log('수정: ', courseId, String(timetableIds))
+  console.log('수정: ', courses.value?.[courseId])
   putData.value = {
     course_id: courseId,
     timetable_ids: !timetableIds ? [] : timetableIds,
     data: {
       professor_id: argDate?.professor ? await Pstore.searchProfessorsId(argDate?.professor) : null,
-      target: argDate?.target ?? null,
+      target: courses.value?.[courseId].target ?? null,
       title: argDate?.title ?? null,
       section: argDate?.section ?? '2025-1',
       // 시간표 수정
@@ -132,6 +129,7 @@ const handleSubmit = async () => {
   putData.value.course_id = null
   putData.value.timetable_ids = null
   setCourses()
+  await Tstore.setTimetable()
 }
 // ================================= 삭제 =================================
 // 과목
@@ -142,14 +140,16 @@ const handleCourseDel = async (course_id) => {
     console.log(res)
     // 초기화
     await setCourses()
+    await Tstore.setTimetable()
   }
 }
-const handleTimetableDel = async (course_id, day) => {
+const handleTimetableDel = async (schedule_ids) => {
   if (confirm('정말 삭제하시겠습니까?')) {
-    const res = await delTimetable(course_id, day)
+    const res = await delTimetable(schedule_ids)
     console.log(res)
     // 초기화
     await setCourses()
+    await Tstore.setTimetable()
   }
 }
 </script>
@@ -279,7 +279,13 @@ const handleTimetableDel = async (course_id, day) => {
                 "
               >
                 <select id="day" v-model="putData.data.class_id">
-                  <option v-for="(cls, idx) in classes" :value="cls.class_id" :key="idx">
+                  <option
+                    v-for="(cls, idx) in putData.data.target == 'special'
+                      ? specialClasses
+                      : KoreanClasses"
+                    :value="cls.class_id"
+                    :key="idx"
+                  >
                     {{ cls.class_group }}
                   </option>
                 </select>
@@ -367,7 +373,7 @@ const handleTimetableDel = async (course_id, day) => {
                 </button>
               </div>
               <div v-else>
-                <button @click="handleTimetableDel(course_id, schedule.day)">삭제</button>
+                <button @click="handleTimetableDel(schedule.schedule_ids)">삭제</button>
               </div>
             </td>
           </tr>

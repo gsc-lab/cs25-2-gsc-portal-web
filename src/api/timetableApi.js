@@ -83,7 +83,7 @@ export const postFukaCustomStudents = async (fukaData) => {
   try {
     await api.post(`/timetables/huka/student/custom`, {
       student_ids: fukaData.student_ids,
-      sec_id: fukaData.section,
+      day: fukaData.day,
       date: fukaData.date,
       start_slot: fukaData.startTime,
       end_slot: fukaData.endTime,
@@ -244,83 +244,6 @@ export const getClassStudents = async (class_id) => {
   } catch (e) {
     errorMsg(e)
   }
-  // const res = {
-  //   all_students: [
-  //     {
-  //       user_id: '2423004',
-  //       name: '김철수',
-  //       email: 'kim@g.yju.ac.kr',
-  //       course_id: 'C003',
-  //       class_id: null,
-  //     },
-  //   ],
-  //   assigned_students: [
-  //     {
-  //       user_id: '2725001',
-  //       name: '박지민',
-  //       grade: '1',
-  //       email: 'park@g.yju.ac.kr',
-  //     },
-  //     {
-  //       user_id: '2725002',
-  //       name: '최은비',
-  //       grade: '1',
-  //       email: 'choi@g.yju.ac.kr',
-  //     },
-  //     {
-  //       user_id: '2624003',
-  //       name: '이도현',
-  //       grade: '2',
-  //       email: 'lee@g.yju.ac.kr',
-  //     },
-  //     {
-  //       user_id: '2524004',
-  //       name: '윤하린',
-  //       grade: '2',
-  //       email: 'yoon@g.yju.ac.kr',
-  //     },
-  //     {
-  //       user_id: '2423005',
-  //       name: '정하늘',
-  //       grade: '3',
-  //       email: 'jung@g.yju.ac.kr',
-  //     },
-  //   ],
-
-  //   unassigned_students: [
-  //     {
-  //       user_id: '2423004',
-  //       name: '김철수',
-  //       grade: '3',
-  //       email: 'kim@g.yju.ac.kr',
-  //     },
-  //     {
-  //       user_id: '2725006',
-  //       name: '홍예린',
-  //       grade: '1',
-  //       email: 'hong@g.yju.ac.kr',
-  //     },
-  //     {
-  //       user_id: '2624007',
-  //       name: '서민재',
-  //       grade: '2',
-  //       email: 'seo@g.yju.ac.kr',
-  //     },
-  //     {
-  //       user_id: '2524008',
-  //       name: '강태현',
-  //       grade: '2',
-  //       email: 'kang@g.yju.ac.kr',
-  //     },
-  //     {
-  //       user_id: '2423009',
-  //       name: '오수빈',
-  //       grade: '3',
-  //       email: 'oh@g.yju.ac.kr',
-  //     },
-  //   ],
-  // }
-  // return res
 }
 
 // ---------------------------------------------------------------
@@ -365,7 +288,7 @@ export const putTimetable = async (Data) => {
       day_of_week: Data.data.day,
       start_period: Data.data.start_period,
       end_period: Data.data.end_period,
-      class_id: Data.data.class_id,
+      class_name: Data.data.class_id.slice(4), // 나중에 id로 수정 할수도...
     })
   } catch (e) {
     errorMsg(e)
@@ -405,7 +328,10 @@ export const delCourse = async (course_id) => {
 export const delTimetable = async (course_id, day) => {
   console.log(course_id, day)
   try {
-    const res = await api.delete(`/timetables/registerTimetable/${course_id}/${day}`)
+    const res = await api.delete(`/timetables/registerTimetable/${schedule_ids}`, {
+      course_id: course_id,
+      day_of_week: day,
+    })
     return res.data
   } catch (e) {
     errorMsg(e)
