@@ -4,7 +4,7 @@ import { createWebHistory, createRouter } from 'vue-router'
 const routes = [
   // ==================================================  로그인  ==================================================
   { path: '/login', name: 'login', component: () => import('@/pages/Login/LoginPage.vue') },
-  { path: '/dashboard', name: 'dashboard', component: () => import('@/pages/Main/DashBoard.vue') },
+  { path: '/', name: 'dashboard', component: () => import('@/pages/Main/DashBoard.vue') },
   {
     path: '/register',
     name: 'register',

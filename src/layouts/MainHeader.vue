@@ -2,7 +2,7 @@
   <header v-if="user.userInfo && router.currentRoute.value.path !== '/login'" class="header">
     <div class="header-inner">
       <div class="header-left">
-        <router-link to="/dashboard" class="logo-text">GSC-Portal</router-link>
+        <router-link to="/" class="logo-text">GSC-Portal</router-link>
       </div>
 
       <nav class="navbar">
@@ -33,8 +33,9 @@
           </ul>
         </div>
 
-        <router-link class="menu" to="/weekendAttendance">강의실 신청</router-link>
+        <router-link class="menu" to="/classroom">강의실 신청</router-link>
         <router-link class="menu" to="/profile">프로필</router-link>
+        <router-link class="menu" to="/admin" v-if="isAdmin">관리자</router-link>
       </nav>
 
       <div class="header-right">
@@ -48,9 +49,17 @@
 import { useUserStore } from '@//stores/user'
 import { useRouter } from 'vue-router'
 import { postuserInfo } from '@/api/auth'
+import { ref, watch } from 'vue'
 
 const router = useRouter()
 const user = useUserStore()
+
+const isAdmin = ref(false)
+
+watch(() => {
+  isAdmin.value = user.userInfo.role_type == 'admin' ? true : false
+  console.log('role', isAdmin.value)
+})
 
 async function logout() {
   try {
