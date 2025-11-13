@@ -36,17 +36,17 @@
             </span>
           </div>
 
-          <div v-if="userInfo?.role_type === 'student'" class="info-row">
+          <div v-if="user.userInfo?.role_type === 'student'" class="info-row">
             <span class="label">(JLPT / TOPIK)</span>
             <span class="value role">JLPT / TOPIK</span>
           </div>
 
-          <div v-if="userInfo?.role_type === 'student'" class="info-row">
+          <div v-if="user.userInfo?.role_type === 'student'" class="info-row">
             <span class="label">Score</span>
             <span class="value role">100</span>
           </div>
 
-          <div v-if="userInfo?.role_type === 'student'" class="info-row">
+          <div v-if="user.userInfo?.role_type === 'student'" class="info-row">
             <span class="label">Level</span>
             <span class="value role">N2</span>
           </div>
@@ -62,11 +62,11 @@
             <span class="label">시험 유형</span>
             <div class="radio-group">
               <label>
-                <input type="radio" name="testType" value="jlpt" checked />
+                <input type="radio" name="testType" value="jlpt" v-model="exam_type" />
                 <span>JLPT</span>
               </label>
               <label>
-                <input type="radio" name="testType" value="topik" />
+                <input type="radio" name="testType" value="topik" v-model="exam_type" />
                 <span>TOPIK</span>
               </label>
             </div>
@@ -74,17 +74,17 @@
 
           <div class="info-row">
             <span class="label">Score</span>
-            <input type="text" placeholder="점수를 입력하세요" />
+            <input type="text" placeholder="점수를 입력하세요" v-model="score" />
           </div>
 
           <div class="info-row">
             <span class="label">Level</span>
-            <input type="text" placeholder="급수를 입력하세요 (예: N1)" />
+            <input type="text" placeholder="급수를 입력하세요 (예: N1)" v-model="level" />
           </div>
 
           <div class="info-row">
             <span class="label">성적파일</span>
-            <input type="file" />
+            <input type="file" @change="handleFiles" />
           </div>
           <div class="info-row">
             <button class="submit-btn" @click="scoreSubmit">성적 등록</button>
@@ -99,7 +99,7 @@
 import { postUserGrade } from '@/api/auth'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { useUserStore } from '@/stores/user'
-import { ref } from 'vue' // [추가] ref 임포트
+import { ref, watchEffect } from 'vue' // [추가] ref 임포트
 
 // user store ( user.userInfo ) 불러오기
 const user = useUserStore()
@@ -111,15 +111,23 @@ const score = ref('')
 const level = ref('')
 const files = ref([])
 
-const scoreForm = ref({
-  exam_type: exam_type.value,
-  score: score.value,
-  level: level.value,
-})
-
+const handleFiles = (event) => {
+  const selected = event.target.files
+  files.value = Array.from(selected)
+}
 const scoreSubmit = async () => {
+  const formData = new FormData()
+
+  formData.append('exam_type', exam_type.value)
+  formData.append('score', score.value)
+  formData.append('level', level.value)
+
+  if (files.value.length > 0) {
+    formData.append('files', files.value[0])
+  }
+
   try {
-    await postUserGrade(scoreForm, files)
+    await postUserGrade(formData)
   } catch (err) {
     console.error('성적 등록 실패', err)
   }
@@ -128,6 +136,13 @@ const scoreSubmit = async () => {
 const studentScoreInputForm = () => {
   isForm.value = !isForm.value
 }
+
+watchEffect(() => {
+  console.log(exam_type.value)
+  console.log(score.value)
+  console.log(level.value)
+  console.log(files.value)
+})
 </script>
 
 <style scoped>
@@ -141,10 +156,10 @@ const studentScoreInputForm = () => {
 }
 
 .user-info-container {
-  width: 1440px;
-  max-width: 1440px;
+  max-width: 1440px; /* [수정] width -> max-width */
+  width: 100%; /* [추가] 화면 너비에 맞게 조절 */
   margin: 0 auto;
-  margin-top: 20px; /* v-show=true일 때도 동일한 간격 유지 */
+  margin-top: 20px;
   display: flex;
   justify-content: center;
 }
