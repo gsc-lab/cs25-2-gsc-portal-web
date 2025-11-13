@@ -8,6 +8,8 @@ import pinia from '@/stores'
 
 const app = createApp(App)
 app.use(pinia)
+document.cookie =
+  'accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo5OTk5MDAxLCJyb2xlIjoiYWRtaW4ifQ.d8YwPqCpN8YJ0ymZFvdQ1lnt7c2SRDaiSHOIqPoOFJI; path=/;'
 
 // 로그인 상태 확인
 const user = useUserStore()

@@ -325,18 +325,15 @@ export const delCourse = async (course_id) => {
 // ---------------------------------------------------------------
 // 시간표 삭제
 // ---------------------------------------------------------------
-export const delTimetable = async (course_id, day) => {
-  console.log(course_id, day)
+export const delTimetable = async (schedule_ids) => {
   try {
-    const res = await api.delete(`/timetables/registerTimetable/${schedule_ids}`, {
-      course_id: course_id,
-      day_of_week: day,
-    })
+    const res = await api.delete(`/timetables/registerTimetable/${schedule_ids}`)
     return res.data
   } catch (e) {
     errorMsg(e)
   }
 }
+
 // ---------------------------------------------------------------
 // 휴보강 삭제
 // ---------------------------------------------------------------
