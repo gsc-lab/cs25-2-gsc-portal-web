@@ -113,6 +113,7 @@ onMounted(async () => {
   // const res = await getAllUser()
   await user.fetchUser()
   console.log(user.userInfo)
+  console.log(dashBoard.value)
 })
 
 const HandleNoticeMove = () => {
@@ -124,7 +125,7 @@ const HandleNoticeMove = () => {
 }
 
 const HandleNoticeClick = (notice_id) => {
-  router.push({ path: `/noticeView/grade/${notice_id}` })
+  router.push({ path: `/noticeView/${notice_id}` })
 }
 
 const HandleCleaningMove = () => {
