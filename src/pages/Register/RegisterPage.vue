@@ -72,7 +72,7 @@ const userInfo = reactive({
   studentId: '',
   phoneNumber: '',
   email: '',
-  is_student: false
+  is_student: false,
 })
 
 const submitRegister = async () => {
@@ -92,7 +92,7 @@ const submitRegister = async () => {
     phone: userInfo.phoneNumber,
     email: userInfo.email,
     is_student: userInfo.is_student,
-    token: token // 읽어온 토큰을 데이터에 포함
+    token: token, // 읽어온 토큰을 데이터에 포함
   }
 
   // 토큰이 없는 경우 예외 처리
