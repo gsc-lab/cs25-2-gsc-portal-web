@@ -2,7 +2,7 @@ import { createWebHistory, createRouter } from 'vue-router'
 
 const routes = [
   { path: '/login', name: 'login', component: () => import('@/pages/Login/LoginPage.vue') },
-  { path: '/dashboard', name: 'dashboard', component: () => import('@/pages/Main/DashBoard.vue') },
+  { path: '/', name: 'dashboard', component: () => import('@/pages/Main/DashBoard.vue') },
   { path: '/register', name: 'register', component: () => import('@/pages/Register/RegisterPage.vue') },
   { path: '/registerWait', name: 'registerWait', component: () => import('@/pages/Register/SignupWaitPage.vue') },
   { path: '/notice', name: 'notice', component: () => import('@/pages/Notice/NoticePage.vue') },
