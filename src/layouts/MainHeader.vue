@@ -2,7 +2,7 @@
   <header v-if="user.userInfo && router.currentRoute.value.path !== '/login'" class="header">
     <div class="header-inner">
       <div class="header-left">
-        <router-link to="/dashboard" class="logo-text">GSC-Portal</router-link>
+        <router-link to="/" class="logo-text">GSC-Portal</router-link>
       </div>
 
       <nav class="navbar">
