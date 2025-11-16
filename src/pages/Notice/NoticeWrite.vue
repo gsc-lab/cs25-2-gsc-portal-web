@@ -48,26 +48,24 @@
             <div class="form-row">
               <label class="form-label" for="notice-grade">분류</label>
               <div class="select-group">
-                <select id="notice-grade" class="form-select" v-model="gradeSelect">
-                  <option v-for="grade in grade_id" :key="grade.grade_id" :value="grade.grade_id">
-                    {{ grade.grade_id === '전체' ? '전체 학년' : grade.grade_id + '학년' }}
+                <select id="notice-grade" class="form-select" v-model="targetSelect">
+                  <option
+                    v-for="notice in noticeTarget"
+                    :key="notice.target"
+                    :value="notice.target"
+                  >
+                    {{ targetFilter(notice.target) }}
                   </option>
                 </select>
                 <select class="form-select" v-model="courseTypeSelect">
                   <option
-                    v-for="courseT in filterCourseType"
-                    :key="courseT"
-                    :value="courseT.course_type"
+                    v-for="type in filterCourseType"
+                    :key="type.course_type"
+                    :value="type.course_type"
                   >
-                    {{
-                      courseT.course_type === 'general'
-                        ? '전체'
-                        : courseT.course_type === 'regular'
-                          ? '정규'
-                          : courseT.course_type === 'special'
-                            ? '특강'
-                            : '한국어'
-                    }}
+                    <span>
+                      {{ courseTypeFilter(type.course_type) }}
+                    </span>
                   </option>
                 </select>
               </div>
@@ -195,6 +193,7 @@
 import { getCourse, postNotice, getAllUser } from '@/api/apiNotice'
 import AppLayout from '@/layouts/AppLayout.vue'
 import router from '@/router'
+import { useCourseStore } from '@/stores/course'
 import { useNoticeStore } from '@/stores/notice'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
@@ -202,8 +201,10 @@ import { computed, onMounted, ref, watch, watchEffect } from 'vue'
 
 const user = useUserStore()
 const noticeStore = useNoticeStore()
+const courseStore = useCourseStore()
 
-const { grade_id, course_type } = storeToRefs(noticeStore)
+const { course_type, noticeTarget, targetSelect, courseTypeSelect, courseSelect } =
+  storeToRefs(noticeStore)
 
 // ======================================================================
 
@@ -211,21 +212,21 @@ const openTargetModal = ref(false)
 const title = ref('') // 제목
 const isImportant = ref(false) // 중요
 const author = ref(user.userInfo.name) // 작성자
-const gradeSelect = ref('전체') // 학년 선택
-const courseTypeSelect = ref('general') // 과목유형 선택 (전체, 정규, 특강, 한국어)
-const courseSelect = ref('') // 과목명 선택
+// const courseSelect = ref('') // 과목명 선택
 const files = ref([]) // 파일 배열
 const content = ref('') // 내용
 // ======================================================================
 
-const gradeFilters = ref(['1학년', '2학년', '3학년'])
+const gradeFilters = ref(['1학년', '2학년', '3학년']) // 모달) 학년 목록
 const modalGradeSelect = ref('1학년') // 모달) 학년 선택 (기본값 1학년)
 const modalStudentSelect = ref([]) // 모달) 선택된 학생들
+
 // ======================================================================
 
 // API 요청받은값 저장
 const courses = ref([]) // 과목 선택 배열
 const students = ref([]) // 학생 목록 배열
+
 // ======================================================================
 
 // ======================================================================
@@ -234,7 +235,6 @@ onMounted(async () => {
   try {
     courses.value = await getCourse()
     students.value = await getAllUser()
-
     console.log('과목 목록', courses.value)
     // console.log('학생 정보', students.value)
   } catch (err) {
@@ -250,25 +250,42 @@ const handleImportant = () => {
 }
 
 const filterCourseType = computed(() => {
-  if (gradeSelect.value === '전체') {
+  if (targetSelect.value === '전체') {
     return course_type.value.filter((type) => type.course_type === 'general')
-  } else {
-    return course_type.value.filter((type) => type.course_type !== 'general')
   }
+  if (['1', '2', '3'].includes(targetSelect.value)) {
+    const typeList = ['general', 'regular']
+    return course_type.value.filter((type) => typeList.includes(type.course_type))
+  }
+  if (['special', 'korean'].includes(targetSelect.value)) {
+    const typeList = ['A', 'B']
+    return course_type.value.filter((type) => typeList.includes(type.course_type))
+  }
+
+  return []
 })
 
 // 학년, 과목 유형에 따른 과목 필터링
 const filterCourse = computed(() => {
-  // if (gradeCheck.value === '전체') return courses.value
-  // 선택된 학년이 전체일 경우 => 전체 과목배열을 순회하여 선택된 과목타입이 같을 경우 반환 !
-  if (gradeSelect.value === '전체') {
-    return courses.value.filter((course) => course.course_type === courseTypeSelect.value)
-  } else {
+  if (targetSelect.value === '전체') {
+    return []
+  }
+
+  if (['1', '2', '3'].includes(targetSelect.value)) {
     return courses.value.filter(
       (course) =>
-        course.grade_id === gradeSelect.value && course.course_type === courseTypeSelect.value,
+        course.grade_id === targetSelect.value && course.course_type === courseTypeSelect.value,
     )
   }
+  if (['special', 'korean'].includes(targetSelect.value)) {
+    return courses.value.filter(
+      (course) =>
+        course.class_id &&
+        course.class_id.includes(courseTypeSelect.value) &&
+        course.course_type === targetSelect.value,
+    )
+  }
+  return []
 })
 
 // 과목 배열에서 과목의 ID 값을 이용하여 선택된 과목의 값이 일치하는 값 저장
@@ -291,6 +308,28 @@ const removeFile = (index) => {
   files.value.splice(index, 1)
 }
 
+const targetFilter = (target) => {
+  if (target === '1' || target === '2' || target === '3') {
+    return target + '학년'
+  }
+  if (target === 'special') return '일본어 특강'
+  if (target === 'korean') return '한국어'
+
+  return target
+}
+
+const courseTypeFilter = (type) => {
+  if (type === 'A' || type === 'B') {
+    return type + '반'
+  }
+  if (type === 'general') {
+    return '전체'
+  }
+  if (type === 'regular') {
+    return '정규'
+  }
+}
+
 // 공지사항 등록 ( API POST 요청 )
 const submitNotice = async () => {
   if (title.value === '' || content.value === '') {
@@ -310,10 +349,10 @@ const submitNotice = async () => {
   }
 
   // 학년 선택 정보가 있을 경우
-  if (gradeSelect.value !== '전체') {
+  if (targetSelect.value !== '전체') {
     noticeData.targets = [
       {
-        grade_id: gradeSelect.value || null,
+        grade_id: targetSelect.value || null,
         level_id: null,
         language_id: null,
       },
@@ -335,28 +374,47 @@ const submitNotice = async () => {
   }
 }
 
-watch(gradeSelect, (newGrade) => {
-  if (newGrade === '전체') {
-    courseTypeSelect.value = 'general'
-  } else {
-    courseTypeSelect.value = 'regular'
-  }
-})
+// watch(gradeSelect, (newGrade) => {
+//   if (newGrade === '전체') {
+//     courseTypeSelect.value = 'general'
+//   } else {
+//     courseTypeSelect.value = 'regular'
+//   }
+// })
 
 watchEffect(() => {
-  console.log('선택된 학년: ', gradeSelect.value)
+  console.log('선택된 학년: ', targetSelect.value)
   console.log('선택된 과목 타입: ', courseTypeSelect.value)
   console.log('선택과목 아이디: ', courseSelect.value)
   console.log('필터링: ', selectedCourseId.value)
   console.log('선택된 과목이름: ', selectedCourseTitle.value)
 })
+
+// watch(targetSelect, async (newTarget) => {
+//   console.log(targetSelect.value)
+//   if (newTarget === 'special') {
+//     try {
+
+//     }
+//   }
+// })
+watch(targetSelect, (newTarget) => {
+  if (newTarget === '전체') {
+    courseTypeSelect.value = 'general'
+  } else if (['1', '2', '3'].includes(newTarget)) {
+    courseTypeSelect.value = 'regular'
+  } else if (['special', 'korean'].includes(newTarget)) {
+    courseTypeSelect.value = 'A'
+  }
+})
+
 const saveAndClose = () => {
   console.log(modalStudentSelect.value)
   openTargetModal.value = false
 }
 
 const backPage = () => {
-  router.back()
+  router.push({ path: '/notice' })
 }
 </script>
 
