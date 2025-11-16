@@ -3,58 +3,69 @@
     <section class="notice-board-container">
       <div class="grade-filter">
         <button
-          v-for="filter in ['', '1', '2', '3']"
-          :key="filter"
-          :class="['filter-btn', { active: gradeSelect === filter }]"
-          @click="HandleGradeNotice(filter)"
+          v-for="notice in noticeTarget"
+          :key="notice.target"
+          :class="['filter-btn', { active: targetSelect === notice.target }]"
+          @click="HandleGradeNotice(notice.target)"
         >
-          <span v-if="filter === ''">전체</span>
-          <span v-else>{{ filter + '학년' }}</span>
+          <span>{{ targetFilter(notice.target) }}</span>
         </button>
         <button class="filter-btn detail-filter" @click="detailOpen = !detailOpen">
           상세 필터링 설정
         </button>
       </div>
 
-      <div v-if="detailOpen && gradeSelect !== ''" class="detail-list">
-        <template v-for="course in course_type" :key="course.course_type">
-          <div class="filter-item">
+      <div v-if="detailOpen && targetSelect !== '전체'" class="detail-list">
+        <template v-for="course in course_type" :key="course">
+          <div
+            v-if="course.course_type === 'general' || course.course_type === 'regular'"
+            class="filter-item"
+          >
             <input
               type="radio"
               :id="`course-${course.course_type}`"
               :value="course.course_type"
               v-model="courseTypeSelect"
             />
-            <label :for="`course-${course.course_type}`">
-              {{
-                course.course_type === 'general'
-                  ? '전체'
-                  : course.course_type === 'regular'
-                    ? '정규'
-                    : course.course_type === 'special'
-                      ? '특강'
-                      : '한국어'
-              }}
+            <label
+              v-if="targetSelect === '1' || targetSelect === '2' || targetSelect === '3'"
+              :for="`course-${course.course_type}`"
+            >
+              {{ course.course_type === 'general' ? '전체' : '정규' }}
+            </label>
+          </div>
+          <div v-if="course.course_type === 'A' || course.course_type === 'B'" class="filter-item">
+            <input
+              type="radio"
+              :id="`course-${course.course_type}`"
+              :value="course.course_type"
+              v-model="courseTypeSelect"
+            />
+            <label
+              v-if="targetSelect === 'special' || targetSelect === 'korean'"
+              :for="`course-${course.course_type}`"
+            >
+              {{ course.course_type === 'A' ? 'A' + '반' : 'B' + '반' }}
             </label>
           </div>
         </template>
       </div>
 
       <div
-        v-if="detailOpen && gradeSelect !== '' && courseTypeSelect !== 'general'"
+        v-if="detailOpen && targetSelect !== '전체' && courseTypeSelect !== 'general'"
         class="detail-list"
       >
         <template v-for="course in courses" :key="course.course_id">
           <div
             v-if="
-              gradeSelect === course.grade_id &&
+              targetSelect === course.grade_id &&
               course.title &&
               course.title.trim() !== '' &&
               course.course_type === courseTypeSelect
             "
             class="filter-item"
           >
-            <div v-if="gradeSelect === course.grade_id">
+            <div>
               <input
                 type="radio"
                 :id="`${course.course_id}`"
@@ -67,6 +78,32 @@
             </div>
           </div>
         </template>
+        <div v-for="course in coursesA" :key="course.course_id" class="filter-item">
+          <div>
+            <input
+              type="radio"
+              :id="`${course.course_id}`"
+              :value="course.course_id"
+              v-model="courseSelect"
+            />
+            <label :for="course.course_id">
+              {{ course.class_name }}
+            </label>
+          </div>
+        </div>
+        <div v-for="course in coursesB" :key="course.course_id" class="filter-item">
+          <div>
+            <input
+              type="radio"
+              :id="`${course.course_id}`"
+              :value="course.course_id"
+              v-model="courseSelect"
+            />
+            <label :for="course.course_id">
+              {{ course.class_name }}
+            </label>
+          </div>
+        </div>
       </div>
 
       <div class="notice-list-card">
@@ -112,7 +149,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch, watchEffect } from 'vue'
+import { computed, onMounted, ref, watch, watchEffect } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useNoticeStore } from '@/stores/notice'
 import { useCourseStore } from '@/stores/course'
@@ -134,8 +171,9 @@ const coursesStore = useCourseStore()
 // const regular = ref([])
 
 // store 가져오기
-const { filterNotices, gradeSelect, courseTypeSelect, courseSelect } = storeToRefs(noticeStore)
-const { courses, course_type } = storeToRefs(coursesStore)
+const { filterNotices, targetSelect, courseTypeSelect, courseSelect, noticeTarget, course_type } =
+  storeToRefs(noticeStore)
+const { courses } = storeToRefs(coursesStore)
 
 onMounted(async () => {
   await coursesStore.fetchCourse()
@@ -147,7 +185,7 @@ onMounted(async () => {
   // console.log('정규과목 조회: ', regular.value)
 
   if (route.params.gradeId) {
-    gradeSelect.value = route.params.gradeId
+    targetSelect.value = route.params.gradeId
     detailOpen.value = true
   }
 })
@@ -168,6 +206,7 @@ function formatDate(isoString) {
   })
 }
 
+// 대상 필터링
 function courseIdGradeId(courseId) {
   const course = noticeStore.courseMap.get(courseId)
   return course ? course.grade_id + '학년' : '전체'
@@ -175,8 +214,9 @@ function courseIdGradeId(courseId) {
 
 watchEffect(() => {
   console.log('공지사항 리스트 변경', noticeStore.noticeList)
-  console.log('선택된 학년', gradeSelect.value)
+  console.log('선택된 타켓', targetSelect.value)
   console.log('선택된 타입', courseTypeSelect.value)
+  console.log('선택된 과목', courseSelect.value)
   console.log('과목 목록 변경', courses.value)
   console.log('url 변동 감지', route.params.gradeId)
 })
@@ -185,10 +225,10 @@ watch(
   () => route.params.gradeId,
   async (newGrade) => {
     if (newGrade) {
-      gradeSelect.value = newGrade
+      targetSelect.value = newGrade
       detailOpen.value = true
     } else {
-      gradeSelect.value = ''
+      targetSelect.value = '전체'
       detailOpen.value = false
       courseTypeSelect.value = 'general'
       courseSelect.value = ''
@@ -197,13 +237,13 @@ watch(
   },
 )
 
-watch(gradeSelect, (newVal, oldVal) => {
+watch(targetSelect, (newVal, oldVal) => {
   if (newVal === '' || newVal !== oldVal) {
     detailOpen.value = false
     courseTypeSelect.value = 'general'
     courseSelect.value = ''
   }
-  if (newVal === '1' || newVal === '2') {
+  if (newVal !== '전체') {
     detailOpen.value = true
   }
 })
@@ -214,13 +254,55 @@ watch(courseTypeSelect, (newVal, oldVal) => {
   }
 })
 
+// 타켓 목록 필터링
+const targetFilter = (target) => {
+  if (target === '1' || target === '2' || target === '3') {
+    return target + '학년'
+  }
+  if (target === 'special') return '일본어 특강'
+  if (target === 'korean') return '한국어'
+
+  return target
+}
+
+// 일본어 특강 A 반 필터링
+const coursesA = computed(() => {
+  const filterA = courses.value.filter((course) => {
+    const targetCheck = targetSelect.value === course.course_type
+    const titleCheck = course.title && course.title.trim() !== ''
+    const courseTypeCheck = courseTypeSelect.value === 'A'
+    const classCheck = course.class_id && course.class_id.includes('A')
+
+    return targetCheck && titleCheck && courseTypeCheck && classCheck
+  })
+  return filterA
+})
+
+// 일본어 특강 B 반 필터링
+const coursesB = computed(() => {
+  const filterB = courses.value.filter((course) => {
+    const targetCheck = targetSelect.value === course.course_type
+    const titleCheck = course.title && course.title.trim() !== ''
+    const courseTypeCheck = courseTypeSelect.value === 'B'
+    const classCheck = course.class_id && course.class_id.includes('B')
+
+    return targetCheck && titleCheck && courseTypeCheck && classCheck
+  })
+  return filterB
+})
+
 // 선택 학년 공지사항으로 이동
-const HandleGradeNotice = (grade) => {
-  console.log(grade)
-  if (grade) {
-    router.push({ path: `/notice/grade/${grade}` })
+const HandleGradeNotice = (target) => {
+  console.log(target)
+
+  if (target) {
+    if (target === '전체') {
+      router.push({ path: '/notice' })
+    } else {
+      router.push({ path: `/notice/grade/${target}` })
+    }
   } else {
-    gradeSelect.value = ''
+    targetSelect.value = ''
     courseTypeSelect.value = ''
     courseSelect.value = ''
     detailOpen.value = false
