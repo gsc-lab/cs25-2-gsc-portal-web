@@ -12,6 +12,8 @@ export const postCourse = async (courseData) => {
       title: courseData.course,
       professor_id: courseData.professor_id,
       target: courseData.target,
+      class_id: courseData.class_id,
+      class_name: courseData.className,
     })
     alert('과목이 등록되었습니다.')
   } catch (e) {
@@ -271,6 +273,7 @@ export const putCourse = async (Data) => {
       title: Data.data.title,
       professor_id: Data.data.professor_id,
       target: Data.data.target,
+      class_id: Data.data.class_id,
     })
     return res.data
   } catch (e) {
@@ -288,7 +291,6 @@ export const putTimetable = async (Data) => {
       day_of_week: Data.data.day,
       start_period: Data.data.start_period,
       end_period: Data.data.end_period,
-      class_name: Data.data.class_id.slice(4), // 나중에 id로 수정 할수도...
     })
   } catch (e) {
     errorMsg(e)
@@ -325,13 +327,10 @@ export const delCourse = async (course_id) => {
 // ---------------------------------------------------------------
 // 시간표 삭제
 // ---------------------------------------------------------------
-export const delTimetable = async (course_id, day) => {
-  console.log(course_id, day)
+export const delTimetable = async (schedule_ids) => {
+  console.log(schedule_ids)
   try {
-    const res = await api.delete(`/timetables/registerTimetable/${schedule_ids}`, {
-      course_id: course_id,
-      day_of_week: day,
-    })
+    const res = await api.delete(`/timetables/registerTimetable/${schedule_ids}`)
     return res.data
   } catch (e) {
     errorMsg(e)

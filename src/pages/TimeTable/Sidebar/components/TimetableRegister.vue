@@ -8,7 +8,7 @@ const Tstore = useTimetableStore() // 시간표 store
 const Cstore = useClassroomStore() // 장소 store
 const courses = ref() // 필터링 과목
 const classrooms = ref(null) // 원본 교실
-const classes = ref() // 분반 클래스 목록
+
 onMounted(async () => {
   classrooms.value = await Cstore.getClassroom() // 원본 교실 정의
 })
@@ -17,7 +17,6 @@ onMounted(async () => {
 const days = ['월', '화', '수', '목', '금']
 const enDays = ['MON', 'TUE', 'WED', 'THU', 'FRI']
 
-const spClassName = ref('') // 분반 반이름
 const classroomName = ref('') // 교실 이름
 
 // 값 저장
@@ -25,7 +24,6 @@ const postTimetableData = ref({
   target: null,
   room_id: null,
   course_id: null,
-  spClass_id: null,
   day: null,
   startTime: null,
   endTime: null,
@@ -62,12 +60,6 @@ watch(
   () => postTimetableData.value.target,
   async (target) => {
     courses.value = await Tstore.courseFilter(target)
-    if (target == 'special') {
-      // target에 맞게 classes 정의
-      classes.value = await getSpecialClasses()
-    } else if (target == 'korean') {
-      classes.value = await getKoreanClasses()
-    }
   },
   { immediate: true },
 )
@@ -77,9 +69,6 @@ watch(
 const handleSubmit = async () => {
   if (postTimetableData.value.room_id == '') {
     postTimetableData.value.room_id = classroomName.value
-  }
-  if (postTimetableData.value.spClass_id == '') {
-    postTimetableData.value.spClass_id = spClassName.value
   }
   console.log('등록', postTimetableData.value)
   await postTimetable(postTimetableData.value)
@@ -118,21 +107,6 @@ const handleSubmit = async () => {
         {{ course.title }}
       </option>
     </select>
-  </div>
-
-  <!-- 특강이면 그룹 저장 / 없으면 등록 -->
-  <div v-if="postTimetableData.target == 'special' || postTimetableData.target == 'korean'">
-    <label for="">반 : </label>
-    <select id="" v-model="postTimetableData.spClass_id">
-      <option v-for="cls in classes" :key="cls.class_id" :value="cls.class_id">
-        {{ cls.class_group }}
-      </option>
-      <option value="">기타</option>
-    </select>
-    <div v-if="postTimetableData.spClass_id == ''">
-      <label for="spClassName">반 이름 입력 : </label>
-      <input id="spClassName" v-model="spClassName" />
-    </div>
   </div>
 
   <!-- 요일 -->
