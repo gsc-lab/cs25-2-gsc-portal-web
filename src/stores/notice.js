@@ -89,6 +89,7 @@ export const useNoticeStore = defineStore('Notice', () => {
     }
   }
 
+  // 공지사항 필터링
   const filterNotices = computed(() => {
     return noticeList.value.filter((notice) => {
       const course = courseMap.value.get(notice.course_id)
@@ -106,7 +107,7 @@ export const useNoticeStore = defineStore('Notice', () => {
         }
       }
 
-      // 과목별 ture 시 해당 과목 게시글만 반환
+      // 과목별 ture 시 해당 과목 x 게시글만 반환
 
       let courseTypeCheck = false
       if (courseTypeSelect.value === 'general') {
@@ -131,6 +132,32 @@ export const useNoticeStore = defineStore('Notice', () => {
     })
   })
 
+  // 일본어 특강 A 반 필터링
+  const coursesA = computed(() => {
+    const filterA = courses.value.filter((course) => {
+      const targetCheck = targetSelect.value === course.course_type
+      const titleCheck = course.title && course.title.trim() !== ''
+      const courseTypeCheck = courseTypeSelect.value === 'A'
+      const classCheck = course.class_id && course.class_id.includes('A')
+
+      return targetCheck && titleCheck && courseTypeCheck && classCheck
+    })
+    return filterA
+  })
+
+  // 일본어 특강 B 반 필터링
+  const coursesB = computed(() => {
+    const filterB = courses.value.filter((course) => {
+      const targetCheck = targetSelect.value === course.course_type
+      const titleCheck = course.title && course.title.trim() !== ''
+      const courseTypeCheck = courseTypeSelect.value === 'B'
+      const classCheck = course.class_id && course.class_id.includes('B')
+
+      return targetCheck && titleCheck && courseTypeCheck && classCheck
+    })
+    return filterB
+  })
+
 
 
 
@@ -149,6 +176,8 @@ export const useNoticeStore = defineStore('Notice', () => {
     course_type,
     setCourse,
     courseMap,
+    coursesA,
+    coursesB,
   }
 
 })
