@@ -169,7 +169,7 @@ const handleTimetableDel = async (schedule_ids) => {
   <div>
     <select id="section" v-model="section">
       <option v-for="section in sections" :value="section.sec_id" :key="section.sec_id">
-        {{ section.sec_id }}
+        {{ section.label }}
       </option>
     </select>
   </div>

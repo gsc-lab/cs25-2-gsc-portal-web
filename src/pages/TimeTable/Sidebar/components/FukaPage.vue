@@ -110,7 +110,7 @@ const handleSubmit = async () => {
       <label for="section">학기:</label>
       <select id="section" v-model="postFukaData.section">
         <option v-for="section in sections" :value="section.sec_id" :key="section">
-          {{ section.sec_id }}
+          {{ section.label }}
         </option>
       </select>
     </div>

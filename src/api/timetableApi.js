@@ -116,12 +116,13 @@ export const postClassStudents = async (class_id, student_ids) => {
 // ---------------------------------------------------------------
 export const postSection = async (section) => {
   try {
-    await api.post(`/modal/common/sections`, {
+    const res = await api.post(`/modal/common/sections`, {
       year: section.year,
       semester: section.semester,
       start_date: section.start_date,
       end_date: section.end_date,
     })
+    return res.data
   } catch (e) {
     errorMsg(e)
   }
@@ -254,7 +255,6 @@ export const getClassStudents = async (class_id) => {
 export const getSections = async () => {
   try {
     const res = await api.get(`/modal/common/sections`)
-    console.log('getSections : ', res.data)
     return res.data
   } catch (e) {
     errorMsg(e)

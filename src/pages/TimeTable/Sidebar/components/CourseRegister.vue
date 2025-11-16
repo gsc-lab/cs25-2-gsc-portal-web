@@ -72,15 +72,19 @@ watch(
 const handleSubmit = async () => {
   // 학기 추가
   if (postCourseData.value.section == 'new') {
-    // 1, 2, s, w외의 학기
-    if (postCourseData.value.section.semester == 'new') {
-      postCourseData.value.section.semester = newSemesterName.value
-    }
+    // // 1, 2, s, w외의 학기
+    // if (newSection.value.semester == 'new') {
+    //   newSection.value.semester = newSemesterName.value
+    //   console.log('newSection', newSection.value)
+    // }
     // 새로운 학기 등록
-    await postSection(newSection.value)
+    const res = await postSection(newSection.value)
     // sec_id 생성 -> postCourseData에 대입
-    postCourseData.value.section = `${newSection.value.year}-${newSection.value.semester}`
+    postCourseData.value.section = res.sec_id
     console.log('OK', postCourseData.value.section)
+    // 초기화
+    await Tstore.setSections()
+    sections.value = await Tstore.getSections()
   }
   // 과목 등록
   await postCourse(postCourseData.value)
@@ -143,7 +147,7 @@ const handleSubmit = async () => {
     <label for="section">학기 : </label>
     <select id="section" v-model="postCourseData.section">
       <option v-for="section in sections" :value="section.sec_id" :key="section.sec_id">
-        {{ section.sec_id }}
+        {{ section.label }}
       </option>
       <option value="new">새로 생성</option>
     </select>
@@ -160,12 +164,12 @@ const handleSubmit = async () => {
           <option value="2">2학기</option>
           <option value="s">여름방학</option>
           <option value="w">겨울방학</option>
-          <option value="new">기타</option>
+          <!-- <option value="new">기타</option> -->
         </select>
-        <div v-if="newSection.semester == 'new'">
+        <!-- <div v-if="newSection.semester == 'new'">
           <label for="semesterName">학기 이름:</label>
           <input id="semesterName" v-model="newSemesterName" />
-        </div>
+        </div> -->
       </div>
       <div>
         <label for="date">학기 시작일 : </label>
