@@ -2,15 +2,19 @@
 import { ref, watch, onMounted } from 'vue'
 import { useClassroomStore } from '@/stores/classroom'
 import { useTimetableStore } from '@/stores/timetable'
-import { postTimetable, getSpecialClasses, getKoreanClasses } from '@/api/timetableApi'
+import { postTimetable } from '@/api/timetableApi'
 
 const Tstore = useTimetableStore() // 시간표 store
 const Cstore = useClassroomStore() // 장소 store
 const courses = ref() // 필터링 과목
 const classrooms = ref(null) // 원본 교실
+const sections = ref(null)
+const section = ref() // 조회 학기
 
 onMounted(async () => {
   classrooms.value = await Cstore.getClassroom() // 원본 교실 정의
+  sections.value = await Tstore.getSections() // sections 조회
+  section.value = await Tstore.sectionOfDate() // 현재 section 초기화
 })
 
 // 초기화
@@ -63,6 +67,15 @@ watch(
   },
   { immediate: true },
 )
+// section 바뀌면 과목조회
+watch(
+  () => section.value,
+  async () => {
+    await Tstore.setCourses(section.value)
+    courses.value = await Tstore.courseFilter(postTimetableData.value.target)
+  },
+  { immediate: true },
+)
 
 // ================================= Submit =================================
 // 저장버튼 누른 후 실행
@@ -80,6 +93,14 @@ const handleSubmit = async () => {
 <template>
   <!-- --------------------------------------------------------------------------- -->
   <!-- TimetableRegister -->
+
+  <div>
+    <select id="section" v-model="section">
+      <option v-for="section in sections" :value="section.sec_id" :key="section.sec_id">
+        {{ section.sec_id }}
+      </option>
+    </select>
+  </div>
 
   <!-- Grade 등 선택 -->
   <div>

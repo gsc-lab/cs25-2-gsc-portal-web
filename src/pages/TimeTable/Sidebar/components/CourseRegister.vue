@@ -2,13 +2,7 @@
 import { ref, watch, onMounted } from 'vue'
 import { useTimetableStore } from '@/stores/timetable'
 import { useProfessorStore } from '@/stores/professor'
-import {
-  postCourse,
-  getSections,
-  postSection,
-  getSpecialClasses,
-  getKoreanClasses,
-} from '@/api/timetableApi'
+import { postCourse, postSection, getSpecialClasses, getKoreanClasses } from '@/api/timetableApi'
 
 const Tstore = useTimetableStore()
 const Pstore = useProfessorStore()
@@ -17,7 +11,7 @@ const sections = ref(null)
 const classes = ref(null)
 onMounted(async () => {
   professors.value = await Pstore.getProfessors()
-  sections.value = await getSections()
+  sections.value = await Tstore.getSections()
   console.log('professors', professors.value)
 })
 

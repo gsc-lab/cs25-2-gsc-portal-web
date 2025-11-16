@@ -131,9 +131,9 @@ export const postSection = async (section) => {
 // ---------------------------------------------------------------
 // 과목 정보 조회
 // ---------------------------------------------------------------
-export const getCourses = async () => {
+export const getCourses = async (sec_id) => {
   try {
-    const res = await api.get(`/modal/subjects/courses/all`)
+    const res = await api.get(`/modal/subjects/courses/all/${sec_id}`)
     console.log(res.data)
     return res.data
   } catch (e) {
