@@ -22,7 +22,7 @@ router.beforeEach(async (to, from, next) => {
   if (userStore.userInfo) {
 
     if (to.path === '/login') {
-      return next('/dashboard')
+      return next('/')
     }
     return next()
   }
@@ -33,7 +33,7 @@ router.beforeEach(async (to, from, next) => {
     await userStore.fetchUser()
 
     if (to.path === '/login') {
-      return next('/dashboard') // 대시보드로 이동
+      return next('/') // 대시보드로 이동
     }
     return next()
 
