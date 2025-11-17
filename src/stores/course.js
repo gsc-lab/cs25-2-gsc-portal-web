@@ -6,13 +6,8 @@ export const useCourseStore = defineStore('course', () => {
 
   // 전체 과목 정보
   const courses = ref([])
-
-  const course_type = ref([
-    { course_type: 'general' },
-    { course_type: 'regular' },
-    { course_type: 'special' },
-    { course_type: 'korean' }
-  ])
+  // 선택 학년
+  const targetSelect = ref('')
 
   // 상태확인, 에러 메시지 저장
   const isLoading = ref(false)
@@ -28,13 +23,11 @@ export const useCourseStore = defineStore('course', () => {
   })
 
 
-
   async function fetchCourse() {
     isLoading.value = true
 
     try {
-      const response = await getCourse()
-      courses.value = response
+      courses.value = await getCourse()
     } catch (err) {
       error.value = err
       console.error("전체 과목 정보 불러오기 실패", err)
@@ -43,10 +36,11 @@ export const useCourseStore = defineStore('course', () => {
     }
   }
 
+
   return {
     courses,
-    courseMap,
     fetchCourse,
-    course_type,
+    targetSelect,
+    courseMap,
   }
 })
