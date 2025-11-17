@@ -7,7 +7,7 @@ import { deleteReservation, postReservation } from '@/api/classroomApi'
 const Ustore = useUserStore()
 
 const CRstore = useClassroomStore()
-const selectRes = ref(null) // 선택한 강의실 예약 데이터 (배열순: 일->토  / 날짜순: 월->일 )
+const selectRes = ref(null) // 선택한 강의실 예약 데이터 (배열순: 일->토 )
 
 const isSelecting = ref(false)
 
@@ -58,7 +58,7 @@ watch(
 watch(
   () => selectDate.value,
   async () => {
-    console.log('selectDate.value', selectDate.value)
+    // console.log('selectDate.value', selectDate.value)
     selectRes.value = CRstore.getSelectResSchedule(selectDate.value.toISOString().split('T')[0])
   },
 )
@@ -83,7 +83,7 @@ function startSelection(data, t, idxOfDay) {
   if (data?.user_id == Ustore.userInfo.user_id) {
     handleDelete(data)
   } else if (data?.user_id == null) {
-    selectTime.value.date = searchDate(idxOfDay + 1)
+    selectTime.value.date = searchDate(idxOfDay + 2)
     selectTime.value.start_time = t
     isSelecting.value = true
   }
@@ -92,7 +92,7 @@ function startSelection(data, t, idxOfDay) {
 function updateSelection(data, t, idxOfDay) {
   if (isSelecting.value) {
     console.log(data?.user_id)
-    if (data?.user_id != null || selectTime.value.date != searchDate(idxOfDay + 1)) endSelection()
+    if (data?.user_id != null || selectTime.value.date != searchDate(idxOfDay + 2)) endSelection()
     // 추가되는 값이 더 크면 [1] 작으면 [0]  (시간은 end에 +1)
     if (selectTime.value.start_time + 1 <= t) selectTime.value.end_time = t + 1
     else {
@@ -162,7 +162,7 @@ const handleDelete = async (data) => {
           :key="d"
           style="border: 1px solid #000; padding: 10px"
         >
-          {{ d }}요일({{ searchDate(idx + 1).slice(5) }})
+          {{ d }}요일({{ searchDate(idx + 2).slice(5) }})
         </th>
       </tr>
     </thead>
