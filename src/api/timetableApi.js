@@ -85,7 +85,6 @@ export const postFukaCustomStudents = async (fukaData) => {
   try {
     await api.post(`/timetables/huka/student/custom`, {
       student_ids: fukaData.student_ids,
-      day: fukaData.day,
       date: fukaData.date,
       start_slot: fukaData.startTime,
       end_slot: fukaData.endTime,
