@@ -7,7 +7,7 @@ import { deleteReservation, postReservation } from '@/api/classroomApi'
 const Ustore = useUserStore()
 
 const CRstore = useClassroomStore()
-const selectRes = ref(null) // 선택한 강의실 예약 데이터 (배열순: 일->토  / 날짜순: 월->일 )
+const selectRes = ref(null) // 선택한 강의실 예약 데이터 (배열순: 일->토 )
 
 const isSelecting = ref(false)
 
@@ -58,7 +58,7 @@ watch(
 watch(
   () => selectDate.value,
   async () => {
-    console.log('selectDate.value', selectDate.value)
+    // console.log('selectDate.value', selectDate.value)
     selectRes.value = CRstore.getSelectResSchedule(selectDate.value.toISOString().split('T')[0])
   },
 )
@@ -158,7 +158,7 @@ const handleDelete = async (data) => {
       <tr>
         <th style="border: 1px solid #000; padding: 10px"></th>
         <th
-          v-for="(d, idx) in ['월', '화', '수', '목', '금', '토', '일']"
+          v-for="(d, idx) in ['일', '월', '화', '수', '목', '금', '토']"
           :key="d"
           style="border: 1px solid #000; padding: 10px"
         >
@@ -169,7 +169,7 @@ const handleDelete = async (data) => {
     <tbody>
       <tr v-for="(_, t) in 24" :key="t">
         <td style="border: 1px solid #000; padding: 10px">{{ time(t) }}</td>
-        <template v-for="(d, idx) in ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']" :key="d">
+        <template v-for="(d, idx) in ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']" :key="d">
           <td
             style="border: 1px solid #000; padding: 10px"
             @mousedown="startSelection(filterRes(selectRes?.[d], time(t)), t, idx)"
