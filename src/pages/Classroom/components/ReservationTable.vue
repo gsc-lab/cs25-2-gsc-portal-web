@@ -83,7 +83,7 @@ function startSelection(data, t, idxOfDay) {
   if (data?.user_id == Ustore.userInfo.user_id) {
     handleDelete(data)
   } else if (data?.user_id == null) {
-    selectTime.value.date = searchDate(idxOfDay + 1)
+    selectTime.value.date = searchDate(idxOfDay + 2)
     selectTime.value.start_time = t
     isSelecting.value = true
   }
@@ -92,7 +92,7 @@ function startSelection(data, t, idxOfDay) {
 function updateSelection(data, t, idxOfDay) {
   if (isSelecting.value) {
     console.log(data?.user_id)
-    if (data?.user_id != null || selectTime.value.date != searchDate(idxOfDay + 1)) endSelection()
+    if (data?.user_id != null || selectTime.value.date != searchDate(idxOfDay + 2)) endSelection()
     // 추가되는 값이 더 크면 [1] 작으면 [0]  (시간은 end에 +1)
     if (selectTime.value.start_time + 1 <= t) selectTime.value.end_time = t + 1
     else {
@@ -158,18 +158,18 @@ const handleDelete = async (data) => {
       <tr>
         <th style="border: 1px solid #000; padding: 10px"></th>
         <th
-          v-for="(d, idx) in ['일', '월', '화', '수', '목', '금', '토']"
+          v-for="(d, idx) in ['월', '화', '수', '목', '금', '토', '일']"
           :key="d"
           style="border: 1px solid #000; padding: 10px"
         >
-          {{ d }}요일({{ searchDate(idx + 1).slice(5) }})
+          {{ d }}요일({{ searchDate(idx + 2).slice(5) }})
         </th>
       </tr>
     </thead>
     <tbody>
       <tr v-for="(_, t) in 24" :key="t">
         <td style="border: 1px solid #000; padding: 10px">{{ time(t) }}</td>
-        <template v-for="(d, idx) in ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']" :key="d">
+        <template v-for="(d, idx) in ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']" :key="d">
           <td
             style="border: 1px solid #000; padding: 10px"
             @mousedown="startSelection(filterRes(selectRes?.[d], time(t)), t, idx)"
