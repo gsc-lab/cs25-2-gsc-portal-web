@@ -80,19 +80,11 @@ watch(
 const handleSubmit = async () => {
   // student_ids에는 id만 저장
   postFukaData.value.student_ids = selectedUsers.value.map((std) => std.user_id)
-  // 저장
+  // default 저장
   if (selectType.value == 'default') await postFukaStudents(postFukaData.value)
-  // pick면 학기를 계산해서 저장
-  else {
-    // 학기 검색
-    const section = sections.value.find(
-      (section) =>
-        section.start_date <= postFukaData.value.date &&
-        section.end_date >= postFukaData.value.date,
-    )
-    postFukaData.value.section = section.sec_id // 학기 id 대입
-    await postFukaCustomStudents(postFukaData.value)
-  }
+  // pick 저장
+  else await postFukaCustomStudents(postFukaData.value)
+
   console.log(postFukaData.value)
   // 초기화
   setVal()
@@ -118,7 +110,7 @@ const handleSubmit = async () => {
       <label for="section">학기:</label>
       <select id="section" v-model="postFukaData.section">
         <option v-for="section in sections" :value="section.sec_id" :key="section">
-          {{ section.sec_id }}
+          {{ section.label }}
         </option>
       </select>
     </div>

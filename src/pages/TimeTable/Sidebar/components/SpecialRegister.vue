@@ -21,11 +21,13 @@ const handleGetClasses = async () => {
   isJP.value = !isJP.value
   if (isJP.value) classes.value = await getSpecialClasses()
   else classes.value = await getKoreanClasses()
+  selectClassId.value = classes.value[0].class_id
   console.log(classes.value)
 }
 // 반 초기화
-onMounted(() => {
-  handleGetClasses()
+onMounted(async () => {
+  await handleGetClasses()
+  if (selectClassId.value == null) selectClassId.value = classes.value[0].class_id
 })
 
 // ==========================  반 선택 감시  ==========================
@@ -34,7 +36,6 @@ watch(
   async () => {
     await getClassStd()
   },
-  { immediate: true },
 )
 
 // 해당 반 학생 조회

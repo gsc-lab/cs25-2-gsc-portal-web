@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { lengthHour } from '@/utils/lengthHour'
 import { useClassroomStore } from '@/stores/classroom'
 import { useProfessorStore } from '@/stores/professor'
-import { getStudentTimetable, getAdminTimetable, getCourses } from '@/api/timetableApi'
+import { getStudentTimetable, getAdminTimetable, getCourses, getSections } from '@/api/timetableApi'
 
 export const useTimetableStore = defineStore('timetable', {
   state: () => ({
@@ -34,6 +34,8 @@ export const useTimetableStore = defineStore('timetable', {
 
     // 과목
     courses: [],
+    // 학기
+    sections: [],
   }),
   actions: {
     // ------------------------ studentTimetable --------------------------
@@ -112,8 +114,9 @@ export const useTimetableStore = defineStore('timetable', {
 
     // --------------------------- courses -----------------------------
     // [ set ] : courses셋팅
-    async setCourses() {
-      const res = await getCourses()
+    async setCourses(sec_id) {
+      if (!sec_id) sec_id = await this.sectionOfDate()
+      const res = await getCourses(sec_id)
       const sorted = Object.fromEntries(
         Object.entries(res).sort(([, a], [, b]) => {
           if (a?.section !== b?.section) return a?.section.localeCompare(b?.section)
@@ -152,5 +155,31 @@ export const useTimetableStore = defineStore('timetable', {
     //   const row = this.courses.filter((course) => course.title == argTitle);
     //   return row.course_id;
     // }
+
+    // ------------------------ sections --------------------------
+    // [ set ] : sections 셋팅
+    async setSections() {
+      this.sections = await getSections()
+      console.log('store: setSections', this.sections)
+    },
+
+    // [ get ] : sections 반환
+    async getSections() {
+      if (this.sections.length <= 0) {
+        await this.setSections()
+      }
+      return this.sections
+    },
+
+    // 날짜기준 학기 조회
+    async sectionOfDate(date) {
+      if (this.sections.length <= 0) {
+        await this.setSections()
+      }
+      if (!date) date = new Date().toISOString().slice(0, 10)
+      const section = this.sections.find((s) => s.start_date <= date && s.end_date >= date)
+      // console.log('section', section)
+      return section.sec_id
+    },
   },
 })
