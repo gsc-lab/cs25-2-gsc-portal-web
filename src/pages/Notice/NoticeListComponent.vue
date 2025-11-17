@@ -78,32 +78,37 @@
             </div>
           </div>
         </template>
-        <div v-for="course in coursesA" :key="course.course_id" class="filter-item">
-          <div>
-            <input
-              type="radio"
-              :id="`${course.course_id}`"
-              :value="course.course_id"
-              v-model="courseSelect"
-            />
-            <label :for="course.course_id">
-              {{ course.class_name }}
-            </label>
+        <template v-if="courseTypeSelect === 'A'">
+          <div v-for="course in coursesA" :key="course.course_id" class="filter-item">
+            <div>
+              <input
+                type="radio"
+                :id="`${course.course_id}`"
+                :value="course.course_id"
+                v-model="courseSelect"
+              />
+              <label :for="course.course_id">
+                {{ course.class_name }}
+              </label>
+            </div>
           </div>
-        </div>
-        <div v-for="course in coursesB" :key="course.course_id" class="filter-item">
-          <div>
-            <input
-              type="radio"
-              :id="`${course.course_id}`"
-              :value="course.course_id"
-              v-model="courseSelect"
-            />
-            <label :for="course.course_id">
-              {{ course.class_name }}
-            </label>
+        </template>
+
+        <template v-if="courseTypeSelect === 'B'">
+          <div v-for="course in coursesB" :key="course.course_id" class="filter-item">
+            <div>
+              <input
+                type="radio"
+                :id="`${course.course_id}`"
+                :value="course.course_id"
+                v-model="courseSelect"
+              />
+              <label :for="course.course_id">
+                {{ course.class_name }}
+              </label>
+            </div>
           </div>
-        </div>
+        </template>
       </div>
 
       <div class="notice-list-card">
@@ -132,11 +137,16 @@
               <span v-if="notice.attachments.length > 0">📁</span>
             </div>
             <div v-if="notice.course_id || notice.targets[0]?.grade_id" class="col-target">
-              {{ courseIdGradeId(notice.course_id) }}
+              <span v-if="notice.course_id">
+                {{ courseIdGradeId(notice.course_id) }}
+              </span>
+              <span v-else>
+                {{ notice.targets[0]?.grade_id ? notice.targets[0]?.grade_id + '학년' : '전체' }}
+              </span>
             </div>
             <div v-else class="col-target">
               <span>
-                {{ notice.targets[0]?.grade_id ? notice.targets[0]?.grade_id + '학년' : '전체' }}
+                {{ courseTypeSelect + '반' }}
               </span>
             </div>
             <div class="col-author">{{ notice.author?.name }}</div>
@@ -149,7 +159,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch, watchEffect } from 'vue'
+import { onMounted, ref, watch, watchEffect } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useNoticeStore } from '@/stores/notice'
 import { useCourseStore } from '@/stores/course'
@@ -168,11 +178,21 @@ const detailOpen = ref(false)
 const noticeStore = useNoticeStore() // 22
 const coursesStore = useCourseStore()
 
+console.log('coursesStore: ', coursesStore)
+
 // const regular = ref([])
 
 // store 가져오기
-const { filterNotices, targetSelect, courseTypeSelect, courseSelect, noticeTarget, course_type } =
-  storeToRefs(noticeStore)
+const {
+  filterNotices,
+  targetSelect,
+  courseTypeSelect,
+  courseSelect,
+  noticeTarget,
+  course_type,
+  coursesA,
+  coursesB,
+} = storeToRefs(noticeStore)
 const { courses } = storeToRefs(coursesStore)
 
 onMounted(async () => {
@@ -240,7 +260,13 @@ watch(
 watch(targetSelect, (newVal, oldVal) => {
   if (newVal === '' || newVal !== oldVal) {
     detailOpen.value = false
-    courseTypeSelect.value = 'general'
+
+    if (['special', 'korean'].includes(newVal)) {
+      courseTypeSelect.value = 'A'
+    } else {
+      courseTypeSelect.value = 'general'
+    }
+
     courseSelect.value = ''
   }
   if (newVal !== '전체') {
@@ -264,32 +290,6 @@ const targetFilter = (target) => {
 
   return target
 }
-
-// 일본어 특강 A 반 필터링
-const coursesA = computed(() => {
-  const filterA = courses.value.filter((course) => {
-    const targetCheck = targetSelect.value === course.course_type
-    const titleCheck = course.title && course.title.trim() !== ''
-    const courseTypeCheck = courseTypeSelect.value === 'A'
-    const classCheck = course.class_id && course.class_id.includes('A')
-
-    return targetCheck && titleCheck && courseTypeCheck && classCheck
-  })
-  return filterA
-})
-
-// 일본어 특강 B 반 필터링
-const coursesB = computed(() => {
-  const filterB = courses.value.filter((course) => {
-    const targetCheck = targetSelect.value === course.course_type
-    const titleCheck = course.title && course.title.trim() !== ''
-    const courseTypeCheck = courseTypeSelect.value === 'B'
-    const classCheck = course.class_id && course.class_id.includes('B')
-
-    return targetCheck && titleCheck && courseTypeCheck && classCheck
-  })
-  return filterB
-})
 
 // 선택 학년 공지사항으로 이동
 const HandleGradeNotice = (target) => {

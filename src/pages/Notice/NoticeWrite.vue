@@ -193,7 +193,6 @@
 import { getCourse, postNotice, getAllUser } from '@/api/apiNotice'
 import AppLayout from '@/layouts/AppLayout.vue'
 import router from '@/router'
-import { useCourseStore } from '@/stores/course'
 import { useNoticeStore } from '@/stores/notice'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
@@ -201,7 +200,6 @@ import { computed, onMounted, ref, watch, watchEffect } from 'vue'
 
 const user = useUserStore()
 const noticeStore = useNoticeStore()
-const courseStore = useCourseStore()
 
 const { course_type, noticeTarget, targetSelect, courseTypeSelect, courseSelect } =
   storeToRefs(noticeStore)
@@ -341,10 +339,10 @@ const submitNotice = async () => {
     title: title.value,
     author: author.value,
     is_pinned: isImportant.value ? 1 : 0,
-    course_id: selectedCourseId.value ? selectedCourseId.value : null,
-    course_title: selectedCourseTitle.value ? selectedCourseTitle.value?.title : null,
+    course_id: selectedCourseId.value || null,
+    course_title: selectedCourseTitle.value || null,
     specific_users: modalStudentSelect.value || [],
-    course_type: courseTypeSelect.value,
+    course_type: courseTypeSelect.value === 'regular' ? 'regular' : 'special',
     content: content.value,
   }
 
@@ -352,11 +350,25 @@ const submitNotice = async () => {
   if (targetSelect.value !== '전체') {
     noticeData.targets = [
       {
-        grade_id: targetSelect.value || null,
-        level_id: null,
+        grade_id: null,
+        class_id: null,
         language_id: null,
       },
     ]
+    if (['1', '2', '3'].includes(targetSelect.value)) {
+      noticeData.targets[0].grade_id = targetSelect.value
+    } else if (['special', 'korean'].includes(targetSelect.value)) {
+      if (courseSelect.value && courseTypeSelect.value) {
+        noticeData.targets[0].class_id = courseSelect.value + courseTypeSelect.value
+      }
+      if (targetSelect.value === 'special') {
+        noticeData.targets[0].language_id = 'JP'
+      }
+      if (targetSelect.value === 'korean') {
+        noticeData.targets[0].language_id = 'KR'
+      }
+    }
+
     // 학년 전체일 경우 빈 객체 [] 로 전달
   } else {
     noticeData.targets = []
