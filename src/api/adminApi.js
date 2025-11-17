@@ -70,6 +70,29 @@ export const getUserInfo = async (grade, status) => {
   }
 }
 
+// ---------------------------------------------------------------
+// 회원정보 조회 (관리자, 교수)
+//[
+// {
+//     "user_id": "8888001",
+//     "name": "이교수",
+//     "email": "prof1@g.yju.ac.kr",
+//     "phone": "010-8888-0001",
+//     "status": "active",
+//     "updated_at": "2025-11-17 11:26:21",
+//     "role_type": "professor"
+// }, ... ]
+// ---------------------------------------------------------------
+export const getAdminsInfo = async () => {
+  try {
+    const res = await api.get(`/admin/proadmin`)
+    console.log(res.data)
+    return res.data
+  } catch (e) {
+    errorMsg(e)
+  }
+}
+
 // ========================== POST ===============================
 // ---------------------------------------------------------------
 // 승인 / 거절 등록
@@ -105,16 +128,16 @@ export const postEmail = async (email, reason) => {
 // ---------------------------------------------------------------
 // 승인 / 거절 등록
 // ---------------------------------------------------------------
-export const patchUser = async (user_id, userInfo) => {
+export const patchUser = async (userInfo) => {
   try {
-    const res = await api.patch(`/admin/students/${user_id}`, {
+    const res = await api.patch(`/admin/students/${userInfo.user_id}`, {
       name: userInfo.name,
       phone: userInfo.phone,
       status: userInfo.status,
-      grade_id: userInfo.grade,
+      grade_id: userInfo.grade_id,
       language_id: userInfo.language_id,
-      level_name: userInfo.level_name,
-      class_name: userInfo.class_name,
+      class_id: userInfo.class_id,
+      is_international: userInfo.is_international,
     })
     return res.data
   } catch (e) {
@@ -136,7 +159,7 @@ export const delEmail = async (id) => {
 }
 
 // ---------------------------------------------------------------
-// 학생 삭제
+// 사용자 삭제
 // ---------------------------------------------------------------
 export const delUser = async (id) => {
   try {
