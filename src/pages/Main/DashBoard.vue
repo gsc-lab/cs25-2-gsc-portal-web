@@ -10,9 +10,50 @@
         <section class="dashboard-grid">
           <div class="card timetable">
             <h2 class="card-title">오늘의 시간표</h2>
+            <div>
+              <button
+                v-for="(target, key) in targetGradeList"
+                :key="key"
+                @click="gradeSelect(target)"
+              >
+                <span>
+                  {{
+                    target === '1'
+                      ? target + '학년'
+                      : target === '2'
+                        ? target + '학년'
+                        : target === '3'
+                          ? target + '학년'
+                          : target === '특강'
+                            ? '특강'
+                            : '한국어'
+                  }}
+                </span>
+              </button>
+            </div>
             <div class="card-content">
               <div class="dummy-box">
-                <span>시간표 데이터</span>
+                <table v-if="filterSchedule" class="schedule-table">
+                  <thead>
+                    <tr>
+                      <th>교시</th>
+                      <th v-for="day in dayList" :key="day">{{ day }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="period in 12" :key="period">
+                      <td>{{ period }}교시</td>
+                      <td v-for="day in dayList" :key="day">
+                        <span
+                          v-for="(courseItem, index) in filterSchedule[day]?.[period]"
+                          :key="index"
+                        >
+                          {{ courseItem['title'] }}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -75,7 +116,7 @@
               </button>
             </div>
             <div class="card-content">
-              <p>1학년 일정 데이터</p>
+              <p>데이터 표시 예정</p>
             </div>
           </div>
 
@@ -87,7 +128,7 @@
               </button>
             </div>
             <div class="card-content">
-              <p class="room-number">000호</p>
+              <p class="room-number">투표 진행중인 강의실 표시 : 000호</p>
             </div>
           </div>
         </section>
@@ -97,7 +138,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed, watch, watchEffect } from 'vue'
 import { getDashBoard } from '@/api/apiDashBoard'
 import router from '@/router'
 import { useUserStore } from '@/stores/user'
@@ -106,15 +147,53 @@ import AppLayout from '@/layouts/AppLayout.vue'
 const user = useUserStore()
 const dashBoard = ref({})
 const Today = new Date().toISOString().split('T')[0]
+const day = '2025-04-30' // 테스트용 날짜
+
+// 타겟 목록
+const targetGradeList = ref(['1', '2', '3', '특강', '한국어'])
+
+// 선택된 타겟
+const targetGrade = ref('1')
+
+// 타겟 키
+const targetKey = {
+  1: '1',
+  2: '2',
+  3: '3',
+  특강: 'special',
+  한국어: 'korean',
+}
+
+// 요일 목록
+const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI']
 
 onMounted(async () => {
-  const response = await getDashBoard({ date: Today })
+  const response = await getDashBoard({ date: day }) // date : Today 로 변경해야함
   dashBoard.value = response
   // const res = await getAllUser()
   await user.fetchUser()
   console.log(user.userInfo)
   console.log(dashBoard.value)
 })
+
+// 시간표 필터링
+const filterSchedule = computed(() => {
+  // schedules 가 아니면 return
+  if (!dashBoard.value.schedules) return null
+
+  // dataKey = targetKey 안에 선택된 학년값 저장
+  const dataKey = targetKey[targetGrade.value]
+
+  console.log(dashBoard.value.schedules[dataKey])
+
+  // dashBoard 안에 시간표에서 선택된 dataKey을 반환
+  return dashBoard.value.schedules[dataKey]
+})
+
+// 버튼 클릭 시 실행될 함수 (단순화)
+const gradeSelect = (grade) => {
+  targetGrade.value = grade
+}
 
 const HandleNoticeMove = () => {
   if (user.userInfo?.grade_id) {
@@ -123,6 +202,10 @@ const HandleNoticeMove = () => {
     router.push({ path: 'notice' })
   }
 }
+
+watchEffect(() => {
+  console.log(targetGrade.value)
+})
 
 const HandleNoticeClick = (notice_id) => {
   router.push({ path: `/noticeView/${notice_id}` })
@@ -155,8 +238,8 @@ a.btn-link {
 }
 
 .dashboard-container {
-  width: 1440px;
-  max-width: 1440px;
+  width: 1800px;
+  max-width: 1800px;
   margin: 0 auto;
 }
 
