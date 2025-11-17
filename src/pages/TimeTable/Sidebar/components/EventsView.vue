@@ -1,15 +1,13 @@
 <script setup>
 import { getEvent, delEvent } from '@/api/timetableApi'
 import { ref, watch } from 'vue'
+import { useTimetableStore } from '@/stores/timetable'
 
 const eventList = ref(null) // 휴보강 정보
 const target = ref('0')
 const events = ref(null) // target 필터링 휴보강 정보
 
-// const selectEvent = ref({
-//   schedule_ids: [],
-
-// })
+const Tstore = useTimetableStore() // 시간표 store
 
 async function setEvents() {
   eventList.value = await getEvent()
@@ -40,6 +38,7 @@ const handleDel = async (event_ids) => {
     }
     // 초기화
     events.value = await setEvents()
+    await Tstore.setTimetable()
   }
 }
 </script>
