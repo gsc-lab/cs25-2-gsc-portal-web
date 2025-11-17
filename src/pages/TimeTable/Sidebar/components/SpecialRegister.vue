@@ -14,18 +14,20 @@ const classes = ref(null) // isJP -> 반 조회
 const selectClassId = ref(null) // (select) 반 저장
 const assignedStd = ref([]) // [students] 배정 O
 const unassignedStd = ref([]) // [students] 배정 X
-const lenUnassignedStd = ref(null) // 배정 X 학생 수
+const lenAssignedStd = ref(null) // 배정 X 학생 수
 
 // 반 조회
 const handleGetClasses = async () => {
   isJP.value = !isJP.value
   if (isJP.value) classes.value = await getSpecialClasses()
   else classes.value = await getKoreanClasses()
+  selectClassId.value = classes.value[0].class_id
   console.log(classes.value)
 }
 // 반 초기화
-onMounted(() => {
-  handleGetClasses()
+onMounted(async () => {
+  await handleGetClasses()
+  if (selectClassId.value == null) selectClassId.value = classes.value[0].class_id
 })
 
 // ==========================  반 선택 감시  ==========================
@@ -34,7 +36,6 @@ watch(
   async () => {
     await getClassStd()
   },
-  { immediate: true },
 )
 
 // 해당 반 학생 조회
@@ -43,15 +44,15 @@ async function getClassStd() {
   console.log('학생: ', clsStd)
   assignedStd.value = [...clsStd.assigned_students]
   unassignedStd.value = [...clsStd.unassigned_students]
-  lenUnassignedStd.value = unassignedStd.value.length
+  lenAssignedStd.value = assignedStd.value.length
 }
 
 // ==========================  등록 / 수정  ==========================
 const handleSubmit = async () => {
   // 선택 중인 학생의 ID추출
   const student_ids = assignedStd.value.map((std) => std.user_id)
-  console.log('student_ids', student_ids)
-  if (lenUnassignedStd.value == 0) await postClassStudents(selectClassId.value, student_ids)
+  console.log('student_ids', lenAssignedStd.value, student_ids)
+  if (lenAssignedStd.value == 0) await postClassStudents(selectClassId.value, student_ids)
   else await putClassStudents(selectClassId.value, student_ids)
 }
 </script>

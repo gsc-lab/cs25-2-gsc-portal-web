@@ -12,6 +12,8 @@ export const postCourse = async (courseData) => {
       title: courseData.course,
       professor_id: courseData.professor_id,
       target: courseData.target,
+      class_id: courseData.class_id,
+      class_name: courseData.className,
     })
     alert('과목이 등록되었습니다.')
   } catch (e) {
@@ -83,7 +85,6 @@ export const postFukaCustomStudents = async (fukaData) => {
   try {
     await api.post(`/timetables/huka/student/custom`, {
       student_ids: fukaData.student_ids,
-      day: fukaData.day,
       date: fukaData.date,
       start_slot: fukaData.startTime,
       end_slot: fukaData.endTime,
@@ -114,12 +115,13 @@ export const postClassStudents = async (class_id, student_ids) => {
 // ---------------------------------------------------------------
 export const postSection = async (section) => {
   try {
-    await api.post(`/modal/common/sections`, {
+    const res = await api.post(`/modal/common/sections`, {
       year: section.year,
       semester: section.semester,
       start_date: section.start_date,
       end_date: section.end_date,
     })
+    return res.data
   } catch (e) {
     errorMsg(e)
   }
@@ -129,9 +131,9 @@ export const postSection = async (section) => {
 // ---------------------------------------------------------------
 // 과목 정보 조회
 // ---------------------------------------------------------------
-export const getCourses = async () => {
+export const getCourses = async (sec_id) => {
   try {
-    const res = await api.get(`/modal/subjects/courses/all`)
+    const res = await api.get(`/modal/subjects/courses/all/${sec_id}`)
     console.log(res.data)
     return res.data
   } catch (e) {
@@ -252,7 +254,6 @@ export const getClassStudents = async (class_id) => {
 export const getSections = async () => {
   try {
     const res = await api.get(`/modal/common/sections`)
-    console.log('getSections : ', res.data)
     return res.data
   } catch (e) {
     errorMsg(e)
@@ -271,6 +272,7 @@ export const putCourse = async (Data) => {
       title: Data.data.title,
       professor_id: Data.data.professor_id,
       target: Data.data.target,
+      class_id: Data.data.class_id,
     })
     return res.data
   } catch (e) {
@@ -288,7 +290,6 @@ export const putTimetable = async (Data) => {
       day_of_week: Data.data.day,
       start_period: Data.data.start_period,
       end_period: Data.data.end_period,
-      class_name: Data.data.class_id.slice(4), // 나중에 id로 수정 할수도...
     })
   } catch (e) {
     errorMsg(e)

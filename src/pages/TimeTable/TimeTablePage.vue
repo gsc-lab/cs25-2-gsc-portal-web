@@ -26,6 +26,7 @@ watch(
 // 시간표에서 선택한 데이터
 function setData(data) {
   Tstore.setSchedule(data)
+  sidebarIsOpen.value = true
   // console.log("저장 완료:", store.selectTT);
 }
 </script>

@@ -11,7 +11,6 @@ import {
   delTimetable,
   getSpecialClasses,
   getKoreanClasses,
-  getSections,
 } from '@/api/timetableApi'
 
 const Tstore = useTimetableStore() // 시간표 store
@@ -22,13 +21,16 @@ const classrooms = ref(null) // 교실
 const specialClasses = ref() // 분반 클래스 목록
 const KoreanClasses = ref()
 const sections = ref(null)
+const section = ref() // 조회 학기
+
 onMounted(async () => {
   professors.value = await Pstore.getProfessors()
   classrooms.value = await Cstore.getClassroom()
-  sections.value = await getSections()
+  sections.value = await Tstore.getSections()
   specialClasses.value = await getSpecialClasses()
   KoreanClasses.value = await getKoreanClasses()
-  console.log('professors', professors.value)
+  section.value = await Tstore.sectionOfDate()
+  console.log('sections', sections.value)
   console.log('classrooms', classrooms.value)
 })
 
@@ -64,7 +66,7 @@ async function setOriginCourses() {
 
 // set originCourses, courses
 async function setCourses() {
-  await Tstore.setCourses()
+  await Tstore.setCourses(section.value)
   await setOriginCourses()
   courses.value = await Tstore.courseFilter(target.value)
   console.log('courses.value', courses.value)
@@ -81,6 +83,13 @@ watch(
     console.log(courses.value)
   },
   { immediate: true },
+)
+// section 바뀌면 과목조회
+watch(
+  () => section.value,
+  async () => {
+    setCourses()
+  },
 )
 
 const toggleSelect = (course_id) => {
@@ -156,6 +165,14 @@ const handleTimetableDel = async (schedule_ids) => {
 
 <template>
   CourseView
+
+  <div>
+    <select id="section" v-model="section">
+      <option v-for="section in sections" :value="section.sec_id" :key="section.sec_id">
+        {{ section.label }}
+      </option>
+    </select>
+  </div>
 
   <div>
     <input type="radio" id="0" value="0" v-model="target" />

@@ -2,15 +2,16 @@
 import { ref, watch, onMounted } from 'vue'
 import { useTimetableStore } from '@/stores/timetable'
 import { useProfessorStore } from '@/stores/professor'
-import { postCourse, getSections, postSection } from '@/api/timetableApi'
+import { postCourse, postSection, getSpecialClasses, getKoreanClasses } from '@/api/timetableApi'
 
 const Tstore = useTimetableStore()
 const Pstore = useProfessorStore()
 const professors = ref() // 교수 명단
 const sections = ref(null)
+const classes = ref(null)
 onMounted(async () => {
   professors.value = await Pstore.getProfessors()
-  sections.value = await getSections()
+  sections.value = await Tstore.getSections()
   console.log('professors', professors.value)
 })
 
@@ -20,6 +21,8 @@ const postCourseData = ref({
   course: null,
   professor_id: null,
   section: null,
+  class_id: null,
+  className: null,
 })
 
 const newSection = ref({
@@ -50,21 +53,38 @@ watch(
   },
   { immediate: true },
 )
-
+// ================================= target 감시 =================================
+// target 바뀌면 해당 과목 필터링
+watch(
+  () => postCourseData.value.target,
+  async (target) => {
+    if (target == 'special') {
+      // target에 맞게 classes 정의
+      classes.value = await getSpecialClasses()
+    } else if (target == 'korean') {
+      classes.value = await getKoreanClasses()
+    }
+  },
+  { immediate: true },
+)
 // ================================= Submit =================================
 // 저장버튼 누른 후 실행
 const handleSubmit = async () => {
   // 학기 추가
   if (postCourseData.value.section == 'new') {
-    // 1, 2, s, w외의 학기
-    if (postCourseData.value.section.semester == 'new') {
-      postCourseData.value.section.semester = newSemesterName.value
-    }
+    // // 1, 2, s, w외의 학기
+    // if (newSection.value.semester == 'new') {
+    //   newSection.value.semester = newSemesterName.value
+    //   console.log('newSection', newSection.value)
+    // }
     // 새로운 학기 등록
-    await postSection(newSection.value)
+    const res = await postSection(newSection.value)
     // sec_id 생성 -> postCourseData에 대입
-    postCourseData.value.section = `${newSection.value.year}-${newSection.value.semester}`
+    postCourseData.value.section = res.sec_id
     console.log('OK', postCourseData.value.section)
+    // 초기화
+    await Tstore.setSections()
+    sections.value = await Tstore.getSections()
   }
   // 과목 등록
   await postCourse(postCourseData.value)
@@ -107,13 +127,27 @@ const handleSubmit = async () => {
       </option>
     </select>
   </div>
+  <!-- 분반 -->
+  <div v-if="postCourseData.target == 'special' || postCourseData.target == 'korean'">
+    <label for="class_id">반 : </label>
+    <select id="class_id" v-model="postCourseData.class_id">
+      <option v-for="cls in classes" :key="cls.class_id" :value="cls.class_id">
+        {{ cls.class_group }}
+      </option>
+      <option :value="null">기타</option>
+    </select>
+    <div v-if="postCourseData.class_id == null">
+      <label for="className">반 이름 입력 : </label>
+      <input id="className" v-model="postCourseData.className" />
+    </div>
+  </div>
 
   <!-- 학기 입력 -->
   <div>
     <label for="section">학기 : </label>
     <select id="section" v-model="postCourseData.section">
       <option v-for="section in sections" :value="section.sec_id" :key="section.sec_id">
-        {{ section.sec_id }}
+        {{ section.label }}
       </option>
       <option value="new">새로 생성</option>
     </select>
@@ -130,12 +164,12 @@ const handleSubmit = async () => {
           <option value="2">2학기</option>
           <option value="s">여름방학</option>
           <option value="w">겨울방학</option>
-          <option value="new">기타</option>
+          <!-- <option value="new">기타</option> -->
         </select>
-        <div v-if="newSection.semester == 'new'">
+        <!-- <div v-if="newSection.semester == 'new'">
           <label for="semesterName">학기 이름:</label>
           <input id="semesterName" v-model="newSemesterName" />
-        </div>
+        </div> -->
       </div>
       <div>
         <label for="date">학기 시작일 : </label>
