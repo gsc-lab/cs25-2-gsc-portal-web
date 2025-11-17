@@ -14,7 +14,7 @@ const postData = ref({
   classroom_id: null,
   building: '창조관',
   room_number: null,
-  room_type: 0,
+  room_type: '',
   mode: 'free',
   limit: null,
 })
@@ -32,19 +32,28 @@ watch(
     postData.value.room_number = newCR.room_number
   },
 )
-
+// 등록
 const handleSubmitPost = async () => {
+  console.log('postData.value', postData.value)
+  if (postData.value.building == null && buildingName.value != '')
+    postData.value.building = buildingName.value
+  else if (postData.value.room_number == '') return
+
+  await postClassroom(postData.value)
+  // 초기화
+  await CRstore.setClassroomInfo()
+  classrooms.value = await CRstore.getClassroomInfo()
+}
+// 수정
+const handleSubmitPatch = async () => {
   if (postData.value.building == null && buildingName.value != '')
     postData.value.building = buildingName.value
   else if (postData.value.room_number == '' || buildingName.value == '') return
 
-  await postClassroom(postData.value)
-}
-const handleSubmitPatch = async () => {
-  if (postData.value.building == null && buildingName.value != '') postData.value.building = buildingName.value
-  else if (postData.value.room_number == '' || buildingName.value == '') return
-
   await patchClassroom(postData.value)
+  // 초기화
+  await CRstore.setClassroomInfo()
+  classrooms.value = await CRstore.getClassroomInfo()
 }
 </script>
 
@@ -58,7 +67,7 @@ const handleSubmitPatch = async () => {
     </button>
 
     <div v-if="!isPost">
-      <label for="pa">수정대상 : </label>
+      <label for="pa">수정대상 :</label>
       <select id="pa" v-model="selectCR">
         <option v-for="clr in classrooms" :value="clr" :key="clr">
           {{ clr.building }}{{ clr.room_number }}
@@ -68,7 +77,7 @@ const handleSubmitPatch = async () => {
 
     <!-- 관, 동 -->
     <div>
-      <label for="building">장소 : </label>
+      <label for="building">장소 :</label>
       <select id="building" v-model="postData.building">
         <option value="창조관">창조관</option>
         <option value="연서관">연서관</option>
@@ -79,20 +88,21 @@ const handleSubmitPatch = async () => {
         <option value="null">기타</option>
       </select>
       <div v-if="postData.building == null">
-        <label for="room_number">장소 입력 : </label>
+        <label for="room_number">장소 입력 :</label>
         <input id="room_number" placeholder="xx관" v-model="buildingName" required />
       </div>
     </div>
 
     <!-- 호실 -->
     <div>
-      <label for="room_number">호실 : </label>
-      <input id="room_number" placeholder="000" v-model="postData.room_number" />호
+      <label for="room_number">호실 :</label>
+      <input id="room_number" placeholder="000" v-model="postData.room_number" />
+      호
     </div>
 
     <!-- 사용대상 -->
     <div>
-      <label for="room_type">사용대상 : </label>
+      <label for="room_type">사용대상 :</label>
       <select id="room_type" v-model="postData.room_type">
         <option value="0">전체</option>
         <option value="1">1학년</option>
@@ -105,7 +115,7 @@ const handleSubmitPatch = async () => {
     <div v-if="postData.room_type != '0'">
       <!-- 운영 방식 (free or poll) -->
       <div>
-        <label for="mode">운영 방식 : </label>
+        <label for="mode">운영 방식 :</label>
         <select id="mode" v-model="postData.mode">
           <option value="poll">신청제</option>
           <option value="free">자율</option>
@@ -114,8 +124,9 @@ const handleSubmitPatch = async () => {
 
       <!-- 제한 내용 (x명 이상) -->
       <div v-if="postData.mode == 'poll'">
-        <label for="limit">제한 : </label>
-        <input id="limit" placeholder="5" v-model="postData.limit" /> 명 이상
+        <label for="limit">제한 :</label>
+        <input id="limit" placeholder="5" v-model="postData.limit" />
+        명 이상
       </div>
     </div>
 

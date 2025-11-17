@@ -9,7 +9,11 @@ export const useClassroomStore = defineStore('classroom', {
     selectCR: null, // 지금 선택 중인 classroom_id
     selectResSchedule: {}, // 해당 classroom_id의 예약 현환
 
-    selectReTime: [], // 선택한 일시 ["날짜", start_time, end_time]
+    selectReTime: {
+      date: null,
+      start_time: null,
+      end_time: null,
+    }, // 선택한 일시 ["날짜", start_time, end_time]
   }),
   actions: {
     // ----------------------- classrooms -----------------------
@@ -52,7 +56,7 @@ export const useClassroomStore = defineStore('classroom', {
     },
     //  [ get ] : classroomsInfo 조회
     async getClassroomInfo() {
-      if (Object.keys(this.classroomsInfo.length <= 0)) {
+      if (Object.keys(this.classroomsInfo).length <= 0) {
         await this.setClassroomInfo()
       }
       return this.classroomsInfo
@@ -82,15 +86,15 @@ export const useClassroomStore = defineStore('classroom', {
 
     // ----------------------- selectResSchedule -----------------------
     // [ set ] : selectResSchedule 세팅
-    async setSelectResSchedule(selected_id) {
-      this.selectResSchedule = await getReservation(selected_id)
+    async setSelectResSchedule(selected_id = this.selectCR, date = this.selectReTime.date) {
+      this.selectResSchedule = await getReservation(selected_id, date)
       if (selected_id != this.selectCR) this.selectCR = selected_id
-      console.log('store: selectResSchedule', this.selectResSchedule)
+      // console.log('store: selectResSchedule', this.selectResSchedule)
     },
     //  [ get ] : selectResSchedule 조회
-    async getSelectResSchedule() {
-      // selectResSchedule 없으면 classroomsInfo의 0번째 id를 세트 후 반환
-      await this.setSelectResSchedule(this.selectCR)
+    async getSelectResSchedule(date = this.selectReTime.date) {
+      if (date != this.selectReTime.date) this.selectReTime.date = date
+      await this.setSelectResSchedule(this.selectCR, date)
       return this.selectResSchedule
     },
 

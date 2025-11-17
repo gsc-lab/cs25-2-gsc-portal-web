@@ -48,10 +48,10 @@ export const getClassroomsInfo = async () => {
 //      },{}]
 //    }
 // ---------------------------------------------------------------
-export const getReservation = async (classroom_id) => {
+export const getReservation = async (classroom_id, date) => {
   try {
     const res = await api.get(`/classrooms/${classroom_id}/reservations`, {
-      params: { date: '2025-10-13' },
+      params: { date: date },
     })
     console.log(res.data)
     return res.data
@@ -74,11 +74,10 @@ export const getReservation = async (classroom_id) => {
 //     },{}]
 // ---------------------------------------------------------------
 export const getPoll = async (date) => {
-  console.log('getPoll: ', date)
   try {
     const res = await api.get(`/classrooms/polls`, {
       params: {
-        date: '2025-04-02', // date
+        date: date,
       },
     })
     console.log(res.data)
@@ -92,15 +91,14 @@ export const getPoll = async (date) => {
 // ---------------------------------------------------------------
 // 강의실 예약 등록
 // ---------------------------------------------------------------
-export const postReservation = async (reservationData) => {
+export const postReservation = async (classroom_id, data) => {
   try {
-    const res = await api.post(`/classrooms/${reservationData.classroom_id}/reservations`, {
-      // user_id: '2423001',// reservationData.name,
-      reserve_date: reservationData.reserve_date,
-      start_time: reservationData.start_time,
-      end_time: reservationData.end_time,
+    const res = await api.post(`/classrooms/${classroom_id}/reservations`, {
+      reserve_date: data.date,
+      start_time: data.start_time,
+      end_time: data.end_time,
     })
-    // console.log(res.data);
+    console.log(res.data)
     return res.data
   } catch (e) {
     errorMsg(e)
@@ -115,7 +113,7 @@ export const postClassroom = async (CRdata) => {
     const res = await api.post(`/classrooms`, {
       building: CRdata.building,
       room_number: CRdata.room_number,
-      room_type: CRdata.room_type,
+      room_type: String(CRdata.room_type),
 
       // mode: CRdata.mode,
       // limit: CRdata.limit,
@@ -156,6 +154,20 @@ export const patchClassroom = async (CRdata) => {
       // mode: CRdata.mode,
       // limit: CRdata.limit,
     })
+    // console.log(res.data);
+    return res.data
+  } catch (e) {
+    errorMsg(e)
+  }
+}
+
+// ========================== delete ===============================
+// ---------------------------------------------------------------
+// 강의실 예약 삭제
+// ---------------------------------------------------------------
+export const deleteReservation = async (classroom_id, reservation_id) => {
+  try {
+    const res = await api.delete(`/classrooms/${classroom_id}/reservations/${reservation_id}`)
     // console.log(res.data);
     return res.data
   } catch (e) {
