@@ -30,26 +30,24 @@
             <div class="form-row">
               <label class="form-label" for="notice-grade">분류</label>
               <div class="select-group">
-                <select id="notice-grade" class="form-select" v-model="gradeSelect">
-                  <option v-for="grade in grade_id" :key="grade.grade_id" :value="grade.grade_id">
-                    {{ grade.grade_id === '전체' ? '전체 학년' : grade.grade_id + '학년' }}
+                <select id="notice-grade" class="form-select" v-model="targetSelect">
+                  <option
+                    v-for="notice in noticeTarget"
+                    :key="notice.target"
+                    :value="notice.target"
+                  >
+                    {{ targetFilter(notice.target) }}
                   </option>
                 </select>
                 <select class="form-select" v-model="courseTypeSelect">
                   <option
-                    v-for="courseT in course_type"
-                    :key="courseT"
-                    :value="courseT.course_type"
+                    v-for="type in filterCourseType"
+                    :key="type.course_type"
+                    :value="type.course_type"
                   >
-                    {{
-                      courseT.course_type === 'general'
-                        ? '전체'
-                        : courseT.course_type === 'regular'
-                          ? '정규'
-                          : courseT.course_type === 'special'
-                            ? '특강'
-                            : '한국어'
-                    }}
+                    <span>
+                      {{ courseTypeFilter(type.course_type) }}
+                    </span>
                   </option>
                 </select>
               </div>
@@ -101,7 +99,12 @@
 
             <div class="form-row content-row">
               <label class="form-label" for="notice-content">내용</label>
-              <textarea id="notice-content" class="form-textarea" v-model="content"></textarea>
+              <textarea
+                id="notice-content"
+                class="form-textarea"
+                placeholder="내용을 입력하세요"
+                v-model="content"
+              ></textarea>
             </div>
           </div>
 
@@ -185,14 +188,14 @@ const route = useRoute()
 const notice = ref(null)
 const noticeStore = useNoticeStore()
 
-const { grade_id, course_type } = storeToRefs(noticeStore)
+const { noticeTarget, course_type } = storeToRefs(noticeStore)
 
 // ======================= 기존 게시글 내용 저장 ========================
 
 const title = ref('') // 제목
 const isImportant = ref(false) // 중요
 const author = ref('') // 작성자
-const gradeSelect = ref('전체') // 학년 선택
+const targetSelect = ref('전체') // 학년 선택
 const courseTypeSelect = ref('general') // select 태그에서 선택시 변경 : 기본값 regular
 const courseSelect = ref('') // 선택한 과목 명
 const existing_file_ids = ref([]) // 유지하고 싶은 기존 파일
@@ -203,60 +206,123 @@ const content = ref('') // 내용
 
 const openTargetModal = ref(false)
 const gradeFilters = ref(['1학년', '2학년', '3학년'])
-const modalGradeSelect = ref('1학년') // 모달) 학년 선택
+const modalGradeSelect = ref('1학년') // 모달) 학년 선택 (기본값 1학년)
 const modalStudentSelect = ref([]) // 모달) 선택된 학생들
 
 // ======================================================================
 
+// API 요청받은값 저장
 const courses = ref([]) // 과목 선택 배열
-// ( course_id / title / grade_id / course_type )
 const students = ref([]) // 학생 목록 배열
-// ( user_id / name / email / phone / grade_name )
 
-const isInitial = ref(true)
+const isInitial = ref(true) // 초기화 상태 확인 플래그
+
 onMounted(async () => {
   try {
-    const noticeId = route.params.id // URL의 notice_id 값 가져오기 ( router 에는 notice/:id 설정 )
+    const noticeId = route.params.id // URL의 notice_id 값 가져오기
     courses.value = await getCourse() // 전체 과목 요청 API
     students.value = await getAllUser() // 전체 학생 요청 API
-    console.log(noticeId)
+    console.log('수정할 글 ID:', noticeId)
 
     const res = await getNoticeView(noticeId) // 선택된 공지사항 요청 API
     notice.value = res || {}
 
-    console.log(notice.value)
-    console.log(students.value)
+    console.log('불러온 공지 데이터:', notice.value)
+
+    // 1. 기본 정보
     title.value = notice.value.title || ''
     isImportant.value = notice.value.is_pinned === 1
-    author.value = notice.value.author.name || ''
-    gradeSelect.value = notice.value.targets[0]?.grade_id || '전체'
-    courseTypeSelect.value = notice.value.course_type || 'general'
-    courseSelect.value = notice.value.course_id || null
+    author.value = notice.value.author?.name || ''
     content.value = notice.value.content || ''
     existing_file_ids.value = notice.value.attachments || []
-    console.log(existing_file_ids.value)
-    console.log(courseSelect.value)
-    console.log(courses.value)
-    // DOM 업데이트까지 대기
-    await nextTick()
+
+    // 2. 분류/타입/과목
+    const savedType = notice.value.course_type // ( general, regular, special, korean )
+
+    // special, korean 일 경우
+    if (['special', 'korean'].includes(savedType)) {
+      targetSelect.value = savedType // 'special' 등으로 설정
+
+      // 저장된 targets에서 class_id ('C007A')를 가져와 분리
+      const savedTarget = notice.value.targets && notice.value.targets[0]
+
+      if (savedTarget && savedTarget.class_id) {
+        const fullClassId = savedTarget.class_id // 예: 'C007A'
+
+        // 마지막 글자가 반 (A/B), 나머지가 과목ID(C007)
+        const classType = fullClassId.slice(-1)
+        const courseId = fullClassId.slice(0, -1)
+
+        courseTypeSelect.value = classType // 'A' 또는 'B'
+
+        // DOM 업데이트 후 과목 선택 (filterCourse 계산 대기)
+        await nextTick()
+        courseSelect.value = courseId
+      } else {
+        // class_id가 없는 경우 예외처리 (기본값 A)
+        courseTypeSelect.value = 'A'
+      }
+    }
+    // Case B: 1, 2, 3 학년 또는 전체
+    else {
+      // targets에 grade_id가 있으면 학년 설정, 없으면 전체
+      const savedGrade = notice.value.targets?.[0]?.grade_id
+      targetSelect.value = savedGrade || '전체'
+
+      courseTypeSelect.value = savedType // general, regular
+
+      await nextTick()
+      courseSelect.value = notice.value.course_id || ''
+    }
+
+    // 초기화 완료 후 false로 변경하여 watch 동작 허용
     isInitial.value = false
   } catch (err) {
-    console.log(err)
+    console.error('데이터 로드 실패', err)
   }
 })
 
-// 학년 별 해당 과목 필터링
+const filterCourseType = computed(() => {
+  if (targetSelect.value === '전체') {
+    return course_type.value.filter((type) => type.course_type === 'general')
+  }
+  if (['1', '2', '3'].includes(targetSelect.value)) {
+    const typeList = ['general', 'regular']
+    return course_type.value.filter((type) => typeList.includes(type.course_type))
+  }
+  if (['special', 'korean'].includes(targetSelect.value)) {
+    const typeList = ['A', 'B']
+    return course_type.value.filter((type) => typeList.includes(type.course_type))
+  }
+
+  return []
+})
+
+// 학년, 과목 유형에 따른 과목 필터링
 const filterCourse = computed(() => {
-  // if (gradeCheck.value === '전체') return courses.value
-  if (gradeSelect.value === '전체') {
-    // 대상 (grade) 이 전체일 경우 과목 명에 따라 courses에 담기는 데이터를 구분
-    return courses.value.filter((course) => course.course_type === courseTypeSelect.value)
-  } else {
+  // 1. 전체 선택 시
+  if (targetSelect.value === '전체') {
+    return []
+  }
+
+  // 2. 1, 2, 3 학년 선택 시
+  if (['1', '2', '3'].includes(targetSelect.value)) {
     return courses.value.filter(
       (course) =>
-        course.grade_id === gradeSelect.value && course.course_type === courseTypeSelect.value,
+        course.grade_id === targetSelect.value && course.course_type === courseTypeSelect.value,
     )
   }
+
+  // 3. special, korean 선택 시 (class_id 필터링)
+  if (['special', 'korean'].includes(targetSelect.value)) {
+    return courses.value.filter(
+      (course) =>
+        course.class_id &&
+        course.class_id.includes(courseTypeSelect.value) && // A 또는 B 포함 여부
+        course.course_type === targetSelect.value, // special 또는 korean
+    )
+  }
+  return []
 })
 
 const fixFileName = (str) => {
@@ -267,17 +333,7 @@ const fixFileName = (str) => {
   }
 }
 
-const selectedGrade = computed(() => {
-  if (!notice.value || !notice.value.course_id) return null
-  const selected = courses.value.find((course) => course.course_id === notice.value.course_id)
-  return selected ? selected.grade_id : null
-})
-
-// const selectedCourse = computed(() =>
-// courses.value.find((c) => c.course_id === course_title.value)
-// )
-
-// 선택된 과목이 전체 과목에 존재하는지 확인 ( 있을 경우 course_id 반환 없으면 null 반환 )
+// 선택된 과목 정보 찾기 (수정 시 사용)
 const selectedCourse = computed(() => {
   return courses.value.find((course) => course.course_id === courseSelect.value) || null
 })
@@ -295,31 +351,87 @@ const removeNewFile = (index) => {
   newFiles.value.splice(index, 1)
 }
 
-// 공지사항 수정 등록 ( API POST 요청 )
+const targetFilter = (target) => {
+  if (target === '1' || target === '2' || target === '3') {
+    return target + '학년'
+  }
+  if (target === 'special') return '일본어 특강'
+  if (target === 'korean') return '한국어'
+
+  return target
+}
+
+const courseTypeFilter = (type) => {
+  if (type === 'A' || type === 'B') {
+    return type + '반'
+  }
+  if (type === 'general') {
+    return '전체'
+  }
+  if (type === 'regular') {
+    return '정규'
+  }
+}
+
+// 공지사항 수정 등록 ( API 요청 )
 const updateNotice = async () => {
+  if (title.value === '' || content.value === '') {
+    alert('제목 및 내용을 입력해주세요')
+    return
+  }
+
+  // 1. 기본 데이터 구성
   const noticeData = {
     title: title.value,
     author: author.value,
     is_pinned: isImportant.value ? 1 : 0,
     course_id: selectedCourse.value ? selectedCourse.value.course_id : null,
     course_title: selectedCourse.value ? selectedCourse.value.title : null,
-    course_type: courseTypeSelect.value,
     specific_users: modalStudentSelect.value || [],
     content: content.value,
     existing_file_ids: existing_file_ids.value.map((file) => file.file_id),
+
+    // course_type 설정 로직
+    course_type: ['special', 'korean'].includes(targetSelect.value)
+      ? targetSelect.value
+      : courseTypeSelect.value,
   }
 
-  if (gradeSelect.value !== '전체') {
-    noticeData.targets = [
-      {
-        grade_id: gradeSelect.value,
-        level_id: null,
-        language_id: null,
-      },
-    ]
+  // 2. target
+  if (targetSelect.value !== '전체') {
+    const targetObject = {
+      grade_id: null,
+      class_id: null,
+      language_id: null,
+    }
+
+    // 학년일 경우
+    if (['1', '2', '3'].includes(targetSelect.value)) {
+      targetObject.grade_id = targetSelect.value
+    }
+    // 특강/한국어일 경우
+    else if (['special', 'korean'].includes(targetSelect.value)) {
+      // course_id(C007) + 반(A) = C007A로 합침
+      if (courseSelect.value && courseTypeSelect.value) {
+        targetObject.class_id = courseSelect.value + courseTypeSelect.value
+      }
+
+      if (targetSelect.value === 'special') {
+        targetObject.language_id = 'JP'
+      }
+      if (targetSelect.value === 'korean') {
+        targetObject.language_id = 'KR'
+      }
+    }
+
+    noticeData.targets = [targetObject]
   } else {
+    // 전체일 경우
     noticeData.targets = []
+    noticeData.course_type = 'general'
   }
+
+  console.log('수정 요청 데이터:', noticeData)
 
   try {
     await patchNotice(route.params.id, noticeData, newFiles.value)
@@ -327,31 +439,41 @@ const updateNotice = async () => {
     router.push({ path: '/notice' })
   } catch (err) {
     console.error(err)
-    alert('업로드 중 오류가 발생했습니다.')
+    alert('수정 중 오류가 발생했습니다.')
   }
 }
 
-// watch(courseTypeSelect, (newType, oldType) => {
-//   if (newType !== oldType) {
-//     courseSelect.value = ''
-//   }
-// })
+// 타입 변경 시 과목 선택 초기화
+watch(courseTypeSelect, (newType, oldType) => {
+  if (isInitial.value) return
+  if (newType !== oldType) {
+    courseSelect.value = ''
+  }
+})
 
-watch(gradeSelect, async (newGrade) => {
-  // isInitial = true ( 업데이트 진행 중 )
+// targetSelect) 변경 시
+watch(targetSelect, async (newTarget) => {
+  // isInitial false 시 실행하지 않음
   if (isInitial.value) return
 
-  if (newGrade === '전체') {
+  if (newTarget === '전체') {
     courseTypeSelect.value = 'general'
-  } else {
+    courseSelect.value = ''
+  } else if (['1', '2', '3'].includes(newTarget)) {
     // DOM 업데이트까지 대기
     await nextTick()
     courseTypeSelect.value = 'regular'
+    courseSelect.value = ''
+  } else if (['special', 'korean'].includes(newTarget)) {
+    courseTypeSelect.value = 'A' // 특강 기본값 A반
+    courseSelect.value = ''
   }
 })
 
 watchEffect(() => {
-  console.log('과목 ID 에서 필터링된 학년', selectedGrade.value)
+  //   console.log('선택된 학년: ', targetSelect.value)
+  //   console.log('선택된 과목 타입: ', courseTypeSelect.value)
+  //   console.log('선택과목 아이디: ', courseSelect.value)
 })
 
 const saveAndClose = () => {
@@ -360,7 +482,7 @@ const saveAndClose = () => {
 }
 
 const backPage = () => {
-  router.back()
+  router.push({ path: '/notice' })
 }
 </script>
 
