@@ -54,9 +54,9 @@ export const useNoticeStore = defineStore('Notice', () => {
   ])
 
   // 필터링 시 필요 조건 항목
-  const targetSelect = ref("전체")
-  const courseTypeSelect = ref("general")
-  const courseSelect = ref("")
+  const targetSelect = ref('전체')
+  const courseTypeSelect = ref('general')
+  const courseSelect = ref('')
 
 
   // apiCourse에서 요청받은 과목 정보 가져오기
@@ -64,7 +64,7 @@ export const useNoticeStore = defineStore('Notice', () => {
     courses.value = course_list
   }
 
-  // 전체 과목 정보에서 course_id를 키값으로 하여 빠르게 접근 가능
+  // 전체 과목 정보에서 course_id를 키값으로 하여 객체 접근 가능
   const courseMap = computed(() => {
     const map = new Map()
     for (const course of courses.value) {
@@ -92,45 +92,58 @@ export const useNoticeStore = defineStore('Notice', () => {
   // 공지사항 필터링
   const filterNotices = computed(() => {
     return noticeList.value.filter((notice) => {
-      const course = courseMap.value.get(notice.course_id)
+      const target = targetSelect.value;
+      const type = courseTypeSelect.value;
+      const selectedCourseId = courseSelect.value;
 
-      // 타겟 체크 ture 시 해당 학년 게시글만 반환
-      let targetCheck = false
-      if (notice.course_id) {
-        targetCheck = course?.grade_id === targetSelect.value || course?.course_type === targetSelect.value
-      } else {
-
-        if (notice.targets.length > 0 || notice.targets.some((target) => target?.grade_id !== null)) {
-          targetCheck = notice.targets.some((target) => target.grade_id === targetSelect.value)
-        } else {
-          targetCheck = targetSelect.value === '전체'
-        }
+      // 선택된 과목 id가 선택디고 공지사항의 과목 id 가 선택한 과목 id 와 일치하지 않을 경우 false
+      if (selectedCourseId && notice.course_id !== selectedCourseId) {
+        return false;
       }
 
-      // 과목별 ture 시 해당 과목 x 게시글만 반환
-
-      let courseTypeCheck = false
-      if (courseTypeSelect.value === 'general') {
-        courseTypeCheck = true
-      } else if (notice.course_id && course?.course_type === 'special' || course?.course_type === 'korean') {
-        courseTypeCheck = course?.course_type === courseTypeSelect.value
-      } else if (notice.course_id) {
-        courseTypeCheck = course?.course_type === courseTypeSelect.value
-      } else {
-        courseTypeCheck = false
+      // 공지사항 타겟이 전체일 경우
+      if (target === '전체') {
+        // 공지사항의 과목 id 가 존재하지 않고 과목 타입이 general 이며, targets의 값이 빈 배열일 경우
+        return !notice.course_id && notice.course_type === 'general' && notice.targets.length === 0;
       }
 
-      // 과목 선택 필터링 확인
-      let courseSelectCheck = false
-      if (courseSelect.value === '') {
-        courseSelectCheck = true
-      } else {
-        courseSelectCheck = notice.course_id === courseSelect.value;
+      // course 안에는 courseMap 에 있는 course_id 값과 일치하는 공지사항의 course_id 를 가져와서 저장
+      // 존재하지 않을 경우 undifined
+      const course = courseMap.value.get(notice.course_id);
+
+      // 3. [1, 2, 3 학년] 안에 선택된 target에 해당하면 통과
+      if (['1', '2', '3'].includes(target)) {
+
+        // ( course 가 존재 하며, 과목의 학년과 선택한 학년의 값, 과목의 타입이 선택한 타입과 일치여부 확인)
+        const isCourse =
+          course &&
+          course.grade_id === target &&
+          course.course_type === type;
+
+        // ( notice.targets 가 )
+        const isTarget =
+          notice.targets &&
+          notice.targets.some((tar) => tar.grade_id === target) &&
+          notice.course_type === type;
+
+        return isCourse || isTarget;
       }
 
-      return targetCheck && courseTypeCheck && courseSelectCheck
-    })
-  })
+
+      if (['special', 'korean'].includes(target)) {
+
+        if (!course) return false;
+
+        return (
+          course.course_type === target &&
+          course.class_id &&
+          course.class_id?.includes(type)
+        );
+      }
+
+      return false;
+    });
+  });
 
   // 일본어 특강 A 반 필터링
   const coursesA = computed(() => {
