@@ -215,6 +215,9 @@ function endSelection() {
                 "
               >
                 <p>{{ schedule?.title }}</p>
+                <p v-if="schedule?.students">
+                  {{ schedule?.students }}
+                </p>
                 <p>{{ schedule?.professor }}</p>
                 <p>{{ schedule?.room }}</p>
               </div>
