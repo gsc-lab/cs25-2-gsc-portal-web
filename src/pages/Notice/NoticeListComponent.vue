@@ -136,7 +136,10 @@
               <span>{{ notice.content }}</span>
               <span v-if="notice.attachments.length > 0">📁</span>
             </div>
-            <div v-if="notice.course_id || notice.targets[0]?.grade_id" class="col-target">
+            <div
+              v-if="notice.course_type === 'regular' || notice.course_type === 'general'"
+              class="col-target"
+            >
               <span v-if="notice.course_id">
                 {{ courseIdGradeId(notice.course_id) }}
               </span>
@@ -146,7 +149,7 @@
             </div>
             <div v-else class="col-target">
               <span>
-                {{ courseTypeSelect + '반' }}
+                {{ courseTypeSelect === 'A' ? 'A반' : 'B반' }}
               </span>
             </div>
             <div class="col-author">{{ notice.author?.name }}</div>
