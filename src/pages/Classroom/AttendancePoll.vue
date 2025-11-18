@@ -20,10 +20,15 @@ watch(
   { immediate: true },
 )
 // ====================================================
+
+async function setPollData() {
+  pollData.value = await getPoll(selectDate.value.toISOString().split('T')[0])
+}
+
 watch(
   () => selectDate.value,
-  async () => {
-    pollData.value = await getPoll(selectDate.value.toISOString().split('T')[0])
+  () => {
+    setPollData()
   },
   { immediate: true },
 )
@@ -56,7 +61,7 @@ const handleAction = async (poll_id, isVoted) => {
     <div v-if="!isStudent">
       <button @click="isOpen = !isOpen">설정</button>
       <div v-if="isOpen">
-        <Setting />
+        <Setting @setPollData="setPollData" />
       </div>
     </div>
 
