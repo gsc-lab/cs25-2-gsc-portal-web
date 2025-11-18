@@ -71,7 +71,7 @@ const handleAction = async (poll_id, isVoted) => {
       <p>제한 : {{ data.required_count }}</p>
       <p>현제 신청자 수: {{ data.vote_count }}</p>
 
-      <div>
+      <div v-if="isStudent">
         <button @click="handleAction(data.poll_id, data.user_voted)">
           <p v-if="data.user_voted">취소</p>
           <p v-else>신청</p>
