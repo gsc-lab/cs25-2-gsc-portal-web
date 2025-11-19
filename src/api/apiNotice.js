@@ -3,24 +3,53 @@ import api from "./apiClient";
 // =============== 전체 공지사항 조회 API 요청 ===============
 
 export const getNotice = async () => {
-  const NoticeList = await api.get('/notices?size=100')
-  return NoticeList.data
+  const noticeList = await api.get('/notices?size=100')
+  return noticeList.data
 }
 
 // =============== 단일 공지사항 조회 API 요청 ===============
 
 export const getNoticeView = async (noticeId) => {
-  const NoticeView = await api.get(`/notices/${noticeId}`)
-  return NoticeView.data
+  const noticeView = await api.get(`/notices/${noticeId}`)
+  return noticeView.data
 }
 
-// ============= 모든 과목 데이터 조회 API 요청 ==============
+// ============= 학년별 과목 조회 API 요청 ==============
 
 export const getCourse = async () => {
-  const Course = await api.get('/notices/form/courses')
-  return Course.data
+  const course = await api.get('/notices/form/courses/')
+
+  return course.data
 }
 
+
+// ============= 학년별 정규 과목 데이터 조회 API 요청 ==============
+
+export const getCourseRegular = async (type, grade) => {
+  const courseRegular = await api.get('/notices/form/courses/', {
+    params: {
+      course_type: type,
+      grade_id: grade,
+    }
+  })
+
+  console.log(courseRegular)
+  return courseRegular.data
+}
+
+// ============= 특강 과목 데이터 조회 API 요청 ==============
+
+export const getCourseSpecial = async (type, classId) => {
+  const getCourseSpecial = await api.get('/notices/form/courses/', {
+    params: {
+      course_type: type,
+      class_id: classId
+    }
+  })
+
+  console.log(getCourseSpecial)
+  return getCourseSpecial.data
+}
 // ============ 공지사항 파일 다운로드 요청 API===============
 
 export const getFileDownLoad = async (file_id) => {
