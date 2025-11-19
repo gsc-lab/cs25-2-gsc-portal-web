@@ -36,6 +36,26 @@ export const getClassroomsInfo = async () => {
 }
 
 // ---------------------------------------------------------------
+// 교실 신청제 설정 조회
+//     [{
+//       "rule_id": "r001",
+//       "grade_name": "1학년",
+//       "grade_id": "1",
+//       "required_count": 5,
+//       "start_date": "2025-11-18"
+//    },]
+// ---------------------------------------------------------------
+export const getPollClassrooms = async () => {
+  try {
+    const res = await api.get(`/classrooms/polls/rules`)
+    console.log(res.data)
+    return res.data
+  } catch (e) {
+    errorMsg(e)
+  }
+}
+
+// ---------------------------------------------------------------
 // 교실 예약 정보
 //     {
 //       SUN: [{
@@ -126,6 +146,22 @@ export const postClassroom = async (CRdata) => {
 }
 
 // ---------------------------------------------------------------
+// 강의실 신청제 등록
+// ---------------------------------------------------------------
+export const postPollClassroom = async (data) => {
+  try {
+    const res = await api.post(`/classrooms/polls`, {
+      grade_id: data.grade_id,
+      required_count: data.required_count,
+    })
+    // console.log(res.data);
+    return res.data
+  } catch (e) {
+    errorMsg(e)
+  }
+}
+
+// ---------------------------------------------------------------
 // 신청 등록 / 취소
 // ---------------------------------------------------------------
 export const postPoll = async (poll_id, action) => {
@@ -150,11 +186,24 @@ export const patchClassroom = async (CRdata) => {
       building: CRdata.building,
       room_number: CRdata.room_number,
       room_type: CRdata.room_type,
-
-      // mode: CRdata.mode,
-      // limit: CRdata.limit,
     })
     // console.log(res.data);
+    return res.data
+  } catch (e) {
+    errorMsg(e)
+  }
+}
+
+// ---------------------------------------------------------------
+// 강의실 신청제 수정
+// ---------------------------------------------------------------
+export const putPollClassroom = async (data) => {
+  try {
+    const res = await api.put(`classrooms/polls/rules`, {
+      rule_id: data.rule_id,
+      required_count: data.required_count,
+    })
+    console.log(res.data)
     return res.data
   } catch (e) {
     errorMsg(e)

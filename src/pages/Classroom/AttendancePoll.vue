@@ -20,10 +20,15 @@ watch(
   { immediate: true },
 )
 // ====================================================
+
+async function setPollData() {
+  pollData.value = await getPoll(selectDate.value.toISOString().split('T')[0])
+}
+
 watch(
   () => selectDate.value,
-  async () => {
-    pollData.value = await getPoll(selectDate.value.toISOString().split('T')[0])
+  () => {
+    setPollData()
   },
   { immediate: true },
 )
@@ -56,7 +61,7 @@ const handleAction = async (poll_id, isVoted) => {
     <div v-if="!isStudent">
       <button @click="isOpen = !isOpen">설정</button>
       <div v-if="isOpen">
-        <Setting />
+        <Setting @setPollData="setPollData" />
       </div>
     </div>
 
@@ -66,7 +71,7 @@ const handleAction = async (poll_id, isVoted) => {
       <p>제한 : {{ data.required_count }}</p>
       <p>현제 신청자 수: {{ data.vote_count }}</p>
 
-      <div>
+      <div v-if="isStudent">
         <button @click="handleAction(data.poll_id, data.user_voted)">
           <p v-if="data.user_voted">취소</p>
           <p v-else>신청</p>
