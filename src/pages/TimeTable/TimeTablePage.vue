@@ -12,12 +12,13 @@ const sidebarIsOpen = ref(false)
 const Ustore = useUserStore()
 const Tstore = useTimetableStore()
 
-const isStudent = ref(null) // 학생인지
+const roleType = ref(null) // 권한
+const professorTT = ref(true)
 
 // 사용자 정보 확인
 watch(
   () => {
-    isStudent.value = Ustore.userInfo.role_type == 'student' ? true : false
+    roleType.value = Ustore.userInfo.role_type
     // console.log(isStudent.value)
   },
   { immediate: true },
@@ -34,8 +35,8 @@ function setData(data) {
 <template>
   <AppLayout pageName="Timetable">
     <!-- ===============  학생 시간표 =============== -->
-    <div v-if="isStudent">
-      <TimeTable />
+    <div v-if="roleType == 'student'">
+      <TimeTable v-model="professorTT" />
     </div>
 
     <!-- ===============  교수, 관리자 시간표  =============== -->
@@ -48,8 +49,20 @@ function setData(data) {
       <!-- 사이드바 컴포넌트 -->
       <Sidebar v-if="sidebarIsOpen" />
 
+      <div v-if="roleType == 'professor'">
+        <div v-if="professorTT">
+          <button @click="professorTT = !professorTT">전체 시간표 보기</button>
+          <TimeTable v-model="professorTT" />
+        </div>
+        <div v-else>
+          <button @click="professorTT = !professorTT">담당 시간표 보기</button>
+        </div>
+      </div>
+
       <!-- 시간표 컴포넌트 -->
-      <AdminTimeTable @setRange="setData" />
+      <div v-if="!professorTT">
+        <AdminTimeTable @setRange="setData" />
+      </div>
     </div>
   </AppLayout>
 </template>
