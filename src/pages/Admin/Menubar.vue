@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import Approval from './components/Approval.vue'
 import AddEmail from './components/AddEmail.vue'
+import ClassroomSetting from './components/ClassroomSetting.vue'
 import UserMgmt from './components/UserMgmt.vue'
 
 const menu = ref('Approval')
@@ -12,11 +13,13 @@ const menu = ref('Approval')
     <div>
       <button @click="menu = 'Approval'">사용자 승인 |</button>
       <button @click="menu = 'AddEmail'">외부 이메일 등록 |</button>
+      <button @click="menu = 'ClassroomSetting'">강의실 설정 |</button>
       <button @click="menu = 'UserMgmt'">사용자 관리</button>
     </div>
 
     <Approval v-if="menu == 'Approval'" />
     <AddEmail v-if="menu == 'AddEmail'" />
+    <ClassroomSetting v-if="menu == 'ClassroomSetting'" />
     <UserMgmt v-if="menu == 'UserMgmt'" />
   </div>
 </template>
