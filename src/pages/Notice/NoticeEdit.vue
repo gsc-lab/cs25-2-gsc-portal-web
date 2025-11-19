@@ -58,15 +58,11 @@
               <select
                 id="notice-course"
                 class="form-select"
-                v-if="filterCourse.length"
+                v-if="courses.length"
                 v-model="courseSelect"
               >
                 <option value="">과목을 선택하세요</option>
-                <option
-                  v-for="course in filterCourse"
-                  :key="course.course_id"
-                  :value="course.course_id"
-                >
+                <option v-for="course in courses" :key="course.course_id" :value="course.course_id">
                   {{ course.title }}
                 </option>
               </select>
@@ -177,7 +173,14 @@
 
 <script setup>
 import { computed, nextTick, onMounted, ref, watch, watchEffect } from 'vue'
-import { getNoticeView, getCourse, patchNotice, getAllUser } from '@/api/apiNotice'
+import {
+  getNoticeView,
+  getCourse,
+  patchNotice,
+  getAllUser,
+  getCourseRegular,
+  getCourseSpecial,
+} from '@/api/apiNotice'
 import { useRoute } from 'vue-router'
 import router from '@/router'
 import AppLayout from '@/layouts/AppLayout.vue'
@@ -215,67 +218,62 @@ const modalStudentSelect = ref([]) // 모달) 선택된 학생들
 const courses = ref([]) // 과목 선택 배열
 const students = ref([]) // 학생 목록 배열
 
-const isInitial = ref(true) // 초기화 상태 확인 플래그
+const isInitial = ref(true) // 초기화 상태 확인
 
 onMounted(async () => {
   try {
-    const noticeId = route.params.id // URL의 notice_id 값 가져오기
-    courses.value = await getCourse() // 전체 과목 요청 API
-    students.value = await getAllUser() // 전체 학생 요청 API
-    console.log('수정할 글 ID:', noticeId)
+    const noticeId = route.params.id
+    courses.value = await getCourse()
+    students.value = await getAllUser()
 
-    const res = await getNoticeView(noticeId) // 선택된 공지사항 요청 API
+    const res = await getNoticeView(noticeId)
     notice.value = res || {}
 
-    console.log('불러온 공지 데이터:', notice.value)
-
-    // 1. 기본 정보
+    // 1. 기본 정보 바인딩
     title.value = notice.value.title || ''
     isImportant.value = notice.value.is_pinned === 1
     author.value = notice.value.author?.name || ''
     content.value = notice.value.content || ''
     existing_file_ids.value = notice.value.attachments || []
 
-    // 2. 분류/타입/과목
-    const savedType = notice.value.course_type // ( general, regular, special, korean )
+    const targetData =
+      notice.value.targets && notice.value.targets[0] ? notice.value.targets[0] : null
 
-    // special, korean 일 경우
-    if (['special', 'korean'].includes(savedType)) {
-      targetSelect.value = savedType // 'special' 등으로 설정
+    if (targetData) {
+      if (targetData.grade_id) {
+        targetSelect.value = targetData.grade_id // 1, 2, 3
+        courseTypeSelect.value = notice.value.course_type // general or regular
 
-      // 저장된 targets에서 class_id ('C007A')를 가져와 분리
-      const savedTarget = notice.value.targets && notice.value.targets[0]
-
-      if (savedTarget && savedTarget.class_id) {
-        const fullClassId = savedTarget.class_id // 예: 'C007A'
-
-        // 마지막 글자가 반 (A/B), 나머지가 과목ID(C007)
-        const classType = fullClassId.slice(-1)
-        const courseId = fullClassId.slice(0, -1)
-
-        courseTypeSelect.value = classType // 'A' 또는 'B'
-
-        // DOM 업데이트 후 과목 선택 (filterCourse 계산 대기)
-        await nextTick()
-        courseSelect.value = courseId
+        // 정규 수업일 경우 과목 ID 연결
+        if (notice.value.course_id) {
+          courseSelect.value = notice.value.course_id
+        }
       } else {
-        // class_id가 없는 경우 예외처리 (기본값 A)
-        courseTypeSelect.value = 'A'
+        // language_id
+        if (targetData.language_id === 'JP') {
+          targetSelect.value = 'special'
+        } else if (targetData.language_id === 'KR') {
+          targetSelect.value = 'korean'
+        }
+
+        if (targetData.class_id) {
+          const typeChar = targetData.class_id.slice(-1)
+
+          const courseId = targetData.class_id.slice(0, -1)
+
+          courseTypeSelect.value = typeChar // A or B
+          courseSelect.value = courseId // C003
+        }
       }
-    }
-    // Case B: 1, 2, 3 학년 또는 전체
-    else {
-      // targets에 grade_id가 있으면 학년 설정, 없으면 전체
-      const savedGrade = notice.value.targets?.[0]?.grade_id
-      targetSelect.value = savedGrade || '전체'
-
-      courseTypeSelect.value = savedType // general, regular
-
-      await nextTick()
-      courseSelect.value = notice.value.course_id || ''
+    } else {
+      // 타겟이 없는 경우
+      targetSelect.value = '전체'
+      courseTypeSelect.value = 'general'
     }
 
-    // 초기화 완료 후 false로 변경하여 watch 동작 허용
+    // 초기화 완료 후 false로 변경하여 watch 동작
+
+    await nextTick()
     isInitial.value = false
   } catch (err) {
     console.error('데이터 로드 실패', err)
@@ -297,32 +295,25 @@ const filterCourseType = computed(() => {
 
   return []
 })
-
-// 학년, 과목 유형에 따른 과목 필터링
-const filterCourse = computed(() => {
-  // 1. 전체 선택 시
-  if (targetSelect.value === '전체') {
-    return []
+watch([courseTypeSelect, targetSelect], async ([newType, newTarget]) => {
+  // 정규 과목 호출 API
+  if (['1', '2', '3'].includes(newTarget)) {
+    try {
+      courses.value = await getCourseRegular(newType, newTarget)
+      console.log('학년 별 정규 과목 조회', courses.value)
+    } catch (err) {
+      console.error('정규 과목 요청 실패', err)
+    }
   }
-
-  // 2. 1, 2, 3 학년 선택 시
-  if (['1', '2', '3'].includes(targetSelect.value)) {
-    return courses.value.filter(
-      (course) =>
-        course.grade_id === targetSelect.value && course.course_type === courseTypeSelect.value,
-    )
+  // 특강 과목 호출 API
+  if (['special', 'korean'].includes(newTarget)) {
+    try {
+      courses.value = await getCourseSpecial(newTarget, newType)
+      console.log('특강 과목 조회', courses.value)
+    } catch (err) {
+      console.error('과목 조회 실패', err)
+    }
   }
-
-  // 3. special, korean 선택 시 (class_id 필터링)
-  if (['special', 'korean'].includes(targetSelect.value)) {
-    return courses.value.filter(
-      (course) =>
-        course.class_id &&
-        course.class_id.includes(courseTypeSelect.value) && // A 또는 B 포함 여부
-        course.course_type === targetSelect.value, // special 또는 korean
-    )
-  }
-  return []
 })
 
 const fixFileName = (str) => {

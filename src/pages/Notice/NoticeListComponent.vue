@@ -56,15 +56,7 @@
         class="detail-list"
       >
         <template v-for="course in courses" :key="course.course_id">
-          <div
-            v-if="
-              targetSelect === course.grade_id &&
-              course.title &&
-              course.title.trim() !== '' &&
-              course.course_type === courseTypeSelect
-            "
-            class="filter-item"
-          >
+          <div class="filter-item">
             <div>
               <input
                 type="radio"
@@ -73,38 +65,7 @@
                 v-model="courseSelect"
               />
               <label :for="course.course_id">
-                {{ course.title }}
-              </label>
-            </div>
-          </div>
-        </template>
-        <template v-if="courseTypeSelect === 'A'">
-          <div v-for="course in coursesA" :key="course.course_id" class="filter-item">
-            <div>
-              <input
-                type="radio"
-                :id="`${course.course_id}`"
-                :value="course.course_id"
-                v-model="courseSelect"
-              />
-              <label :for="course.course_id">
-                {{ course.class_name }}
-              </label>
-            </div>
-          </div>
-        </template>
-
-        <template v-if="courseTypeSelect === 'B'">
-          <div v-for="course in coursesB" :key="course.course_id" class="filter-item">
-            <div>
-              <input
-                type="radio"
-                :id="`${course.course_id}`"
-                :value="course.course_id"
-                v-model="courseSelect"
-              />
-              <label :for="course.course_id">
-                {{ course.class_name }}
+                {{ course.title || course.class_name }}
               </label>
             </div>
           </div>
@@ -125,7 +86,7 @@
           <div class="notice-item" @click="HandleNoticeClick(notice.notice_id)">
             <div class="col-num">
               <p v-if="notice.is_pinned">
-                {{ '♥ 중요' }}
+                <span v-if="notice.is_pinned" class="badge-pinned">중요</span>
               </p>
               <p v-else>
                 {{ index + 1 }}
@@ -140,11 +101,11 @@
               v-if="notice.course_type === 'regular' || notice.course_type === 'general'"
               class="col-target"
             >
-              <span v-if="notice.course_id">
-                {{ courseIdGradeId(notice.course_id) }}
+              <span v-if="notice.course_type === 'general'">
+                {{ notice.course_type === 'general' ? '전체' : '정규' }}
               </span>
-              <span v-else>
-                {{ notice.targets[0]?.grade_id ? notice.targets[0]?.grade_id + '학년' : '전체' }}
+              <span>
+                {{ notice.targets[0]?.grade_id ? notice.targets[0]?.grade_id + '학년' : '' }}
               </span>
             </div>
             <div v-else class="col-target">
@@ -165,42 +126,30 @@
 import { onMounted, ref, watch, watchEffect } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useNoticeStore } from '@/stores/notice'
-import { useCourseStore } from '@/stores/course'
 import router from '@/router'
 import { useRoute } from 'vue-router'
+import { getCourseRegular, getCourseSpecial } from '@/api/apiNotice'
 // import { useUserStore } from '@/stores/user'
 // import { getRegularCourse } from '@/api/apiCourse'
 
 const route = useRoute()
 const detailOpen = ref(false)
 
+const courses = ref([])
 // user 정보 불러오기
-// const user = useUserStore()
 
 // 공지사항 store 사용, 과목 store 사용
 const noticeStore = useNoticeStore() // 22
-const coursesStore = useCourseStore()
-
-console.log('coursesStore: ', coursesStore)
 
 // const regular = ref([])
 
 // store 가져오기
-const {
-  filterNotices,
-  targetSelect,
-  courseTypeSelect,
-  courseSelect,
-  noticeTarget,
-  course_type,
-  coursesA,
-  coursesB,
-} = storeToRefs(noticeStore)
-const { courses } = storeToRefs(coursesStore)
+const { filterNotices, targetSelect, courseTypeSelect, courseSelect, noticeTarget, course_type } =
+  storeToRefs(noticeStore)
+// const { courses } = storeToRefs(coursesStore)
 
 onMounted(async () => {
-  await coursesStore.fetchCourse()
-  noticeStore.setCourse(courses.value)
+  // noticeStore.setCourse(courses.value)
   await noticeStore.fetchNotice()
 
   // regular.value = await getRegularCourse()
@@ -229,10 +178,15 @@ function formatDate(isoString) {
   })
 }
 
-// 대상 필터링
-function courseIdGradeId(courseId) {
-  const course = noticeStore.courseMap.get(courseId)
-  return course ? course.grade_id + '학년' : '전체'
+// 타켓 목록 필터링
+const targetFilter = (target) => {
+  if (target === '1' || target === '2' || target === '3') {
+    return target + '학년'
+  }
+  if (target === 'special') return '일본어 특강'
+  if (target === 'korean') return '한국어'
+
+  return target
 }
 
 watchEffect(() => {
@@ -240,8 +194,55 @@ watchEffect(() => {
   console.log('선택된 타켓', targetSelect.value)
   console.log('선택된 타입', courseTypeSelect.value)
   console.log('선택된 과목', courseSelect.value)
-  console.log('과목 목록 변경', courses.value)
+  // console.log('과목 목록 변경', courses.value)
   console.log('url 변동 감지', route.params.gradeId)
+})
+
+watch([courseTypeSelect, targetSelect], async ([newType, newTarget]) => {
+  // 정규 과목 호출 API
+  if (['1', '2', '3'].includes(newTarget) && newType === 'regular') {
+    try {
+      courses.value = await getCourseRegular(newType, newTarget)
+      console.log('학년 별 정규 과목 조회', courses.value)
+    } catch (err) {
+      console.error('정규 과목 요청 실패', err)
+    }
+  }
+  // 특강 과목 호출 API
+  if (['special', 'korean'].includes(newTarget) && ['A', 'B'].includes(newType)) {
+    try {
+      courses.value = await getCourseSpecial(newTarget, newType)
+      console.log('특강 과목 조회', courses.value)
+    } catch (err) {
+      console.error('과목 조회 실패', err)
+    }
+  }
+})
+
+watch(targetSelect, (newTarget, oldTarget) => {
+  if (!newTarget || newTarget === oldTarget) return
+
+  // 전체가 아닐 경우 상세 필터 열기
+  if (newTarget !== '전체') {
+    detailOpen.value = true
+  } else {
+    detailOpen.value = false
+  }
+
+  if (['1', '2', '3'].includes(newTarget)) {
+    if (courseTypeSelect.value !== 'general' && courseTypeSelect.value !== 'regular') {
+      courseTypeSelect.value = 'general'
+    }
+  }
+
+  if (['special', 'korean'].includes(newTarget)) {
+    if (courseTypeSelect.value !== 'A' && courseTypeSelect.value !== 'B') {
+      courseTypeSelect.value = 'A'
+    }
+  }
+
+  // 코스 선택은 초기화
+  courseSelect.value = ''
 })
 
 watch(
@@ -260,39 +261,17 @@ watch(
   },
 )
 
-watch(targetSelect, (newVal, oldVal) => {
-  if (newVal === '' || newVal !== oldVal) {
-    detailOpen.value = false
-
-    if (['special', 'korean'].includes(newVal)) {
-      courseTypeSelect.value = 'A'
-    } else {
-      courseTypeSelect.value = 'general'
-    }
-
-    courseSelect.value = ''
-  }
-  if (newVal !== '전체') {
-    detailOpen.value = true
-  }
-})
-
 watch(courseTypeSelect, (newVal, oldVal) => {
   if (newVal !== oldVal) {
     courseSelect.value = ''
   }
 })
 
-// 타켓 목록 필터링
-const targetFilter = (target) => {
-  if (target === '1' || target === '2' || target === '3') {
-    return target + '학년'
-  }
-  if (target === 'special') return '일본어 특강'
-  if (target === 'korean') return '한국어'
-
-  return target
-}
+// watch(courseSelect, courseTypeSelect, targetSelect, ([newCourse, newType, newTarget]) => {
+//   if (targetSelect) { // 타겟 별
+//     const test = await
+//   }
+// })
 
 // 선택 학년 공지사항으로 이동
 const HandleGradeNotice = (target) => {
@@ -522,5 +501,14 @@ const HandleNoticeClick = (notice_id) => {
 
 .col-target {
   font-weight: 500;
+}
+.badge-pinned {
+  background: #ffe2e5;
+  color: #f64e60;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 </style>

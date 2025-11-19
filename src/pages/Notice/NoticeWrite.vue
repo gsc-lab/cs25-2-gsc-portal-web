@@ -76,15 +76,11 @@
               <select
                 id="notice-course"
                 class="form-select"
-                v-if="filterCourse.length"
+                v-if="courses.length"
                 v-model="courseSelect"
               >
                 <option value="">과목을 선택하세요</option>
-                <option
-                  v-for="course in filterCourse"
-                  :key="course.course_id"
-                  :value="course.course_id"
-                >
+                <option v-for="course in courses" :key="course.course_id" :value="course.course_id">
                   {{ course.title }}
                 </option>
               </select>
@@ -190,7 +186,7 @@
 </template>
 
 <script setup>
-import { getCourse, postNotice, getAllUser } from '@/api/apiNotice'
+import { getCourseRegular, getCourseSpecial, postNotice, getAllUser } from '@/api/apiNotice'
 import AppLayout from '@/layouts/AppLayout.vue'
 import router from '@/router'
 import { useNoticeStore } from '@/stores/notice'
@@ -231,9 +227,9 @@ const students = ref([]) // 학생 목록 배열
 
 onMounted(async () => {
   try {
-    courses.value = await getCourse()
+    // courses.value = await getCourse()
     students.value = await getAllUser()
-    console.log('과목 목록', courses.value)
+    // console.log('과목 목록', courses.value)
     // console.log('학생 정보', students.value)
   } catch (err) {
     console.error('데이터 로드 실패', err)
@@ -263,28 +259,28 @@ const filterCourseType = computed(() => {
   return []
 })
 
-// 학년, 과목 유형에 따른 과목 필터링
-const filterCourse = computed(() => {
-  if (targetSelect.value === '전체') {
-    return []
-  }
+// // 학년, 과목 유형에 따른 과목 필터링
+// const filterCourse = computed(() => {
+//   if (targetSelect.value === '전체') {
+//     return []
+//   }
 
-  if (['1', '2', '3'].includes(targetSelect.value)) {
-    return courses.value.filter(
-      (course) =>
-        course.grade_id === targetSelect.value && course.course_type === courseTypeSelect.value,
-    )
-  }
-  if (['special', 'korean'].includes(targetSelect.value)) {
-    return courses.value.filter(
-      (course) =>
-        course.class_id &&
-        course.class_id.includes(courseTypeSelect.value) &&
-        course.course_type === targetSelect.value,
-    )
-  }
-  return []
-})
+//   if (['1', '2', '3'].includes(targetSelect.value)) {
+//     return courses.value.filter(
+//       (course) =>
+//         course.grade_id === targetSelect.value && course.course_type === courseTypeSelect.value,
+//     )
+//   }
+//   if (['special', 'korean'].includes(targetSelect.value)) {
+//     return courses.value.filter(
+//       (course) =>
+//         course.class_id &&
+//         course.class_id.includes(courseTypeSelect.value) &&
+//         course.course_type === targetSelect.value,
+//     )
+//   }
+//   return []
+// })
 
 // 과목 배열에서 과목의 ID 값을 이용하여 선택된 과목의 값이 일치하는 값 저장
 const selectedCourseId = computed(() => {
@@ -402,14 +398,6 @@ watchEffect(() => {
   console.log('선택된 과목이름: ', selectedCourseTitle.value)
 })
 
-// watch(targetSelect, async (newTarget) => {
-//   console.log(targetSelect.value)
-//   if (newTarget === 'special') {
-//     try {
-
-//     }
-//   }
-// })
 watch(targetSelect, (newTarget) => {
   if (newTarget === '전체') {
     courseTypeSelect.value = 'general'
@@ -417,6 +405,27 @@ watch(targetSelect, (newTarget) => {
     courseTypeSelect.value = 'regular'
   } else if (['special', 'korean'].includes(newTarget)) {
     courseTypeSelect.value = 'A'
+  }
+})
+
+watch([courseTypeSelect, targetSelect], async ([newType, newTarget]) => {
+  // 정규 과목 호출 API
+  if (['1', '2', '3'].includes(newTarget)) {
+    try {
+      courses.value = await getCourseRegular(newType, newTarget)
+      console.log('학년 별 정규 과목 조회', courses.value)
+    } catch (err) {
+      console.error('정규 과목 요청 실패', err)
+    }
+  }
+  // 특강 과목 호출 API
+  if (['special', 'korean'].includes(newTarget)) {
+    try {
+      courses.value = await getCourseSpecial(newTarget, newType)
+      console.log('특강 과목 조회', courses.value)
+    } catch (err) {
+      console.error('과목 조회 실패', err)
+    }
   }
 })
 
