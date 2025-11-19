@@ -74,7 +74,7 @@ const handleDelete = async (classroom) => {
           <tr>
             <th style="border: 1px solid #000; padding: 10px"></th>
             <th style="border: 1px solid #000; padding: 10px">장소</th>
-            <th style="border: 1px solid #000; padding: 10px">타이</th>
+            <th style="border: 1px solid #000; padding: 10px">타입</th>
             <th style="border: 1px solid #000; padding: 10px">수정</th>
             <th style="border: 1px solid #000; padding: 10px">삭제</th>
           </tr>
