@@ -133,10 +133,7 @@ export const postClassroom = async (CRdata) => {
     const res = await api.post(`/classrooms`, {
       building: CRdata.building,
       room_number: CRdata.room_number,
-      room_type: String(CRdata.room_type),
-
-      // mode: CRdata.mode,
-      // limit: CRdata.limit,
+      room_type: CRdata.room_type,
     })
     // console.log(res.data);
     return res.data
@@ -176,13 +173,13 @@ export const postPoll = async (poll_id, action) => {
   }
 }
 
-// ========================== patch ===============================
+// ========================== put ===============================
 // ---------------------------------------------------------------
 // 강의실 수정
 // ---------------------------------------------------------------
-export const patchClassroom = async (CRdata) => {
+export const putClassroom = async (CRdata) => {
   try {
-    const res = await api.patch(`/classrooms`, {
+    const res = await api.put(`/classrooms/${CRdata.classroom_id}`, {
       building: CRdata.building,
       room_number: CRdata.room_number,
       room_type: CRdata.room_type,
@@ -217,6 +214,19 @@ export const putPollClassroom = async (data) => {
 export const deleteReservation = async (classroom_id, reservation_id) => {
   try {
     const res = await api.delete(`/classrooms/${classroom_id}/reservations/${reservation_id}`)
+    // console.log(res.data);
+    return res.data
+  } catch (e) {
+    errorMsg(e)
+  }
+}
+
+// ---------------------------------------------------------------
+// 강의실 삭제
+// ---------------------------------------------------------------
+export const deleteClassroom = async (classroom_id) => {
+  try {
+    const res = await api.delete(`/classrooms/${classroom_id}`)
     // console.log(res.data);
     return res.data
   } catch (e) {
