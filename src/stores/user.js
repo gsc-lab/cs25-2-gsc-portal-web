@@ -1,32 +1,32 @@
-import { getUserInfo } from '@/api/auth.js'
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { getUserInfo } from "@/api/auth";
+import { defineStore } from "pinia";
+import { ref } from "vue";
+import api from "@/api/apiClient";
 
 export const useUserStore = defineStore('user', () => {
+
   // 유저 정보 저장
-  const userInfo = ref({
-    role_type: 'professor',
-    user_id: '8888001',
-  })
+  const userInfo = ref(null)
   const isLoading = ref(false)
-  const error = ref('')
+  const error = ref(null)
 
   async function fetchUser() {
     isLoading.value = true
+    error.value = null
 
-    try {
-      const response = await getUserInfo()
-      userInfo.value = response
-    } catch (err) {
-      console.warn('유저 정보 불러오기 실패', err)
-      userInfo.value = null
-    } finally {
-      isLoading.value = false
-    }
+    const response = await getUserInfo()
+
+    userInfo.value = response
+    isLoading.value = false
   }
 
   function logoutUser() {
     userInfo.value = null
+    error.value = null
+    isLoading.value = false
+
+    localStorage.removeItem('accessToken')
+    delete api.defaults.headers.common['Authorization'];
   }
 
   return {
