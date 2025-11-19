@@ -43,7 +43,7 @@ const handleAfter = () => {
 const handleAction = async (poll_id, isVoted) => {
   const action = isVoted ? 'cancel' : 'apply'
   await postPoll(poll_id, action) // api전송
-  pollData.value = await getPoll() // 신청 데이터 갱신
+  setPollData() // 신청 데이터 갱신
 }
 </script>
 
