@@ -120,7 +120,6 @@ export const useNoticeStore = defineStore('Notice', () => {
           course.grade_id === target &&
           course.course_type === type;
 
-        // ( notice.targets 가 )
         const isTarget =
           notice.targets &&
           notice.targets.some((tar) => tar.grade_id === target) &&
@@ -132,51 +131,14 @@ export const useNoticeStore = defineStore('Notice', () => {
 
       if (['special', 'korean'].includes(target)) {
 
-        if (!course) return false;
+        // 1. 공지사항의 타입이 'special'이나 'korean'인지 확인
+        if (notice.course_type !== target) return false;
 
-        return (
-          course.course_type === target &&
-          course.class_id &&
-          course.class_id?.includes(type)
-        );
+        return notice.targets?.some(t => t.class_id && t.class_id.includes(type));
       }
-
-      return false;
     });
   });
 
-  // 일본어 특강 A 반 필터링
-  const coursesA = computed(() => {
-    const filterA = courses.value.filter((course) => {
-      const targetCheck = targetSelect.value === course.course_type
-      const titleCheck = course.title && course.title.trim() !== ''
-      const courseTypeCheck = courseTypeSelect.value === 'A'
-      const classCheck = course.class_id && course.class_id.includes('A')
-
-      return targetCheck && titleCheck && courseTypeCheck && classCheck
-    })
-    return filterA
-  })
-
-  // 일본어 특강 B 반 필터링
-  const coursesB = computed(() => {
-    const filterB = courses.value.filter((course) => {
-      const targetCheck = targetSelect.value === course.course_type
-      const titleCheck = course.title && course.title.trim() !== ''
-      const courseTypeCheck = courseTypeSelect.value === 'B'
-      const classCheck = course.class_id && course.class_id.includes('B')
-
-      return targetCheck && titleCheck && courseTypeCheck && classCheck
-    })
-    return filterB
-  })
-
-
-
-
-  // 학년 별 필터링
-
-  // 과목별
   return {
     noticeList,
     courses,
@@ -189,8 +151,6 @@ export const useNoticeStore = defineStore('Notice', () => {
     course_type,
     setCourse,
     courseMap,
-    coursesA,
-    coursesB,
-  }
 
+  }
 })
