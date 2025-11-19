@@ -9,12 +9,13 @@ const Tstore = useTimetableStore()
 const timetableData = ref(null)
 const today = new Date('2025-06-05') // 오늘
 const today_day = today.getDay() // 오늘의 요일 (일요일=0)
-const selectDate = ref(today)
+const selectDate = ref(null)
 
 // 주 변경시 시간표 데이터 갱신
 watch(
   () => selectDate.value,
   async () => {
+    if (selectDate.value == null) selectDate.value = Tstore.date ? new Date(Tstore.date) : today
     // console.log("selectDate", selectDate.value);
     await Tstore.setTimetable(selectDate.value.toISOString().split('T')[0])
   },
