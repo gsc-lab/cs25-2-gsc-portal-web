@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import { day } from '@/utils/reName'
 import { useTimetableStore } from '@/stores/timetable'
+import { getStudentTimetable } from '@/api/timetableApi'
 
 const Tstore = useTimetableStore()
 
@@ -9,13 +10,21 @@ const Tstore = useTimetableStore()
 const timetableData = ref(null)
 const today = new Date('2025-06-05') // 오늘
 const today_day = today.getDay() // 오늘의 요일 (일요일=0)
-const selectDate = ref(today)
+const selectDate = ref(null)
 
+const professorTT = defineModel()
 // 주 변경시 시간표 데이터 갱신
 watch(
   () => selectDate.value,
   async () => {
-    timetableData.value = await Tstore.getStdTimetable(selectDate.value.toISOString().split('T')[0])
+    if (selectDate.value == null) selectDate.value = Tstore.date ? new Date(Tstore.date) : today
+    if (professorTT.value) {
+      timetableData.value = await Tstore.getPfsTimetable(
+        selectDate.value.toISOString().split('T')[0],
+      )
+    } else {
+      timetableData.value = await getStudentTimetable(selectDate.value.toISOString().split('T')[0])
+    }
   },
   { immediate: true },
 )

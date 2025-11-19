@@ -142,7 +142,7 @@ export const getCourses = async (sec_id) => {
 }
 
 // ---------------------------------------------------------------
-// 시간표 정보 조회
+// [학생] 시간표 정보 조회
 // ---------------------------------------------------------------
 export const getStudentTimetable = async (today) => {
   try {
@@ -159,7 +159,24 @@ export const getStudentTimetable = async (today) => {
 }
 
 // ---------------------------------------------------------------
-// 시간표 정보 조회
+// [교수] 시간표 정보 조회
+// ---------------------------------------------------------------
+export const getProfessorTimetable = async (today) => {
+  try {
+    const res = await api.get(`/timetables/professor`, {
+      params: {
+        date: today,
+      },
+    })
+    console.log('교수 시간표 정보 조회', res.data)
+    return res.data
+  } catch (e) {
+    errorMsg(e)
+  }
+}
+
+// ---------------------------------------------------------------
+// [전체] 시간표 정보 조회
 // ---------------------------------------------------------------
 export const getAdminTimetable = async (today) => {
   try {
