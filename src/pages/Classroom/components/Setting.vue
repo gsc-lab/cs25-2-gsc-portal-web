@@ -1,28 +1,33 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getPollClassrooms, postPollClassroom, patchPollClassroom } from '@/api/classroomApi'
+import { getPollClassrooms, postPollClassroom, putPollClassroom } from '@/api/classroomApi'
 
 const emit = defineEmits(['setPollData'])
 
 const classroomData = ref()
 const postData = ref({
+  rule_id: undefined,
   grade_id: '',
   required_count: 0,
 })
 
-// 수정: classrooms 데이터 초기화
-onMounted(async () => {
-  classroomData.value = [
-    { grade_id: '1', required_count: undefined },
-    { grade_id: '2', required_count: undefined },
-    { grade_id: '3', required_count: undefined },
-  ]
+const resetPollClassroom = async () => {
   // 조회
   const resPollClassroom = await getPollClassrooms()
   console.log('resPollClassroom', resPollClassroom)
   // 개수 확인하고 부족하면 자동 추가
   if (resPollClassroom.length < 3) setClassroomData(resPollClassroom)
   else classroomData.value = resPollClassroom
+}
+
+// 수정: classrooms 데이터 초기화
+onMounted(async () => {
+  classroomData.value = [
+    { rule_id: undefined, grade_id: '1', required_count: undefined },
+    { rule_id: undefined, grade_id: '2', required_count: undefined },
+    { rule_id: undefined, grade_id: '3', required_count: undefined },
+  ]
+  await resetPollClassroom()
 })
 
 // 해당 학년에 required_count 대입
@@ -40,6 +45,7 @@ function setClassroomData(resPollClassroom) {
 // 수정 대상 세트
 const handleSetPut = (classroomData) => {
   postData.value = {
+    rule_id: classroomData.rule_id,
     grade_id: classroomData.grade_id,
     required_count: classroomData.required_count != undefined ? classroomData.required_count : 0,
   }
@@ -48,13 +54,14 @@ const handleSetPut = (classroomData) => {
 
 // 등록
 const handleSubmit = async () => {
-  // if (classroomData.value[Number(postData.value.grade_id) - 1].required_count == undefined) {
-  await postPollClassroom(postData.value)
-  // } else {
-  //   await patchPollClassroom(postData.value)
-  // }
+  if (classroomData.value[Number(postData.value.grade_id) - 1].rule_id == undefined) {
+    await postPollClassroom(postData.value)
+  } else {
+    await putPollClassroom(postData.value)
+  }
   // 초기화
-  postData.value.grade_id == ''
+  postData.value.grade_id = ''
+  await resetPollClassroom()
   emit('setPollData')
 }
 </script>

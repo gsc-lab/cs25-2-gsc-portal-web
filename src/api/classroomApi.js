@@ -194,20 +194,21 @@ export const patchClassroom = async (CRdata) => {
   }
 }
 
-// // ---------------------------------------------------------------
-// // 강의실 신청제 수정
-// // ---------------------------------------------------------------
-// export const patchPollClassroom = async (data) => {
-//   try {
-//     const res = await api.patch(`classrooms/polls`, {
-//       grade_id: data.grade_id,
-//       required_count: data.required_count,
-//     })
-//     return res.data
-//   } catch (e) {
-//     errorMsg(e)
-//   }
-// }
+// ---------------------------------------------------------------
+// 강의실 신청제 수정
+// ---------------------------------------------------------------
+export const putPollClassroom = async (data) => {
+  try {
+    const res = await api.put(`classrooms/polls/rules`, {
+      rule_id: data.rule_id,
+      required_count: data.required_count,
+    })
+    console.log(res.data)
+    return res.data
+  } catch (e) {
+    errorMsg(e)
+  }
+}
 
 // ========================== delete ===============================
 // ---------------------------------------------------------------
