@@ -17,11 +17,6 @@
 
         <div class="nav-item">
           <router-link class="menu" to="/timetable">시간표</router-link>
-          <ul class="dropdown">
-            <li><router-link to="/timetable">1학년 시간표</router-link></li>
-            <li><router-link to="/timetable">2학년 시간표</router-link></li>
-            <li><router-link to="/timetable">3학년 시간표</router-link></li>
-          </ul>
         </div>
 
         <div class="nav-item">
@@ -33,8 +28,11 @@
           </ul>
         </div>
 
-        <router-link class="menu" to="/weekendAttendance">강의실 신청</router-link>
+        <router-link class="menu" to="/classroom">강의실 신청</router-link>
         <router-link class="menu" to="/profile">프로필</router-link>
+        <router-link class="menu" to="/admin" v-if="user.userInfo.role_type === 'admin'">
+          관리자
+        </router-link>
       </nav>
 
       <div class="header-right">
