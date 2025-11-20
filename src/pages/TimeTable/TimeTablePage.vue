@@ -13,7 +13,7 @@ const Ustore = useUserStore()
 const Tstore = useTimetableStore()
 
 const roleType = ref(null) // 권한
-const professorTT = ref(true)
+const professorTT = ref(false)
 
 // 사용자 정보 확인
 watch(
