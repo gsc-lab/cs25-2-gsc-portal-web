@@ -11,6 +11,7 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 
+
 // 라우터 가드 설정
 router.beforeEach(async (to, from, next) => {
 
