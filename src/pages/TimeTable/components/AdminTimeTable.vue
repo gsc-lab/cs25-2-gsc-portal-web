@@ -10,6 +10,9 @@ const timetableData = ref(null)
 const today = new Date('2025-06-05') // 오늘
 const today_day = today.getDay() // 오늘의 요일 (일요일=0)
 const selectDate = ref(null)
+// 선택한 target만 보이게
+const targets = ref({ 1: true, 2: true, 3: true, special: true, korean: true })
+const selectTargets = ref(['1', '2', '3', 'special', 'korean'])
 
 // 주 변경시 시간표 데이터 갱신
 watch(
@@ -69,6 +72,17 @@ watch(
   },
   { immediate: true },
 )
+
+// ================================= target 선택 =================================
+const handleSelect = (t) => {
+  // true/false 설정
+  targets.value[t] = !targets.value[t]
+  // true인 키 값으로 배열 생성
+  const targetsKey = Object.keys(targets.value).filter((target) => targets.value[target])
+  console.log(targetsKey)
+  // selectTargets 대입
+  selectTargets.value = targetsKey
+}
 
 // ===================================== 선택 =====================================
 // 선택 시작
@@ -131,6 +145,39 @@ function endSelection() {
   <div style="background-color: aliceblue">
     TimeTable
 
+    <div style="display: flex; gap: 5px">
+      <button
+        @click="handleSelect(1)"
+        :style="targets[1] ? { backgroundColor: 'aqua' } : { backgroundColor: 'gray' }"
+      >
+        1학년
+      </button>
+      <button
+        @click="handleSelect(2)"
+        :style="targets[2] ? { backgroundColor: 'aqua' } : { backgroundColor: 'gray' }"
+      >
+        2학년
+      </button>
+      <button
+        @click="handleSelect(3)"
+        :style="targets[3] ? { backgroundColor: 'aqua' } : { backgroundColor: 'gray' }"
+      >
+        3학년
+      </button>
+      <button
+        @click="handleSelect('special')"
+        :style="targets['special'] ? { backgroundColor: 'aqua' } : { backgroundColor: 'gray' }"
+      >
+        특강
+      </button>
+      <button
+        @click="handleSelect('korean')"
+        :style="targets['korean'] ? { backgroundColor: 'aqua' } : { backgroundColor: 'gray' }"
+      >
+        한국어
+      </button>
+    </div>
+
     <div>
       <button @click="handleBefore">지난주</button>
       <p>{{ selectDate.toISOString().split('T')[0] }}</p>
@@ -145,7 +192,7 @@ function endSelection() {
           <th
             v-for="(d, idx) in ['MON', 'TUE', 'WED', 'THU', 'FRI']"
             :key="idx"
-            colspan="5"
+            :colspan="selectTargets.length"
             style="border: 1px solid #000; padding: 10px"
           >
             {{ day(d) }} ({{ searchDate(idx + 1).slice(5) }})
@@ -155,11 +202,7 @@ function endSelection() {
         <tr>
           <th style="border: 1px solid #000; padding: 10px"></th>
           <template v-for="_ in 5" :key="_">
-            <th
-              v-for="g in ['1', '2', '3', 'special', 'korean']"
-              :key="g"
-              style="border: 1px solid #000; padding: 10px"
-            >
+            <th v-for="g in selectTargets" :key="g" style="border: 1px solid #000; padding: 10px">
               {{ setTarget(String(g)) }}
             </th>
           </template>
@@ -178,7 +221,7 @@ function endSelection() {
           <template v-for="(d, idx) in ['MON', 'TUE', 'WED', 'THU', 'FRI']" :key="idx">
             <!-- 학년 -->
             <td
-              v-for="g in ['1', '2', '3', 'special', 'korean']"
+              v-for="g in selectTargets"
               :key="g"
               @mousedown="
                 timetableData?.[g]?.[d][String(hour)].length > 1 ||
