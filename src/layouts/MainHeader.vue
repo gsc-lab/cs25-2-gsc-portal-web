@@ -35,6 +35,7 @@
 
         <router-link class="menu" to="/weekendAttendance">강의실 신청</router-link>
         <router-link class="menu" to="/profile">프로필</router-link>
+
       </nav>
 
       <div class="header-right">
