@@ -1,5 +1,7 @@
 import api from '@/api/apiClient'
 
+
+// test
 // google 로그인 요청
 export const googleLogin = () => {
   window.location.href = `${api.defaults.baseURL}/auth`
