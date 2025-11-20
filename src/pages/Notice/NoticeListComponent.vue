@@ -3,8 +3,8 @@
     <section class="notice-board-container">
       <div class="grade-filter">
         <button
-          v-for="notice in noticeTarget"
-          :key="notice.target"
+          v-for="(notice, key) in isUserInfoList"
+          :key="key"
           :class="['filter-btn', { active: targetSelect === notice.target }]"
           @click="HandleGradeNotice(notice.target)"
         >
@@ -16,36 +16,23 @@
       </div>
 
       <div v-if="detailOpen && targetSelect !== '전체'" class="detail-list">
-        <template v-for="course in course_type" :key="course">
+        <template v-for="(course, key) in course_type" :key="key">
           <div
             v-if="course.course_type === 'general' || course.course_type === 'regular'"
             class="filter-item"
           >
-            <input
-              type="radio"
-              :id="`course-${course.course_type}`"
-              :value="course.course_type"
-              v-model="courseTypeSelect"
-            />
+            <input type="radio" :id="key" :value="course.course_type" v-model="courseTypeSelect" />
             <label
               v-if="targetSelect === '1' || targetSelect === '2' || targetSelect === '3'"
-              :for="`course-${course.course_type}`"
+              :for="key"
             >
-              {{ course.course_type === 'general' ? '전체' : '정규' }}
+              {{ typeFilter(course.course_type) }}
             </label>
           </div>
           <div v-if="course.course_type === 'A' || course.course_type === 'B'" class="filter-item">
-            <input
-              type="radio"
-              :id="`course-${course.course_type}`"
-              :value="course.course_type"
-              v-model="courseTypeSelect"
-            />
-            <label
-              v-if="targetSelect === 'special' || targetSelect === 'korean'"
-              :for="`course-${course.course_type}`"
-            >
-              {{ course.course_type === 'A' ? 'A' + '반' : 'B' + '반' }}
+            <input type="radio" :id="key" :value="course.course_type" v-model="courseTypeSelect" />
+            <label v-if="targetSelect === 'special' || targetSelect === 'korean'" :for="key">
+              {{ typeFilter(course.course_type) }}
             </label>
           </div>
         </template>
@@ -123,12 +110,13 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch, watchEffect } from 'vue'
+import { computed, onMounted, ref, watch, watchEffect } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useNoticeStore } from '@/stores/notice'
 import router from '@/router'
 import { useRoute } from 'vue-router'
 import { getCourseRegular, getCourseSpecial } from '@/api/apiNotice'
+import { useUserStore } from '@/stores/user'
 // import { useUserStore } from '@/stores/user'
 // import { getRegularCourse } from '@/api/apiCourse'
 
@@ -137,6 +125,7 @@ const detailOpen = ref(false)
 
 const courses = ref([])
 // user 정보 불러오기
+const user = useUserStore()
 
 // 공지사항 store 사용, 과목 store 사용
 const noticeStore = useNoticeStore() // 22
@@ -188,6 +177,47 @@ const targetFilter = (target) => {
 
   return target
 }
+
+// 과목 타입 필터링
+const typeFilter = (type) => {
+  if (type === 'general') {
+    return '전체'
+  }
+  if (type === 'regular') {
+    return '정규'
+  }
+  if (type === 'A') {
+    return 'A반'
+  }
+  if (type === 'B') {
+    return 'B반'
+  }
+}
+
+// 사용자 유저 정보에 대한 필터링된 리스트
+const isUserInfoList = computed(() => {
+  if (!user.userInfo) return []
+
+  const userInfo = user.userInfo
+
+  if (userInfo.role_type === 'admin') {
+    return noticeTarget.value
+  }
+
+  return noticeTarget.value.filter((target) => {
+    if (target === userInfo.grade_id) {
+      return true
+    }
+    if (userInfo.language_id === 'JP' && target === 'special') {
+      return true
+    }
+    if (userInfo.language_id === 'KR' && target === 'korean') {
+      return true
+    }
+
+    return false
+  })
+})
 
 watchEffect(() => {
   console.log('공지사항 리스트 변경', noticeStore.noticeList)
