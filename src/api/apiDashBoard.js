@@ -7,5 +7,6 @@ export const getDashBoard = async (dashBoardData) => {
     params: dashBoardData
   })
 
-  return dashBoard.data
+  return dashBoard.data;
+
 }

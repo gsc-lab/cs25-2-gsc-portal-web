@@ -5,5 +5,5 @@ import api from "./apiClient";
 export const getCourse = async () => {
   const course = await api.get('/notices/form/courses/')
 
-  return course.data
+  return course.data;
 }
