@@ -17,7 +17,7 @@
 
             <div class="grade-tabs">
               <button
-                v-for="(target, key) in visibleGradeList"
+                v-for="(target, key) in isUserInfoList"
                 :key="key"
                 class="grade-btn"
                 :class="{ active: targetGrade === target }"
@@ -199,8 +199,8 @@ const gradeSelect = (grade) => {
   targetGrade.value = grade
 }
 
-// 필터링된 리스트 계산
-const visibleGradeList = computed(() => {
+// 사용자 유저 정보에 대한 필터링된 리스트
+const isUserInfoList = computed(() => {
   if (!user.userInfo) return []
 
   const userInfo = user.userInfo
