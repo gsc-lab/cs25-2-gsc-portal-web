@@ -24,7 +24,7 @@
 
             <div class="form-row">
               <label class="form-label" for="notice-author">작성자</label>
-              <input id="notice-author" class="form-input" type="text" v-model="author" />
+              <input id="notice-author" class="form-input" type="text" v-model="author" disabled />
             </div>
 
             <div class="form-row">
@@ -172,10 +172,9 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, ref, watch, watchEffect } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import {
   getNoticeView,
-  getCourse,
   patchNotice,
   getAllUser,
   getCourseRegular,
@@ -223,7 +222,7 @@ const isInitial = ref(true) // 초기화 상태 확인
 onMounted(async () => {
   try {
     const noticeId = route.params.id
-    courses.value = await getCourse()
+    // courses.value = await getCourse()
     students.value = await getAllUser()
 
     const res = await getNoticeView(noticeId)
@@ -236,18 +235,12 @@ onMounted(async () => {
     content.value = notice.value.content || ''
     existing_file_ids.value = notice.value.attachments || []
 
-    const targetData =
-      notice.value.targets && notice.value.targets[0] ? notice.value.targets[0] : null
+    const targetData = notice.value.targets?.[0]
 
     if (targetData) {
       if (targetData.grade_id) {
         targetSelect.value = targetData.grade_id // 1, 2, 3
         courseTypeSelect.value = notice.value.course_type // general or regular
-
-        // 정규 수업일 경우 과목 ID 연결
-        if (notice.value.course_id) {
-          courseSelect.value = notice.value.course_id
-        }
       } else {
         // language_id
         if (targetData.language_id === 'JP') {
@@ -257,22 +250,27 @@ onMounted(async () => {
         }
 
         if (targetData.class_id) {
-          const typeChar = targetData.class_id.slice(-1)
-
-          const courseId = targetData.class_id.slice(0, -1)
-
-          courseTypeSelect.value = typeChar // A or B
-          courseSelect.value = courseId // C003
+          courseTypeSelect.value = targetData.class_id.slice(-1) // 특강일 경우 A 혹은 B 가져오기
         }
       }
+
+      if (['1', '2', '3'].includes(targetSelect.value)) {
+        courses.value = await getCourseRegular(courseTypeSelect.value, targetSelect.value)
+      } else if (['special', 'korean'].includes(targetSelect.value)) {
+        courses.value = await getCourseSpecial(targetSelect.value, courseTypeSelect.value)
+      }
+
+      if (targetData.class_id) {
+        courseSelect.value = targetData.class_id.slice(0, -1) // C003A -> C003 으로 짜르기
+      } else if (notice.value.course_id) {
+        courseSelect.value = notice.value.course_id
+      }
     } else {
-      // 타겟이 없는 경우
       targetSelect.value = '전체'
       courseTypeSelect.value = 'general'
     }
 
     // 초기화 완료 후 false로 변경하여 watch 동작
-
     await nextTick()
     isInitial.value = false
   } catch (err) {
@@ -295,30 +293,12 @@ const filterCourseType = computed(() => {
 
   return []
 })
-watch([courseTypeSelect, targetSelect], async ([newType, newTarget]) => {
-  // 정규 과목 호출 API
-  if (['1', '2', '3'].includes(newTarget)) {
-    try {
-      courses.value = await getCourseRegular(newType, newTarget)
-      console.log('학년 별 정규 과목 조회', courses.value)
-    } catch (err) {
-      console.error('정규 과목 요청 실패', err)
-    }
-  }
-  // 특강 과목 호출 API
-  if (['special', 'korean'].includes(newTarget)) {
-    try {
-      courses.value = await getCourseSpecial(newTarget, newType)
-      console.log('특강 과목 조회', courses.value)
-    } catch (err) {
-      console.error('과목 조회 실패', err)
-    }
-  }
-})
 
 const fixFileName = (str) => {
+  if (!str) return ''
+
   try {
-    return decodeURIComponent(escape(str))
+    return decodeURIComponent(str)
   } catch {
     return str
   }
@@ -434,6 +414,28 @@ const updateNotice = async () => {
   }
 }
 
+watch([courseTypeSelect, targetSelect], async ([newType, newTarget]) => {
+  if (isInitial.value) return
+  // 정규 과목 호출 API
+  if (['1', '2', '3'].includes(newTarget)) {
+    try {
+      courses.value = await getCourseRegular(newType, newTarget)
+      console.log('학년 별 정규 과목 조회', courses.value)
+    } catch (err) {
+      console.error('정규 과목 요청 실패', err)
+    }
+  }
+  // 특강 과목 호출 API
+  if (['special', 'korean'].includes(newTarget)) {
+    try {
+      courses.value = await getCourseSpecial(newTarget, newType)
+      console.log('특강 과목 조회', courses.value)
+    } catch (err) {
+      console.error('과목 조회 실패', err)
+    }
+  }
+})
+
 // 타입 변경 시 과목 선택 초기화
 watch(courseTypeSelect, (newType, oldType) => {
   if (isInitial.value) return
@@ -461,11 +463,11 @@ watch(targetSelect, async (newTarget) => {
   }
 })
 
-watchEffect(() => {
-  //   console.log('선택된 학년: ', targetSelect.value)
-  //   console.log('선택된 과목 타입: ', courseTypeSelect.value)
-  //   console.log('선택과목 아이디: ', courseSelect.value)
-})
+// watchEffect(() => {
+//     console.log('선택된 학년: ', targetSelect.value)
+//     console.log('선택된 과목 타입: ', courseTypeSelect.value)
+//     console.log('선택과목 아이디: ', courseSelect.value)
+// })
 
 const saveAndClose = () => {
   console.log(modalStudentSelect.value)
