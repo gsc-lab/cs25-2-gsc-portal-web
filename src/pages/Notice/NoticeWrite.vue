@@ -38,10 +38,10 @@
               <input
                 id="notice-author"
                 class="form-input"
-                value="author.value"
                 type="text"
                 placeholder="작성자 이름"
                 v-model="author"
+                disabled
               />
             </div>
 
@@ -259,29 +259,6 @@ const filterCourseType = computed(() => {
   return []
 })
 
-// // 학년, 과목 유형에 따른 과목 필터링
-// const filterCourse = computed(() => {
-//   if (targetSelect.value === '전체') {
-//     return []
-//   }
-
-//   if (['1', '2', '3'].includes(targetSelect.value)) {
-//     return courses.value.filter(
-//       (course) =>
-//         course.grade_id === targetSelect.value && course.course_type === courseTypeSelect.value,
-//     )
-//   }
-//   if (['special', 'korean'].includes(targetSelect.value)) {
-//     return courses.value.filter(
-//       (course) =>
-//         course.class_id &&
-//         course.class_id.includes(courseTypeSelect.value) &&
-//         course.course_type === targetSelect.value,
-//     )
-//   }
-//   return []
-// })
-
 // 과목 배열에서 과목의 ID 값을 이용하여 선택된 과목의 값이 일치하는 값 저장
 const selectedCourseId = computed(() => {
   const selected = courses.value.find((course) => course.course_id === courseSelect.value)
@@ -293,6 +270,10 @@ const selectedCourseTitle = computed(() => {
   return selected ? selected.title : null
 })
 
+const selectClassId = computed(() => {
+  return courses.value.filter((course) => course.course_id === courseSelect.value)
+})
+
 const handleFiles = (event) => {
   const selected = event.target.files
   files.value = [...files.value, ...Array.from(selected)]
@@ -302,14 +283,16 @@ const removeFile = (index) => {
   files.value.splice(index, 1)
 }
 
-const targetFilter = (target) => {
-  if (target === '1' || target === '2' || target === '3') {
-    return target + '학년'
-  }
-  if (target === 'special') return '일본어 특강'
-  if (target === 'korean') return '한국어'
+const targetList = {
+  1: '1학년',
+  2: '2학년',
+  3: '3학년',
+  special: '일본어 특강',
+  korean: '한국어',
+}
 
-  return target
+const targetFilter = (target) => {
+  return targetList[target] || target
 }
 
 const courseTypeFilter = (type) => {
@@ -324,12 +307,18 @@ const courseTypeFilter = (type) => {
   }
 }
 
+const isLoading = ref(false)
+
 // 공지사항 등록 ( API POST 요청 )
 const submitNotice = async () => {
   if (title.value === '' || content.value === '') {
     alert('제목 및 내용을 입력해주세요')
     return
   }
+
+  if (isLoading.value) return // 등록 요청중이면 중단
+
+  isLoading.value = true
 
   const noticeData = {
     title: title.value,
@@ -355,7 +344,7 @@ const submitNotice = async () => {
       noticeData.targets[0].grade_id = targetSelect.value
     } else if (['special', 'korean'].includes(targetSelect.value)) {
       if (courseSelect.value && courseTypeSelect.value) {
-        noticeData.targets[0].class_id = courseSelect.value + courseTypeSelect.value
+        noticeData.targets[0].class_id = selectClassId.value[0]?.targets[0]?.class_id || null
       }
       if (targetSelect.value === 'special') {
         noticeData.targets[0].language_id = 'JP'
@@ -379,6 +368,8 @@ const submitNotice = async () => {
   } catch (err) {
     console.error(err)
     alert('업로드 중 오류가 발생했습니다.')
+  } finally {
+    isLoading.value = false
   }
 }
 
