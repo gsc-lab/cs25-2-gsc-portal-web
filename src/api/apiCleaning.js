@@ -21,7 +21,6 @@ export const getCleaningRosterMonthly = async () => {
 // 학기 목록 조회
 export const getSections = async () => {
   const section = await api.get('/modal/setctions')
-
   return section.data
 }
 
