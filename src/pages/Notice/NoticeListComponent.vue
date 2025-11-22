@@ -1,12 +1,28 @@
 <template>
   <main class="notice-board-wrapper">
     <section class="notice-board-container">
+      <div class="search-control-area">
+        <div class="my-post-check" v-if="user.userInfo">
+          <input type="checkbox" id="myPost" :checked="!!authorSelect" @change="myPost" />
+          <label for="myPost">내가 쓴 글 보기</label>
+        </div>
+        <div class="search-box">
+          <input
+            type="text"
+            v-model="inputWord"
+            @keyup.enter="handleSearch"
+            placeholder="제목이나 내용을 검색하세요"
+          />
+          <button @click="handleSearch">검색</button>
+        </div>
+      </div>
+
       <div class="grade-filter">
         <button
           v-for="(notice, key) in isUserInfoList"
           :key="key"
           :class="['filter-btn', { active: targetSelect === notice.target }]"
-          @click="HandleGradeNotice(notice.target)"
+          @click="handleGradeNotice(notice.target)"
         >
           <span>{{ targetFilter(notice.target) }}</span>
         </button>
@@ -70,13 +86,13 @@
         </div>
 
         <div v-for="(notice, index) in filterNotices" :key="notice.notice_id">
-          <div class="notice-item" @click="HandleNoticeClick(notice.notice_id)">
+          <div class="notice-item" @click="handleNoticeClick(notice.notice_id)">
             <div class="col-num">
               <p v-if="notice.is_pinned">
-                <span v-if="notice.is_pinned" class="badge-pinned">중요</span>
+                <span class="badge-pinned">중요</span>
               </p>
               <p v-else>
-                {{ index + 1 }}
+                {{ totalCount - (page - 1) * 10 - index }}
               </p>
             </div>
             <div class="col-title">{{ notice.title }}</div>
@@ -84,6 +100,7 @@
               <span>{{ notice.content }}</span>
               <span v-if="notice.attachments.length > 0">📁</span>
             </div>
+
             <div
               v-if="notice.course_type === 'regular' || notice.course_type === 'general'"
               class="col-target"
@@ -100,11 +117,20 @@
                 {{ courseTypeSelect === 'A' ? 'A반' : 'B반' }}
               </span>
             </div>
-            <div class="col-author">{{ notice.author?.name }}</div>
+            <div class="col-author">{{ notice?.author_name }}</div>
             <div class="col-date">{{ formatDate(notice.created_at) }}</div>
           </div>
         </div>
+
+        <div v-if="filterNotices.length === 0" class="no-data">등록된 공지사항이 없습니다.</div>
       </div>
+
+      <NoticePagination
+        v-if="totalCount > 0"
+        :totalCount="totalCount"
+        :currentPage="page"
+        @page-change="handlePageMove"
+      />
     </section>
   </main>
 </template>
@@ -113,108 +139,157 @@
 import { computed, onMounted, ref, watch, watchEffect } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useNoticeStore } from '@/stores/notice'
+import { useUserStore } from '@/stores/user'
 import router from '@/router'
 import { useRoute } from 'vue-router'
 import { getCourseRegular, getCourseSpecial } from '@/api/apiNotice'
-import { useUserStore } from '@/stores/user'
+import NoticePagination from './NoticePagination.vue'
 // import { useUserStore } from '@/stores/user'
 // import { getRegularCourse } from '@/api/apiCourse'
 
 const route = useRoute()
 const detailOpen = ref(false)
+const inputWord = ref('')
 
-const courses = ref([])
-// user 정보 불러오기
 const user = useUserStore()
+const noticeStore = useNoticeStore()
 
-// 공지사항 store 사용, 과목 store 사용
-const noticeStore = useNoticeStore() // 22
-
-// const regular = ref([])
-
-// store 가져오기
-const { filterNotices, targetSelect, courseTypeSelect, courseSelect, noticeTarget, course_type } =
-  storeToRefs(noticeStore)
+const {
+  filterNotices,
+  targetSelect,
+  courseTypeSelect,
+  courseSelect,
+  noticeTarget,
+  course_type,
+  courses,
+  page,
+  totalCount,
+  keyword,
+  authorSelect, // [New] 추가된 state
+} = storeToRefs(noticeStore)
 // const { courses } = storeToRefs(coursesStore)
 
 onMounted(async () => {
-  // noticeStore.setCourse(courses.value)
-  await noticeStore.fetchNotice()
-
-  // regular.value = await getRegularCourse()
-
-  // console.log('정규과목 조회: ', regular.value)
-
   if (route.params.gradeId) {
     targetSelect.value = route.params.gradeId
     detailOpen.value = true
   }
+
+  inputWord.value = keyword.value
+
+  await noticeStore.fetchNotice()
 })
 
-// ==========================작성날짜================================
+// 이벤트 핸들러
 
-function formatDate(isoString) {
-  if (!isoString) return ''
-  const date = new Date(isoString)
-  return date.toLocaleDateString('ko-KR', {
-    timeZone: 'Asia/seoul',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  })
+// 검색 시
+const handleSearch = () => {
+  noticeStore.keyword = inputWord.value
+  noticeStore.page = 1
+  noticeStore.fetchNotice()
+}
+
+// 페이지 이동 시
+const handlePageMove = (newPage) => {
+  noticeStore.page = newPage
+  noticeStore.fetchNotice()
+}
+
+// 나의 게시물 보기
+const myPost = (my) => {
+  if (my.target.checked) {
+    noticeStore.authorSelect = user.userInfo.user_id
+  } else {
+    noticeStore.authorSelect = ''
+  }
+  noticeStore.page = 1
+  noticeStore.fetchNotice()
+}
+
+// 학년 별 공지사항 이동
+const handleGradeNotice = (target) => {
+  if (target) {
+    targetSelect.value = target
+    if (target === '전체') {
+      router.push({ path: '/notice' })
+    } else {
+      router.push({ path: `/notice/grade/${target}` })
+    }
+  } else {
+    targetSelect.value = '전체'
+    courseSelect.value = ''
+  }
+}
+
+const handleNoticeClick = (notice_id) => {
+  router.push({ path: `noticeView/${notice_id}` })
 }
 
 // 타켓 목록 필터링
 const targetFilter = (target) => {
-  if (target === '1' || target === '2' || target === '3') {
-    return target + '학년'
-  }
+  if (['1', '2', '3'].includes(target)) return target + '학년'
   if (target === 'special') return '일본어 특강'
   if (target === 'korean') return '한국어'
 
   return target
 }
 
+watch(
+  [targetSelect, courseTypeSelect, courseSelect],
+  async ([newTarget, newType], [oldTarget, oldType]) => {
+    // 값이 변하지 않았으면 스킵
+    if (
+      newTarget === oldTarget &&
+      newType === oldType &&
+      courseSelect.value === storeToRefs(noticeStore).courseSelect.value
+    ) {
+      // return; // 상황에 따라 필요
+    }
+
+    // 1. 하위 필터 데이터(과목 목록) 갱신 로직
+    if (newTarget !== oldTarget || newType !== oldType) {
+      if (['1', '2', '3'].includes(newTarget) && newType === 'regular') {
+        try {
+          const response = await getCourseRegular(newType, newTarget)
+          noticeStore.setCourse(response) // Store에 저장
+        } catch (err) {
+          console.error(err)
+        }
+      } else if (['special', 'korean'].includes(newTarget) && ['A', 'B'].includes(newType)) {
+        try {
+          const response = await getCourseSpecial(newTarget, newType)
+          noticeStore.setCourse(response)
+        } catch (err) {
+          console.error(err)
+        }
+      } else {
+        noticeStore.setCourse([]) // 그 외 경우는 과목 목록 비움
+      }
+    }
+
+    // 2. 공지사항 데이터 불러오기 page 는 1로 초기화
+    noticeStore.page = 1
+    await noticeStore.fetchNotice()
+  },
+  { deep: true },
+)
+
 // 과목 타입 필터링
 const typeFilter = (type) => {
-  if (type === 'general') {
-    return '전체'
-  }
-  if (type === 'regular') {
-    return '정규'
-  }
-  if (type === 'A') {
-    return 'A반'
-  }
-  if (type === 'B') {
-    return 'B반'
-  }
+  const map = { general: '전체', regular: '정규', A: 'A반', B: 'B반' }
+  return map[type] || type
 }
 
 // 사용자 유저 정보에 대한 필터링된 리스트
 const isUserInfoList = computed(() => {
   if (!user.userInfo) return []
-
   const userInfo = user.userInfo
-
-  if (userInfo.role_type === 'admin') {
-    return noticeTarget.value
-  }
+  if (userInfo.role_type === 'admin') return noticeTarget.value
 
   return noticeTarget.value.filter((target) => {
-    if (target === userInfo.grade_id) {
-      return true
-    }
-    if (userInfo.language_id === 'JP' && target === 'special') {
-      return true
-    }
-    if (userInfo.language_id === 'KR' && target === 'korean') {
-      return true
-    }
-
+    if (target === userInfo.grade_id) return true
+    if (userInfo.language_id === 'JP' && target === 'special') return true
+    if (userInfo.language_id === 'KR' && target === 'korean') return true
     return false
   })
 })
@@ -226,27 +301,6 @@ watchEffect(() => {
   console.log('선택된 과목', courseSelect.value)
   // console.log('과목 목록 변경', courses.value)
   console.log('url 변동 감지', route.params.gradeId)
-})
-
-watch([courseTypeSelect, targetSelect], async ([newType, newTarget]) => {
-  // 정규 과목 호출 API
-  if (['1', '2', '3'].includes(newTarget) && newType === 'regular') {
-    try {
-      courses.value = await getCourseRegular(newType, newTarget)
-      console.log('학년 별 정규 과목 조회', courses.value)
-    } catch (err) {
-      console.error('정규 과목 요청 실패', err)
-    }
-  }
-  // 특강 과목 호출 API
-  if (['special', 'korean'].includes(newTarget) && ['A', 'B'].includes(newType)) {
-    try {
-      courses.value = await getCourseSpecial(newTarget, newType)
-      console.log('특강 과목 조회', courses.value)
-    } catch (err) {
-      console.error('과목 조회 실패', err)
-    }
-  }
 })
 
 watch(targetSelect, (newTarget, oldTarget) => {
@@ -284,48 +338,28 @@ watch(
     } else {
       targetSelect.value = '전체'
       detailOpen.value = false
+      // 초기화
       courseTypeSelect.value = 'general'
       courseSelect.value = ''
-      router.push({ path: '/notice' })
+      noticeStore.keyword = ''
+      inputWord.value = ''
     }
   },
 )
 
-watch(courseTypeSelect, (newVal, oldVal) => {
-  if (newVal !== oldVal) {
-    courseSelect.value = ''
-  }
-})
+// ==========================작성날짜================================
 
-// watch(courseSelect, courseTypeSelect, targetSelect, ([newCourse, newType, newTarget]) => {
-//   if (targetSelect) { // 타겟 별
-//     const test = await
-//   }
-// })
-
-// 선택 학년 공지사항으로 이동
-const HandleGradeNotice = (target) => {
-  console.log(target)
-
-  if (target) {
-    if (target === '전체') {
-      router.push({ path: '/notice' })
-    } else {
-      router.push({ path: `/notice/grade/${target}` })
-    }
-  } else {
-    targetSelect.value = ''
-    courseTypeSelect.value = ''
-    courseSelect.value = ''
-    detailOpen.value = false
-    router.push({ path: `/notice` })
-  }
-}
-
-// 선택 공지사항으로 이동
-const HandleNoticeClick = (notice_id) => {
-  console.log(notice_id)
-  router.push({ path: `/noticeView/${notice_id}` })
+function formatDate(isoString) {
+  if (!isoString) return ''
+  const date = new Date(isoString)
+  return date.toLocaleDateString('ko-KR', {
+    timeZone: 'Asia/seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 </script>
 
