@@ -165,7 +165,7 @@ const {
   page,
   totalCount,
   keyword,
-  authorSelect, // [New] 추가된 state
+  authorSelect,
 } = storeToRefs(noticeStore)
 // const { courses } = storeToRefs(coursesStore)
 
@@ -243,10 +243,10 @@ watch(
       newType === oldType &&
       courseSelect.value === storeToRefs(noticeStore).courseSelect.value
     ) {
-      // return; // 상황에 따라 필요
+      return
     }
 
-    // 1. 하위 필터 데이터(과목 목록) 갱신 로직
+    // 과목 목록 조회
     if (newTarget !== oldTarget || newType !== oldType) {
       if (['1', '2', '3'].includes(newTarget) && newType === 'regular') {
         try {
@@ -267,7 +267,7 @@ watch(
       }
     }
 
-    // 2. 공지사항 데이터 불러오기 page 는 1로 초기화
+    // 공지사항 데이터 불러오기 page 는 1로 초기화
     noticeStore.page = 1
     await noticeStore.fetchNotice()
   },
