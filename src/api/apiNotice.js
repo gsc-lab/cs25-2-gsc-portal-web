@@ -2,8 +2,8 @@ import api from "./apiClient";
 
 // =============== 전체 공지사항 조회 API 요청 ===============
 
-export const getNotice = async () => {
-  const noticeList = await api.get('/notices?size=100')
+export const getNotice = async (params) => {
+  const noticeList = await api.get(`/notices/`, { params })
   return noticeList.data
 }
 
