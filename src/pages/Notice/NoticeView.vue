@@ -26,13 +26,13 @@
               </button>
               <h1 class="portal-title"></h1>
               <div class="header-button">
-                <button @click="HandleAlarm(notice.notice_id)" class="btn btn-secondary">
+                <button @click="handleAlarm(notice.notice_id)" class="btn btn-secondary">
                   알림 전송
                 </button>
-                <button @click="HandleEdit(notice.notice_id)" class="btn btn-secondary">
+                <button @click="handleEdit(notice.notice_id)" class="btn btn-secondary">
                   수정
                 </button>
-                <button @click="HandleDelete(notice.notice_id)" class="btn btn-danger">삭제</button>
+                <button @click="handleDelete(notice.notice_id)" class="btn btn-danger">삭제</button>
               </div>
             </div>
 
@@ -42,8 +42,8 @@
                 <span class="author">{{ notice?.author?.name }}</span>
                 <span class="separator">|</span>
                 <span class="date">{{ formatDate }}</span>
-                <span class="badge">{{ courseTypeName }}</span>
-                <span class="badge">{{ notice?.course_title }}</span>
+                <span class="badge">{{ courseTypeName(notice?.course_type) }}</span>
+                <span class="badge" v-if="notice?.course_title">{{ notice?.course_title }}</span>
               </div>
             </div>
 
@@ -102,13 +102,10 @@ const target = ref([])
 onMounted(async () => {
   try {
     // 현재 공지사항의 notice_id
-    const noticeId = route.params.id // noticeId 를 사용하여 특정 공지사항 조회 API 호출
-    notice.value = await getNoticeView(noticeId)
-
-    if (user.userInfo.role_type !== 'student') {
-      target.value = await getNoticeTarget(noticeId)
+    const notice_id = route.params.id // noticeId 를 사용하여 특정 공지사항 조회 API 호출
+    if (notice_id) {
+      await fetchNoticeData(notice_id)
     }
-    await patchNoticeRead(notice.value.notice_id)
 
     console.log(notice.value)
     console.log(target.value)
@@ -121,32 +118,35 @@ const formatDate = computed(() => {
   if (!notice.value?.created_at) return ''
   const date = new Date(notice.value.created_at)
   return date.toLocaleDateString('ko-KR', {
-    timeZone: 'Asia/seoul',
+    timeZone: 'Asia/Seoul',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
-    second: '2-digit',
   })
 })
 
 // 파일이름 설정
+
 const fixFileName = (str) => {
+  if (!str) return ''
   try {
-    return decodeURIComponent(escape(str))
+    return decodeURIComponent(str)
   } catch {
     return str
   }
 }
 
 // 파일 다운로드
-const fileDownLoad = async (file_id, rawName = 'download') => {
+const fileDownLoad = async (file_id, rawName) => {
+  const name = rawName || 'download_file'
+
   try {
     const blob = await getFileDownLoad(file_id)
     const contentType = blob.type || 'application/octet-stream'
 
-    let filename = fixFileName(rawName)
+    let filename = fixFileName(name)
     if (filename.endsWith('.htm')) {
       filename = filename.replace(/\.htm/i, '.pdf')
     }
@@ -165,32 +165,26 @@ const fileDownLoad = async (file_id, rawName = 'download') => {
   }
 }
 
-// 과목유형이름 설정
-const courseTypeName = computed(() => {
-  if (!notice.value) {
-    return ''
-  }
-  switch (notice.value.course_type) {
-    case 'general':
-      return '전체'
-    case 'regular':
-      return '정규'
-    case 'special':
-      return '특강'
-    default:
-      return '한국어'
-  }
-})
+const courseTypeList = {
+  general: '전체',
+  regular: '정규',
+  special: '특강',
+  korean: '한국어',
+}
+
+const courseTypeName = (courseType) => {
+  return courseTypeList[courseType] || courseType
+}
 
 // 공지사항 수정 버튼 클릭시 수정 컴포넌트로 이동 (notice_id 전달)
-const HandleEdit = (notice_id) => {
+const handleEdit = (notice_id) => {
   console.log(notice_id)
   router.push({ path: `/noticeEdit/${notice_id}` })
 }
 
 // 상세보기 페이지 ( 알림 전송 여부 결정 ) -> 교수
 // 알림 전송 여부를 결정하기 위해서는 알림 대상을 확인할 수 있는 api 요청 필요
-const HandleAlarm = async (notice_id) => {
+const handleAlarm = async (notice_id) => {
   console.log(notice_id)
 
   const confirmSend = confirm('공지사항 알림을 전송하시겠습니까?')
@@ -207,7 +201,7 @@ const HandleAlarm = async (notice_id) => {
 }
 
 // 공지사항 삭제 버튼 클릭시 -> 교수
-const HandleDelete = async (notice_id) => {
+const handleDelete = async (notice_id) => {
   const isConfrim = window.confirm('삭제?')
   if (!isConfrim) return
 
@@ -220,11 +214,27 @@ const HandleDelete = async (notice_id) => {
   }
 }
 
+const fetchNoticeData = async (id) => {
+  if (!id) return
+
+  try {
+    notice.value = await getNoticeView(id)
+
+    // 학생이 아니면 확인 명단 갱신
+    if (user.userInfo.role_type !== 'student') {
+      target.value = await getNoticeTarget(id)
+    }
+    await patchNoticeRead(id)
+  } catch (err) {
+    console.error(err)
+  }
+}
+
 watch(
-  () => route.params.noticeId,
-  (newId, oldId) => {
-    if (newId !== oldId) {
-      getNoticeView()
+  () => route.params.id,
+  async (newId) => {
+    if (newId) {
+      await fetchNoticeData(newId)
     }
   },
 )
