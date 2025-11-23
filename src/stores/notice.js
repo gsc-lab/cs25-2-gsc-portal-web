@@ -69,14 +69,21 @@ export const useNoticeStore = defineStore('Notice', () => {
         course_id: courseSelect.value || null,
         grade_id: ['1', '2', '3'].includes(targetSelect.value) ? targetSelect.value : null,
 
+        language_id: (() => {
+          if (targetSelect.value === 'special') return 'JP';
+          if (targetSelect.value === 'korean') return 'KR';
+          return null;
+        })(),
+
         course_type: (() => {
-          const target = targetSelect.value
-          const type = courseTypeSelect.value
-          if (type === 'general') return 'general'
-          if (['special', 'korean'].includes(target)) return target
-          if (type === 'regular') return 'regular'
-          return null
-        })()
+          if (['1', '2', '3'].includes(targetSelect.value)) {
+            return courseTypeSelect.value === 'general' ? 'general' : 'regular';
+          }
+          if (['special', 'korean'].includes(targetSelect.value)) {
+            return targetSelect.value;
+          }
+          return 'general'; // 기본값
+        })(),
       }
 
       const params = removeNull(postParams)
@@ -93,13 +100,19 @@ export const useNoticeStore = defineStore('Notice', () => {
   }
 
   const filterNotices = computed(() => {
-    const list = noticeList.value
+    let list = noticeList.value
+
+    if (courseSelect.value) {
+      list = list.filter(notice => notice.course_id === courseSelect.value)
+    }
+
     const target = targetSelect.value
     const type = courseTypeSelect.value
 
     if (['special', 'korean'].includes(target) && ['A', 'B'].includes(type)) {
       return list.filter(notice => {
-        return notice.target?.some(target => target.class_id && target.class_id.includes(type))
+        // notice.targets 배열을 순회하며 class_id가 현재 타입(A or B)으로 끝나는지 확인
+        return notice.targets?.some(t => t.class_id && t.class_id.endsWith(type))
       })
     }
 
