@@ -1,3 +1,101 @@
+<template>
+  <div class="bg-gray-100 rounded-card shadow-subtle p-6 border border-gray-300">
+    <h3 class="text-xl font-bold text-text-heading mb-4">내 시간표</h3>
+
+    <!-- Week Navigation -->
+    <div class="flex items-center justify-between mb-4">
+      <button
+        @click="handleBefore"
+        class="px-4 py-2 bg-white border border-gray-300 text-text-base text-sm font-medium rounded-base hover:bg-gray-50 transition-colors duration-200 shadow-sm"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-4 w-4 inline-block mr-1"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        지난주
+      </button>
+      <p class="text-lg font-semibold text-text-heading">
+        {{ selectDate.toISOString().split('T')[0] }}
+      </p>
+      <button
+        @click="handleAfter"
+        class="px-4 py-2 bg-white border border-gray-300 text-text-base text-sm font-medium rounded-base hover:bg-gray-50 transition-colors duration-200 shadow-sm"
+      >
+        다음주
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-4 w-4 inline-block ml-1"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Timetable Table -->
+    <div class="rounded-lg overflow-hidden border border-gray-300 mt-4">
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse">
+          <thead>
+            <tr>
+              <th
+                class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-400 sticky left-0 z-10 w-16"
+              ></th>
+              <th
+                v-for="(d, idx) in ['MON', 'TUE', 'WED', 'THU', 'FRI']"
+                :key="idx"
+                class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-400"
+              >
+                {{ day(d) }} ({{ searchDate(idx + 1).slice(5) }})
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr v-for="hour in 12" :key="hour">
+              <td
+                class="bg-gray-50 text-text-muted font-semibold text-sm py-2 px-3 border border-gray-400 sticky left-0 z-10 w-16 user-select-none"
+              >
+                {{ hour }}교시
+                <p class="text-xs text-gray-700 mt-1">{{ hour + 8 }}:00~</p>
+              </td>
+              <template v-for="(d, idx) in ['MON', 'TUE', 'WED', 'THU', 'FRI']" :key="idx">
+                <td class="border border-gray-400 py-1 px-1 text-center relative user-select-none">
+                  <div
+                    v-for="schedule in timetableData?.[d][String(hour)]"
+                    :key="schedule"
+                    :class="[
+                      'p-0.5 my-0.5 rounded-sm',
+                      timetableData?.[d][String(hour)][0]?.event?.status === 'CANCEL'
+                        ? 'bg-red-500 text-white'
+                        : timetableData?.[d][String(hour)][0]?.event?.status === 'MAKEUP'
+                          ? 'bg-white border border-gray-300 text-text-base'
+                          : 'bg-primary text-white',
+                    ]"
+                  >
+                    <p class="text-xs font-semibold">{{ schedule?.title }}</p>
+                    <p class="text-xs">{{ schedule?.professor }}</p>
+                    <p class="text-xs">{{ schedule?.room }}</p>
+                  </div>
+                </td>
+              </template>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</template>
+
 <script setup>
 import { ref, watch } from 'vue'
 import { day } from '@/utils/reName'
@@ -46,61 +144,3 @@ const searchDate = (idxOfDay) => {
   return select.toISOString().split('T')[0]
 }
 </script>
-
-<template>
-  <div style="background-color: aliceblue">
-    <div>
-      <button @click="handleBefore">지난주</button>
-      <p>{{ selectDate.toISOString().split('T')[0] }}</p>
-      <button @click="handleAfter">다음주</button>
-    </div>
-
-    <table style="border-collapse: collapse; width: 100%">
-      <thead>
-        <!-- 요일 -->
-        <tr>
-          <th style="border: 1px solid #000; padding: 10px"></th>
-          <th
-            v-for="(d, idx) in ['MON', 'TUE', 'WED', 'THU', 'FRI']"
-            :key="idx"
-            style="border: 1px solid #000; padding: 10px"
-          >
-            {{ day(d) }} ({{ searchDate(idx + 1).slice(5) }})
-          </th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <!-- 교시 1 ~ 12 : hour -->
-        <tr v-for="hour in 12" :key="hour">
-          <!-- 교시 -->
-          <td style="border: 1px solid #000; padding: 10px; user-select: none">
-            {{ hour }}교시
-            <p>{{ hour + 8 }}:00~</p>
-          </td>
-          <!-- day -->
-          <template v-for="(d, idx) in ['MON', 'TUE', 'WED', 'THU', 'FRI']" :key="idx">
-            <!-- 학년 -->
-            <td style="border: 1px solid #000; padding: 10px; user-select: none">
-              <div
-                v-for="schedule in timetableData?.[d][String(hour)]"
-                :key="schedule"
-                :style="
-                  timetableData?.[d][String(hour)][0]?.event?.status === 'CANCEL'
-                    ? { backgroundColor: 'red' }
-                    : timetableData?.[d][String(hour)][0]?.event?.status === 'MAKEUP'
-                      ? { backgroundColor: 'white' }
-                      : { backgroundColor: 'blue', margin: '2px' }
-                "
-              >
-                <p>{{ schedule?.title }}</p>
-                <p>{{ schedule?.professor }}</p>
-                <p>{{ schedule?.room }}</p>
-              </div>
-            </td>
-          </template>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</template>

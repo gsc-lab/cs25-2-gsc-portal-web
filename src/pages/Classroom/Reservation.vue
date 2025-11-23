@@ -15,7 +15,9 @@ onMounted(async () => {
   const date = new Date().toISOString().split('T')[0]
   CRstore.selectReTime.date = date
 
-  selectCR.value = classrooms.value[0].classroom_id
+  if (classrooms.value.length > 0) {
+    selectCR.value = classrooms.value[0].classroom_id
+  }
   console.log(' ')
 })
 
@@ -32,12 +34,14 @@ watch(
 </script>
 
 <template>
-  <div style="background-color: aquamarine">
-    Reservation
+  <div class="bg-bg-paper rounded-card shadow-subtle p-6 border border-gray-200 mb-6">
+    <h2 class="text-xl font-bold text-text-heading mb-6">실습실 예약</h2>
+
     <!-- 강의실 필터링 -->
-    <div>
-      <label for="classroom">강의실 선택 :</label>
-      <select id="classroom" v-model="selectCR">
+    <div class="mb-4">
+      <label for="classroom" class="block text-sm font-medium text-text-base mb-1">강의실 선택 :</label>
+      <select id="classroom" v-model="selectCR"
+              class="block w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
         <option v-for="clr in classrooms" :value="clr.classroom_id" :key="clr.classroom_id">
           {{ clr.building }}-{{ clr.room_number }}
         </option>

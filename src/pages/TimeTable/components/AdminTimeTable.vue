@@ -1,3 +1,130 @@
+<template>
+  <div class="bg-gray-100 rounded-card shadow-subtle p-6 border border-gray-300">
+    <h3 class="text-xl font-bold text-text-heading mb-4">관리자 시간표</h3>
+
+    <!-- Grade Filter Buttons -->
+    <div class="flex flex-wrap gap-2 mb-4">
+      <button
+        v-for="g in ['1', '2', '3', 'special', 'korean']"
+        :key="g"
+        @click="handleSelect(g)"
+        :class="[
+          'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 shadow-sm border',
+          targets[g]
+            ? 'bg-primary text-white border-primary'
+            : 'bg-white text-text-muted border-gray-300 hover:bg-gray-100',
+        ]"
+      >
+        {{ setTarget(String(g)) }}
+      </button>
+    </div>
+
+    <!-- Week Navigation -->
+    <div class="flex items-center justify-between mb-4">
+      <button @click="handleBefore" class="px-4 py-2 bg-white border border-gray-300 text-text-base text-sm font-medium rounded-base hover:bg-gray-50 transition-colors duration-200 shadow-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        지난주
+      </button>
+      <p class="text-lg font-semibold text-text-heading">{{ selectDate.toISOString().split('T')[0] }}</p>
+      <button @click="handleAfter" class="px-4 py-2 bg-white border border-gray-300 text-text-base text-sm font-medium rounded-base hover:bg-gray-50 transition-colors duration-200 shadow-sm">
+        다음주
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Timetable Table -->
+    <div class="rounded-lg overflow-hidden border border-gray-300 mt-4">
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse">
+          <thead>
+            <!-- Days of the week -->
+            <tr>
+              <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-400 sticky left-0 z-10 w-16"></th>
+              <th
+                v-for="(d, idx) in ['MON', 'TUE', 'WED', 'THU', 'FRI']"
+                :key="idx"
+                :colspan="selectTargets.length"
+                class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-400"
+              >
+                {{ day(d) }} ({{ searchDate(idx + 1).slice(5) }})
+              </th>
+            </tr>
+            <!-- Grades/Targets for each day -->
+            <tr>
+              <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-400 sticky left-0 z-10 w-16"></th>
+              <template v-for="_ in 5" :key="_">
+                <th v-for="g in selectTargets" :key="g" class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-400">
+                  {{ setTarget(String(g)) }}
+                </th>
+              </template>
+            </tr>
+          </thead>
+
+          <tbody>
+            <!-- Periods 1 to 12 -->
+            <tr v-for="hour in 12" :key="hour">
+              <!-- Period Cell -->
+              <td class="bg-gray-50 text-text-muted font-semibold text-sm py-2 px-3 border border-gray-400 sticky left-0 z-10 w-16 user-select-none">
+                {{ hour }}교시
+                <p class="text-xs text-gray-700 mt-1">{{ hour + 8 }}:00~</p>
+              </td>
+              <!-- Day and Grade Cells -->
+              <template v-for="(d, idx) in ['MON', 'TUE', 'WED', 'THU', 'FRI']" :key="idx">
+                <td
+                  v-for="g in selectTargets"
+                  :key="g"
+                  @mousedown="
+                    timetableData?.[g]?.[d][String(hour)].length > 1 ||
+                    timetableData?.[g]?.[d][String(hour)][0]?.event?.status == 'CANCEL'
+                      ? startSelection(g, idx + 1, d, hour)
+                      : startSelection(
+                          g,
+                          idx + 1,
+                          d,
+                          hour,
+                          timetableData?.[String(g)][d][String(hour)][0],
+                        )
+                  "
+                  @mouseover="
+                    timetableData?.[g]?.[d][String(hour)].length > 1 ||
+                    timetableData?.[g]?.[d][String(hour)][0]?.event?.status == 'CANCEL'
+                      ? updateSelection(g, d, hour)
+                      : updateSelection(g, d, hour, timetableData?.[String(g)][d][String(hour)][0])
+                  "
+                  @mouseup="endSelection"
+                  class="border border-gray-400 py-1 px-1 text-center relative user-select-none"
+                >
+                  <div
+                    v-for="schedule in timetableData?.[g]?.[d][String(hour)]"
+                    :key="schedule"
+                    :class="[
+                      'p-0.5 my-0.5 rounded-sm',
+                      timetableData?.[g]?.[d][String(hour)][0]?.event?.status === 'CANCEL'
+                        ? 'bg-red-500 text-white'
+                        : timetableData?.[g]?.[d][String(hour)][0]?.event?.status === 'MAKEUP'
+                          ? 'bg-white border border-gray-300 text-text-base'
+                          : 'bg-primary text-white',
+                    ]"
+                  >
+                    <p class="text-xs font-semibold">{{ schedule?.title }}</p>
+                    <p v-if="schedule?.students" class="text-xs">{{ schedule?.students }}</p>
+                    <p class="text-xs">{{ schedule?.professor }}</p>
+                    <p class="text-xs">{{ schedule?.room }}</p>
+                  </div>
+                </td>
+              </template>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</template>
+
 <script setup>
 import { ref, watch } from 'vue'
 import { setTarget, day } from '@/utils/reName'
@@ -140,135 +267,3 @@ function endSelection() {
 }
 // ===================================================================================
 </script>
-
-<template>
-  <div style="background-color: aliceblue">
-    TimeTable
-
-    <div style="display: flex; gap: 5px">
-      <button
-        @click="handleSelect(1)"
-        :style="targets[1] ? { backgroundColor: 'aqua' } : { backgroundColor: 'gray' }"
-      >
-        1학년
-      </button>
-      <button
-        @click="handleSelect(2)"
-        :style="targets[2] ? { backgroundColor: 'aqua' } : { backgroundColor: 'gray' }"
-      >
-        2학년
-      </button>
-      <button
-        @click="handleSelect(3)"
-        :style="targets[3] ? { backgroundColor: 'aqua' } : { backgroundColor: 'gray' }"
-      >
-        3학년
-      </button>
-      <button
-        @click="handleSelect('special')"
-        :style="targets['special'] ? { backgroundColor: 'aqua' } : { backgroundColor: 'gray' }"
-      >
-        특강
-      </button>
-      <button
-        @click="handleSelect('korean')"
-        :style="targets['korean'] ? { backgroundColor: 'aqua' } : { backgroundColor: 'gray' }"
-      >
-        한국어
-      </button>
-    </div>
-
-    <div>
-      <button @click="handleBefore">지난주</button>
-      <p>{{ selectDate.toISOString().split('T')[0] }}</p>
-      <button @click="handleAfter">다음주</button>
-    </div>
-
-    <table style="border-collapse: collapse; width: 100%">
-      <thead>
-        <!-- 요일 -->
-        <tr>
-          <th style="border: 1px solid #000; padding: 10px"></th>
-          <th
-            v-for="(d, idx) in ['MON', 'TUE', 'WED', 'THU', 'FRI']"
-            :key="idx"
-            :colspan="selectTargets.length"
-            style="border: 1px solid #000; padding: 10px"
-          >
-            {{ day(d) }} ({{ searchDate(idx + 1).slice(5) }})
-          </th>
-        </tr>
-        <!-- 학년 * 5 -->
-        <tr>
-          <th style="border: 1px solid #000; padding: 10px"></th>
-          <template v-for="_ in 5" :key="_">
-            <th v-for="g in selectTargets" :key="g" style="border: 1px solid #000; padding: 10px">
-              {{ setTarget(String(g)) }}
-            </th>
-          </template>
-        </tr>
-      </thead>
-
-      <tbody>
-        <!-- 교시 1 ~ 12 : hour -->
-        <tr v-for="hour in 12" :key="hour">
-          <!-- 교시 -->
-          <td style="border: 1px solid #000; padding: 10px; user-select: none">
-            {{ hour }}교시
-            <p>{{ hour + 8 }}:00~</p>
-          </td>
-          <!-- day -->
-          <template v-for="(d, idx) in ['MON', 'TUE', 'WED', 'THU', 'FRI']" :key="idx">
-            <!-- 학년 -->
-            <td
-              v-for="g in selectTargets"
-              :key="g"
-              @mousedown="
-                timetableData?.[g]?.[d][String(hour)].length > 1 ||
-                timetableData?.[g]?.[d][String(hour)][0]?.event?.status == 'CANCEL'
-                  ? startSelection(g, idx + 1, d, hour)
-                  : startSelection(
-                      g,
-                      idx + 1,
-                      d,
-                      hour,
-                      timetableData?.[String(g)][d][String(hour)][0],
-                    )
-              "
-              @mouseover="
-                timetableData?.[g]?.[d][String(hour)].length > 1 ||
-                timetableData?.[g]?.[d][String(hour)][0]?.event?.status == 'CANCEL'
-                  ? updateSelection(g, d, hour)
-                  : updateSelection(g, d, hour, timetableData?.[String(g)][d][String(hour)][0])
-              "
-              @mouseup="endSelection"
-              style="border: 1px solid #000; padding: 10px; user-select: none"
-            >
-              <!-- timetableData?.[String(g)][d][String(hour)] 에 여러개 있으면 과복 데이터 저장 안함  -->
-              <!-- 과목 / 교수 / 장소 -->
-              <!-- {{g}} -->
-              <div
-                v-for="schedule in timetableData?.[g]?.[d][String(hour)]"
-                :key="schedule"
-                :style="
-                  timetableData?.[g]?.[d][String(hour)][0]?.event?.status === 'CANCEL'
-                    ? { backgroundColor: 'red' }
-                    : timetableData?.[g]?.[d][String(hour)][0]?.event?.status === 'MAKEUP'
-                      ? { backgroundColor: 'white' }
-                      : { backgroundColor: 'blue', margin: '2px' }
-                "
-              >
-                <p>{{ schedule?.title }}</p>
-                <p v-if="schedule?.students">
-                  {{ schedule?.students }}
-                </p>
-                <p>{{ schedule?.professor }}</p>
-                <p>{{ schedule?.room }}</p>
-              </div>
-            </td>
-          </template>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</template>

@@ -10,35 +10,48 @@ onMounted(async () => {
 
 // 승인 / 거절 등록
 const handleSubmit = async (user_id, action) => {
-  await postApproval(user_id, action)
-  approval.value = await getApproval()
+  try {
+    await postApproval(user_id, action)
+    alert(`사용자 ${user_id}를(을) ${action === 'active' ? '승인' : '거절'}했습니다.`)
+    approval.value = await getApproval() // Refresh data
+  } catch (error) {
+    console.error('승인/거절 처리 실패:', error)
+    alert('승인/거절 처리 중 오류가 발생했습니다.')
+  }
 }
 </script>
 
 <template>
-  <div style="background-color: azure; margin: 3px">
-    approval
+  <div class="p-4">
+    <h3 class="text-lg font-semibold text-text-heading mb-4">사용자 승인</h3>
 
-    <table style="border-collapse: collapse; width: 100%">
-      <thead>
-        <tr>
-          <th style="border: 1px solid #000; padding: 10px">권한</th>
-          <th style="border: 1px solid #000; padding: 10px">이름</th>
-          <th style="border: 1px solid #000; padding: 10px">학번</th>
-          <th style="border: 1px solid #000; padding: 10px">승인 여부</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="appUser in approval" :key="appUser">
-          <td style="border: 1px solid #000; padding: 10px">{{ appUser.role_type }}</td>
-          <td style="border: 1px solid #000; padding: 10px">{{ appUser.name }}</td>
-          <td style="border: 1px solid #000; padding: 10px">{{ appUser.user_id }}</td>
-          <td style="border: 1px solid #000; padding: 10px">
-            <button @click="handleSubmit(appUser.user_id, 'active')">승인 |</button>{{ ' ' }}
-            <button @click="handleSubmit(appUser.user_id, 'inactive')">거절</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-subtle bg-white">
+      <table class="w-full border-collapse min-w-full divide-y divide-gray-200">
+        <thead>
+          <tr>
+            <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">권한</th>
+            <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">이름</th>
+            <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">학번</th>
+            <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">승인 여부</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="appUser in approval" :key="appUser.user_id" class="divide-y divide-gray-100 hover:bg-gray-50">
+            <td class="text-sm py-2 px-3 border-b border-gray-100 text-center">{{ appUser.role_type }}</td>
+            <td class="text-sm py-2 px-3 border-b border-gray-100 text-center">{{ appUser.name }}</td>
+            <td class="text-sm py-2 px-3 border-b border-gray-100 text-center">{{ appUser.user_id }}</td>
+            <td class="text-sm py-2 px-3 border-b border-gray-100 text-center">
+              <div class="flex gap-2 justify-center">
+                <button @click="handleSubmit(appUser.user_id, 'active')" class="px-3 py-1 bg-primary text-white text-sm font-medium rounded-base hover:bg-primary-dark transition-colors duration-200 shadow-sm">승인</button>
+                <button @click="handleSubmit(appUser.user_id, 'inactive')" class="px-3 py-1 bg-red-500 text-white text-sm font-medium rounded-base hover:bg-red-600 transition-colors duration-200 shadow-sm">거절</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div v-if="!approval || approval.length === 0" class="text-center text-text-muted text-lg py-8">
+        승인 대기중인 사용자가 없습니다.
+      </div>
+    </div>
   </div>
 </template>

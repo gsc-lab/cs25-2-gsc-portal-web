@@ -13,7 +13,7 @@ const content = defineModel('content')
 
 <!-- 페이지 연결 -->
 <template>
-  <div style="background-color: aliceblue">
+  <div class="p-4">
     <CourseView v-if="content === 'CourseView'" />
     <!-- 과목 열람 -->
     <CourseRegister v-if="content === 'CourseRegister'" />

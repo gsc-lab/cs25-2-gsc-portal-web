@@ -1,3 +1,122 @@
+<template>
+  <div class="bg-bg-paper rounded-card shadow-subtle p-6 border border-gray-200">
+    <h3 class="text-xl font-bold text-text-heading mb-6">시간표 등록</h3>
+
+    <div class="flex flex-col gap-4">
+      <!-- Section Select -->
+      <div class="grid grid-cols-[120px_1fr] items-baseline gap-y-4">
+        <label class="block text-sm font-medium text-text-base pt-2" for="section">학기:</label>
+        <select id="section" v-model="section"
+          class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+          <option v-for="s in sections" :value="s.sec_id" :key="s.sec_id">
+            {{ s.label }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Target Selection -->
+      <div class="grid grid-cols-[120px_1fr] items-baseline gap-y-4">
+        <label class="block text-sm font-medium text-text-base pt-2">대상 선택:</label>
+        <div class="flex flex-wrap gap-3">
+          <input type="radio" id="tr-1" value="1" v-model="postTimetableData.target" class="hidden" />
+          <label for="tr-1" class="block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent"
+            :class="{ 'bg-primary-light border-primary text-primary-dark font-semibold': postTimetableData.target === '1' }">
+            1학년
+          </label>
+
+          <input type="radio" id="tr-2" value="2" v-model="postTimetableData.target" class="hidden" />
+          <label for="tr-2" class="block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent"
+            :class="{ 'bg-primary-light border-primary text-primary-dark font-semibold': postTimetableData.target === '2' }">
+            2학년
+          </label>
+
+          <input type="radio" id="tr-3" value="3" v-model="postTimetableData.target" class="hidden" />
+          <label for="tr-3" class="block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent"
+            :class="{ 'bg-primary-light border-primary text-primary-dark font-semibold': postTimetableData.target === '3' }">
+            3학년
+          </label>
+
+          <input type="radio" id="tr-special" value="special" v-model="postTimetableData.target" class="hidden" />
+          <label for="tr-special" class="block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent"
+            :class="{ 'bg-primary-light border-primary text-primary-dark font-semibold': postTimetableData.target === 'special' }">
+            특강
+          </label>
+
+          <input type="radio" id="tr-korean" value="korean" v-model="postTimetableData.target" class="hidden" />
+          <label for="tr-korean" class="block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent"
+            :class="{ 'bg-primary-light border-primary text-primary-dark font-semibold': postTimetableData.target === 'korean' }">
+            한국어
+          </label>
+        </div>
+      </div>
+
+      <!-- Course Select -->
+      <div class="grid grid-cols-[120px_1fr] items-baseline gap-y-4">
+        <label class="block text-sm font-medium text-text-base pt-2" for="course">과목:</label>
+        <select id="course" v-model="postTimetableData.course_id"
+          class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+          <option v-for="(course, idx) in courses" :value="idx" :key="idx">
+            {{ course.title }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Day Select -->
+      <div class="grid grid-cols-[120px_1fr] items-baseline gap-y-4">
+        <label class="block text-sm font-medium text-text-base pt-2" for="day">요일:</label>
+        <select id="day" v-model="postTimetableData.day"
+          class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+          <option v-for="(d, idx) in days" :value="enDays[idx]" :key="idx">{{ d }}요일</option>
+        </select>
+      </div>
+
+      <!-- Classroom Select -->
+      <div class="grid grid-cols-[120px_1fr] items-baseline gap-y-4">
+        <label class="block text-sm font-medium text-text-base pt-2" for="classroom">장소:</label>
+        <div>
+          <select id="classroom" v-model="postTimetableData.room_id"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+            <option v-for="classroom in classrooms" :key="classroom.label" :value="classroom.classroom_id">
+              {{ classroom.label }}
+            </option>
+            <!-- 특강이면 데이터에 없는 장소 등록 가능-->
+            <option v-if="postTimetableData.target == 'special'" value="">기타</option>
+          </select>
+          <div v-if="postTimetableData.room_id == ''" class="mt-4">
+            <label class="block text-sm font-medium text-text-base mb-1" for="classroom-name">장소 입력:</label>
+            <input id="classroom-name" v-model="classroomName"
+              class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Period Select -->
+      <div class="grid grid-cols-[120px_1fr] items-baseline gap-y-4">
+        <label class="block text-sm font-medium text-text-base pt-2" for="time">교시:</label>
+        <div class="flex items-center gap-2">
+          <select id="time-start" v-model="postTimetableData.startTime"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+            <option v-for="startT in 12" :value="startT" :key="startT">{{ startT }}</option>
+          </select>
+          <span class="text-text-base">~</span>
+          <select id="time-end" v-model="postTimetableData.endTime"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+            <option v-for="endT in 12" :value="endT" :key="endT">{{ endT }}</option>
+          </select>
+          <span class="text-text-base">교시</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="flex justify-end mt-6">
+      <button @click="handleSubmit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-base text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+        시간표 등록
+      </button>
+    </div>
+  </div>
+</template>
+
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import { useClassroomStore } from '@/stores/classroom'
@@ -89,87 +208,3 @@ const handleSubmit = async () => {
 }
 // ===================================================================================
 </script>
-
-<template>
-  <!-- --------------------------------------------------------------------------- -->
-  <!-- TimetableRegister -->
-
-  <div>
-    <select id="section" v-model="section">
-      <option v-for="section in sections" :value="section.sec_id" :key="section.sec_id">
-        {{ section.label }}
-      </option>
-    </select>
-  </div>
-
-  <!-- Grade 등 선택 -->
-  <div>
-    <input type="radio" id="1" value="1" v-model="postTimetableData.target" />
-    <label for="1">1학년</label>
-
-    <input type="radio" id="2" value="2" v-model="postTimetableData.target" />
-    <label for="2">2학년</label>
-
-    <input type="radio" id="3" value="3" v-model="postTimetableData.target" />
-    <label for="3">3학년</label>
-
-    <input type="radio" id="special" value="special" v-model="postTimetableData.target" />
-    <label for="special">특강</label>
-
-    <input type="radio" id="korean" value="korean" v-model="postTimetableData.target" />
-    <label for="korean">한국어</label>
-  </div>
-
-  <!-- 과목 -->
-  <div>
-    <label for="course">과목 : </label>
-    <select id="course" v-model="postTimetableData.course_id">
-      <option v-for="(course, idx) in courses" :value="idx" :key="idx">
-        {{ course.title }}
-      </option>
-    </select>
-  </div>
-
-  <!-- 요일 -->
-  <div>
-    <label for="day">요일 : </label>
-    <select id="day" v-model="postTimetableData.day">
-      <option v-for="(day, idx) in days" :value="enDays[idx]" :key="idx">{{ day }}요일</option>
-    </select>
-  </div>
-
-  <!-- 장소 -->
-  <div>
-    <label for="classroom">장소 : </label>
-    <select id="classroom" v-model="postTimetableData.room_id">
-      <option
-        v-for="classroom in classrooms"
-        :key="classroom.label"
-        :value="classroom.classroom_id"
-      >
-        {{ classroom.label }}
-      </option>
-      <!-- 특강이면 데이터에 없는 장소 등록 가능-->
-      <option v-if="postTimetableData.target == 'special'" value="">기타</option>
-    </select>
-    <div v-if="postTimetableData.room_id == ''">
-      <label for="classroom">장소 입력 : </label>
-      <input id="classroom" v-model="classroomName" />
-    </div>
-  </div>
-
-  <!-- 교시 -->
-  <div>
-    <label for="time">교시 : </label>
-    <select id="time" v-model="postTimetableData.startTime">
-      <option v-for="startT in 12" :value="startT" :key="startT">{{ startT }}</option>
-    </select>
-    ~
-    <select id="time" v-model="postTimetableData.endTime">
-      <option v-for="endT in 12" :value="endT" :key="endT">{{ endT }}</option>
-    </select>
-    교시
-  </div>
-
-  <button @click="handleSubmit">시간표 등록</button>
-</template>

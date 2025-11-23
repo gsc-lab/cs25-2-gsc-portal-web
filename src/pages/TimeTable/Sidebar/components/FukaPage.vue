@@ -1,3 +1,98 @@
+<template>
+  <div class="bg-bg-paper rounded-card shadow-subtle p-6 border border-gray-200">
+    <h3 class="text-xl font-bold text-text-heading mb-6">후까 교수님 설정</h3>
+
+    <!-- Default / Pick Radio Buttons -->
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-text-base mb-2">설정 유형:</label>
+      <div class="flex flex-wrap gap-3">
+        <input type="radio" id="fuka-default" value="default" v-model="selectType" class="hidden" />
+        <label for="fuka-default" class="block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent"
+          :class="{ 'bg-primary-light border-primary text-primary-dark font-semibold': selectType === 'default' }">
+          기본 설정
+        </label>
+
+        <input type="radio" id="fuka-pick" value="pick" v-model="selectType" class="hidden" />
+        <label for="fuka-pick" class="block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent"
+          :class="{ 'bg-primary-light border-primary text-primary-dark font-semibold': selectType === 'pick' }">
+          날짜 지정
+        </label>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <!-- Section / Day / Date Settings -->
+      <div v-if="selectType == 'default'" class="flex flex-col gap-4">
+        <div class="grid grid-cols-[120px_1fr] items-baseline gap-y-4">
+          <label class="block text-sm font-medium text-text-base pt-2" for="section">학기:</label>
+          <select id="section" v-model="postFukaData.section"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+            <option v-for="section in sections" :value="section.sec_id" :key="section.sec_id">
+              {{ section.label }}
+            </option>
+          </select>
+        </div>
+        <div class="grid grid-cols-[120px_1fr] items-baseline gap-y-4">
+          <label class="block text-sm font-medium text-text-base pt-2" for="day">요일:</label>
+          <select id="day" v-model="postFukaData.day"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+            <option v-for="(day, idx) in days" :value="enDays[idx]" :key="idx">{{ day }}요일</option>
+          </select>
+        </div>
+      </div>
+      <div v-else class="grid grid-cols-[120px_1fr] items-baseline gap-y-4">
+        <label class="block text-sm font-medium text-text-base pt-2" for="date">날짜:</label>
+        <input type="date" id="date" v-model="postFukaData.date"
+          class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm" />
+      </div>
+
+      <!-- Classroom -->
+      <div class="grid grid-cols-[120px_1fr] items-baseline gap-y-4">
+        <label class="block text-sm font-medium text-text-base pt-2" for="classroom">장소 입력:</label>
+        <input id="classroom" v-model="postFukaData.room"
+          class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm" />
+      </div>
+
+      <!-- Period -->
+      <div class="grid grid-cols-[120px_1fr] items-baseline gap-y-4">
+        <label class="block text-sm font-medium text-text-base pt-2" for="time">교시:</label>
+        <div class="flex items-center gap-2">
+          <select id="time-start" v-model="postFukaData.startTime"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+            <option v-for="startT in 12" :value="String(startT)" :key="startT">{{ startT }}</option>
+          </select>
+          <span class="text-text-base">~</span>
+          <select id="time-end" v-model="postFukaData.endTime"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+            <option v-for="endT in 12" :value="String(endT)" :key="endT">{{ endT }}</option>
+          </select>
+          <span class="text-text-base">교시</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Student Selection -->
+    <div class="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+      <h4 class="text-lg font-bold text-text-heading mb-3">학생 선택</h4>
+      <StudentsSelect :users="users" @select:user="handleSelect" />
+
+      <ul class="list-none p-0 m-0 flex flex-col gap-2 mt-4">
+        <li v-for="user in selectedUsers" :key="user.user_id" class="flex justify-between items-center bg-white p-2 rounded-md text-sm text-text-base shadow-sm">
+          <span>- {{ user.name }} : {{ setTarget(user.grade_id) }}</span>
+          <button @click="handleDelete(user.user_id)" class="px-3 py-1 bg-red-500 text-white text-xs rounded-sm hover:bg-red-600">취소</button>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="flex justify-end mt-6">
+      <button @click="handleSubmit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-base text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+        등록
+      </button>
+    </div>
+  </div>
+</template>
+
 <script setup>
 import StudentsSelect from '@/layouts/StudentsSelect.vue'
 import { getUserInfo } from '@/api/adminApi'
@@ -92,69 +187,3 @@ const handleSubmit = async () => {
   selectedUsers.value = []
 }
 </script>
-
-<template>
-  FukaPage
-  <!-- 기본 / 날짜 지정 -->
-  <div>
-    <input type="radio" id="default" value="default" v-model="selectType" />
-    <label for="default">기본 설정</label>
-
-    <input type="radio" id="pick" value="pick" v-model="selectType" />
-    <label for="pick">날짜 지정</label>
-  </div>
-
-  <!-- 요일 설정 -->
-  <div v-if="selectType == 'default'">
-    <div>
-      <label for="section">학기:</label>
-      <select id="section" v-model="postFukaData.section">
-        <option v-for="section in sections" :value="section.sec_id" :key="section">
-          {{ section.label }}
-        </option>
-      </select>
-    </div>
-    <div>
-      <label for="day">요일 :</label>
-      <select id="day" v-model="postFukaData.day">
-        <option v-for="(day, idx) in days" :value="enDays[idx]" :key="idx">{{ day }}요일</option>
-      </select>
-    </div>
-  </div>
-  <div v-else>
-    <label for="date">날짜 :</label>
-    <input type="date" id="date" v-model="postFukaData.date" />
-  </div>
-
-  <!-- 장소 -->
-  <div>
-    <label for="classroom">장소 입력:</label>
-    <input id="classroom" v-model="postFukaData.room" />
-  </div>
-
-  <!-- 교시 -->
-  <div>
-    <label for="time">교시 :</label>
-    <select id="time" v-model="postFukaData.startTime">
-      <option v-for="startT in 12" :value="String(startT)" :key="startT">{{ startT }}</option>
-    </select>
-    ~
-    <select id="time" v-model="postFukaData.endTime">
-      <option v-for="endT in 12" :value="String(endT)" :key="endT">{{ endT }}</option>
-    </select>
-    교시
-  </div>
-
-  <!-- 학생 선택 -->
-  <div style="background-color: bisque">
-    <StudentsSelect :users="users" @select:user="handleSelect" />
-  </div>
-  <ul>
-    <li v-for="user in selectedUsers" :key="user.user_id">
-      - {{ user.name }} : {{ setTarget(user.grade_id) }}
-      <button @click="handleDelete(user.user_id)">취소</button>
-    </li>
-  </ul>
-
-  <button @click="handleSubmit">등록</button>
-</template>

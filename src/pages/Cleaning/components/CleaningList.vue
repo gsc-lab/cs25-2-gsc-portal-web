@@ -1,11 +1,11 @@
 <template>
-  <div style="border-bottom: 1px solid #eee; padding: 10px 0; margin-top: 10px;">
-    <div style="margin-bottom: 5px;">
-      <strong>{{ cleaningItem.grade_id }}학년 - {{ cleaningItem.classroom_name }}</strong>
-    </div>
+  <div class="bg-bg-paper rounded-card shadow-subtle p-4 border border-gray-200 mb-4">
+    <h3 class="font-semibold text-text-heading text-lg mb-2">
+      {{ cleaningItem.grade_id }}학년 - {{ cleaningItem.classroom_name }}
+    </h3>
     <div>
-      <span>담당자: </span>
-      <span v-for="(member, i) in cleaningItem.members" :key="i">
+      <span class="text-text-base text-sm font-medium mr-1">담당자: </span>
+      <span v-for="(member, i) in cleaningItem.members" :key="i" class="text-text-base text-sm">
         {{ member }}{{ i < cleaningItem.members.length - 1 ? ', ' : '' }}
       </span>
     </div>

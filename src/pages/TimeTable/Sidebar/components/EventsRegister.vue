@@ -1,3 +1,149 @@
+<template>
+  <div class="bg-bg-paper rounded-card shadow-subtle p-6 border border-gray-200">
+    <h3 class="text-xl font-bold text-text-heading mb-6">휴보강 등록</h3>
+
+    <!-- Target Selection -->
+    <div class="mb-6">
+      <label class="block text-sm font-medium text-text-base mb-2">대상 선택:</label>
+      <div class="flex flex-wrap gap-3">
+        <input type="radio" id="er-1" value="1" v-model="postSpecialData.target" class="hidden" />
+        <label for="er-1" class="block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent"
+          :class="{ 'bg-primary-light border-primary text-primary-dark font-semibold': postSpecialData.target === '1' }">
+          1학년
+        </label>
+
+        <input type="radio" id="er-2" value="2" v-model="postSpecialData.target" class="hidden" />
+        <label for="er-2" class="block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent"
+          :class="{ 'bg-primary-light border-primary text-primary-dark font-semibold': postSpecialData.target === '2' }">
+          2학년
+        </label>
+
+        <input type="radio" id="er-3" value="3" v-model="postSpecialData.target" class="hidden" />
+        <label for="er-3" class="block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent"
+          :class="{ 'bg-primary-light border-primary text-primary-dark font-semibold': postSpecialData.target === '3' }">
+          3학년
+        </label>
+
+        <input type="radio" id="er-special" value="special" v-model="postSpecialData.target" class="hidden" />
+        <label for="er-special" class="block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent"
+          :class="{ 'bg-primary-light border-primary text-primary-dark font-semibold': postSpecialData.target === 'special' }">
+          특강
+        </label>
+
+        <input type="radio" id="er-korean" value="korean" v-model="postSpecialData.target" class="hidden" />
+        <label for="er-korean" class="block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent"
+          :class="{ 'bg-primary-light border-primary text-primary-dark font-semibold': postSpecialData.target === 'korean' }">
+          한국어
+        </label>
+      </div>
+    </div>
+
+    <!-- Event Type (Cancel/Makeup) -->
+    <div class="mb-6">
+      <label class="block text-sm font-medium text-text-base mb-2">이벤트 유형:</label>
+      <div class="flex flex-wrap gap-3">
+        <input type="radio" id="er-cancel" value="CANCEL" v-model="postSpecialData.event" class="hidden" />
+        <label for="er-cancel" class="block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent"
+          :class="{ 'bg-primary-light border-primary text-primary-dark font-semibold': postSpecialData.event === 'CANCEL' }">
+          휴강
+        </label>
+
+        <input type="radio" id="er-makeup" value="MAKEUP" v-model="postSpecialData.event" class="hidden" />
+        <label for="er-makeup" class="block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent"
+          :class="{ 'bg-primary-light border-primary text-primary-dark font-semibold': postSpecialData.event === 'MAKEUP' }">
+          보강
+        </label>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <!-- Date -->
+      <div class="grid grid-cols-[120px_1fr] items-baseline gap-y-4">
+        <label class="block text-sm font-medium text-text-base pt-2" for="date">날짜:</label>
+        <input type="date" id="date" v-model="postSpecialData.date" readonly
+          class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm bg-gray-100 text-text-muted cursor-not-allowed" />
+      </div>
+
+      <!-- Course Selection (MAKEUP vs CANCEL) -->
+      <div v-if="postSpecialData.event === 'MAKEUP'">
+        <div class="grid grid-cols-[120px_1fr] items-start gap-y-4">
+          <label class="block text-sm font-medium text-text-base pt-2">휴강과목:</label>
+          <div v-if="Object.keys(cancelMap).length > 0" class="flex flex-col gap-2 p-2 border border-gray-200 rounded-base bg-gray-50">
+            <div v-for="course in cancelMap" :key="course.event_id" class="flex items-center gap-2">
+              <input type="checkbox" :value="course.event_id" v-model="selectMakeup" :id="`makeup-${course.event_id}`"
+                class="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
+              <label :for="`makeup-${course.event_id}`" class="text-sm text-text-base cursor-pointer">
+                {{ course.course_title }}: {{ course.event_date }}, {{ course.period }}교시
+              </label>
+            </div>
+          </div>
+          <div v-else class="text-sm text-text-muted p-2 border border-gray-200 rounded-base bg-gray-50">
+            해당 과목의 휴강 이력이 없음
+          </div>
+        </div>
+      </div>
+      <div v-else>
+        <div class="grid grid-cols-[120px_1fr] items-baseline gap-y-4">
+          <label class="block text-sm font-medium text-text-base pt-2" for="course-id">과목:</label>
+          <select id="course-id" v-model="postSpecialData.course_id"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm bg-gray-100 text-text-muted cursor-not-allowed">
+            <option v-for="(course, idx) in courses" :value="idx" :key="idx">
+              {{ course.title }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Period -->
+      <div class="grid grid-cols-[120px_1fr] items-baseline gap-y-4">
+        <label class="block text-sm font-medium text-text-base pt-2" for="time">교시:</label>
+        <div class="flex items-center gap-2">
+          <select id="time-start" v-model="postSpecialData.startTime"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm bg-gray-100 text-text-muted cursor-not-allowed">
+            <option v-for="startT in 13" :value="startT" :key="startT">{{ startT }}</option>
+          </select>
+          <span class="text-text-base">~</span>
+          <select id="time-end" v-model="postSpecialData.endTime"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm bg-gray-100 text-text-muted cursor-not-allowed">
+            <option v-for="endT in 13" :value="endT" :key="endT">
+              {{ endT }}
+            </option>
+          </select>
+          <span class="text-text-base">교시</span>
+        </div>
+      </div>
+
+      <!-- Classroom -->
+      <div v-if="postSpecialData.event === 'MAKEUP'">
+        <div class="grid grid-cols-[120px_1fr] items-baseline gap-y-4">
+          <label class="block text-sm font-medium text-text-base pt-2" for="classroom-label">장소:</label>
+          <div>
+            <select id="classroom-label" v-model="postSpecialData.classroom_label"
+              class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+              <option v-for="classroom in classrooms" :value="classroom.label" :key="classroom">
+                {{ classroom.label }}
+              </option>
+              <option value="">기타</option>
+            </select>
+            <div v-if="postSpecialData.classroom_label == ''" class="mt-4">
+              <label class="block text-sm font-medium text-text-base mb-1" for="classroom-name">장소 입력:</label>
+              <input id="classroom-name" v-model="classroomName"
+                class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="flex justify-end mt-6">
+      <button @click="handleSubmit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-base text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+        등록
+      </button>
+    </div>
+  </div>
+</template>
+
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import { getCancelSchedule, postEvent } from '@/api/timetableApi'
@@ -109,103 +255,3 @@ const handleSubmit = async () => {
 }
 // ==========================================================================================
 </script>
-
-<template>
-  EventsRegister
-  <!-- 예외 입력을 막기 위해 시간표에서 선택해야 값이 들어감 -->
-  <!-- Grade 등 선택 -->
-  <div>
-    <input type="radio" id="1" value="1" v-model="postSpecialData.target" />
-    <label for="1">1학년</label>
-
-    <input type="radio" id="2" value="2" v-model="postSpecialData.target" />
-    <label for="2">2학년</label>
-
-    <input type="radio" id="3" value="3" v-model="postSpecialData.target" />
-    <label for="3">3학년</label>
-
-    <input type="radio" id="special" value="special" v-model="postSpecialData.target" />
-    <label for="special">특강</label>
-
-    <input type="radio" id="korean" value="korean" v-model="postSpecialData.target" />
-    <label for="korean">한국어</label>
-  </div>
-
-  <!-- 휴 / 보 -->
-  <div>
-    <input type="radio" id="CANCEL" value="CANCEL" v-model="postSpecialData.event" />
-    <label for="CANCEL">휴강</label>
-
-    <input type="radio" id="MAKEUP" value="MAKEUP" v-model="postSpecialData.event" />
-    <label for="MAKEUP">보강</label>
-  </div>
-
-  <!-- 날짜 (post : "0000-00-00")-->
-  <div>
-    <label for="date">날짜 : </label>
-    <input type="date" id="date" v-model="postSpecialData.date" readonly />
-  </div>
-
-  <!-- -------------------------------------- 과목 설정 ---------------------------------------------
-    CANCEL : course_id
-    MAKEUP : event_id  selectMakeup에 저장
-  -->
-  <!-- --------------  보강 --------------- -->
-  <div v-if="postSpecialData.event === 'MAKEUP'">
-    <p>휴강과목 :</p>
-    <div v-if="Object.keys(cancelMap).length > 0">
-      <div v-for="course in cancelMap" :key="course.event_id">
-        <input type="checkbox" :value="course.event_id" v-model="selectMakeup" />
-        <label for="course"
-          >{{ course.course_title }}: {{ course.event_date }}, {{ course.period }}교시</label
-        >
-      </div>
-    </div>
-    <!-- 휴강 과목 없음 -->
-    <div v-else>
-      <p>해당 과목의 휴강 이력이 없음</p>
-    </div>
-  </div>
-  <!-- --------------  휴강 --------------- -->
-  <div v-else>
-    <label for="course">과목 : </label>
-    <select id="course" v-model="postSpecialData.course_id" style="pointer-events: none">
-      <option v-for="(course, idx) in courses" :value="idx" :key="idx">
-        {{ course.title }}
-      </option>
-    </select>
-  </div>
-  <!-- -------------------------------------------------------------------------------------- -->
-
-  <!-- 교시 (post: int형)-->
-  <div>
-    <label for="time">교시 : </label>
-    <select id="time" v-model="postSpecialData.startTime" style="pointer-events: none">
-      <option v-for="startT in 13" :value="startT" :key="startT">{{ startT }}</option>
-    </select>
-    ~
-    <select id="time" v-model="postSpecialData.endTime" style="pointer-events: none">
-      <option v-for="endT in 13" :value="endT" :key="endT">
-        {{ endT }}
-      </option>
-    </select>
-    교시
-  </div>
-
-  <!-- 장소 (post: label(이름))-->
-  <div v-if="postSpecialData.event === 'MAKEUP'">
-    <label for="classroom">장소 : </label>
-    <select id="classroom" v-model="postSpecialData.classroom_label">
-      <option v-for="classroom in classrooms" :value="classroom.label" :key="classroom">
-        {{ classroom.label }}
-      </option>
-      <option value="">기타</option>
-    </select>
-    <div v-if="postSpecialData.classroom_label == ''">
-      <label for="classroom">장소 입력: </label>
-      <input id="classroom" v-model="classroomName" />
-    </div>
-  </div>
-
-  <button @click="handleSubmit">등록</button>
-</template>

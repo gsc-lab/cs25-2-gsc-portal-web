@@ -28,10 +28,20 @@ onMounted(async () => {
 
 // ==============  추가  ===============
 const handlePost = async () => {
-  await postClassroom(postData.value)
-  await CRstore.setClassroomInfo()
-  setCRData()
-  resetPostData()
+  if (!postData.value.building || !postData.value.room_number || !postData.value.room_type) {
+    alert('모든 필드를 입력해주세요.');
+    return;
+  }
+  try {
+    await postClassroom(postData.value)
+    alert('교실이 성공적으로 추가되었습니다.');
+    await CRstore.setClassroomInfo()
+    setCRData()
+    resetPostData()
+  } catch (error) {
+    console.error('교실 추가 실패:', error)
+    alert('교실 추가에 실패했습니다.');
+  }
 }
 
 // ==============  수정  ===============
@@ -44,78 +54,99 @@ const setPostData = (classroom) => {
   }
 }
 const handlePut = async () => {
-  await putClassroom(postData.value)
-  await CRstore.setClassroomInfo()
-  setCRData()
-  resetPostData()
+  if (!postData.value.building || !postData.value.room_number || !postData.value.room_type) {
+    alert('모든 필드를 입력해주세요.');
+    return;
+  }
+  try {
+    await putClassroom(postData.value)
+    alert('교실 정보가 성공적으로 수정되었습니다.');
+    await CRstore.setClassroomInfo()
+    setCRData()
+    resetPostData()
+  } catch (error) {
+    console.error('교실 수정 실패:', error)
+    alert('교실 수정에 실패했습니다.');
+  }
 }
 
 // ==============  삭제  ===============
 const handleDelete = async (classroom) => {
   if (confirm(`${classroom.building}-${classroom.room_number}을 삭제합니다`)) {
-    await deleteClassroom(classroom.classroom_id)
-    await CRstore.setClassroomInfo()
-    setCRData()
+    try {
+      await deleteClassroom(classroom.classroom_id)
+      alert('교실이 성공적으로 삭제되었습니다.');
+      await CRstore.setClassroomInfo()
+      setCRData()
+    } catch (error) {
+      console.error('교실 삭제 실패:', error)
+      alert('교실 삭제에 실패했습니다.');
+    }
   }
 }
 </script>
 
 <template>
-  <div style="background-color: aliceblue; margin: 3px">
-    classroom
+  <div class="p-4">
+    <h3 class="text-lg font-semibold text-text-heading mb-4">강의실 설정</h3>
 
-    <div v-if="postData?.classroom_id !== 'new'">
-      <button @click="postData.classroom_id = 'new'">추가</button>
+    <div class="flex justify-end mb-4">
+      <button @click="postData.classroom_id = 'new'"
+              class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-base hover:bg-primary-dark transition-colors duration-200 shadow-sm">
+        교실 추가
+      </button>
     </div>
 
-    <div>
-      <table style="border-collapse: collapse; width: 100%">
+    <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-subtle bg-white">
+      <table class="w-full border-collapse min-w-full divide-y divide-gray-200">
         <thead>
           <tr>
-            <th style="border: 1px solid #000; padding: 10px"></th>
-            <th style="border: 1px solid #000; padding: 10px">장소</th>
-            <th style="border: 1px solid #000; padding: 10px">타입</th>
-            <th style="border: 1px solid #000; padding: 10px">수정</th>
-            <th style="border: 1px solid #000; padding: 10px">삭제</th>
+            <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">ID</th>
+            <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">장소</th>
+            <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">타입</th>
+            <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">수정</th>
+            <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">삭제</th>
           </tr>
         </thead>
         <tbody>
           <!-- ====================  추가  ==================== -->
-          <tr v-if="postData?.classroom_id == 'new'">
-            <td style="border: 1px solid #000; padding: 10px">NEW</td>
-            <td style="border: 1px solid #000; padding: 10px">
-              <input v-model="postData.building" placeholder="창조관" />-
-              <input v-model="postData.room_number" placeholder="101" />
+          <tr v-if="postData?.classroom_id == 'new'" class="divide-y divide-gray-100 hover:bg-gray-50">
+            <td class="text-sm py-2 px-3 border-b border-gray-100 text-center">NEW</td>
+            <td class="text-sm py-2 px-3 border-b border-gray-100 text-center">
+              <div class="flex items-center justify-center gap-1">
+                <input v-model="postData.building" placeholder="창조관" class="w-20 px-2 py-1 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm" />-
+                <input v-model="postData.room_number" placeholder="101" class="w-16 px-2 py-1 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm" />
+              </div>
             </td>
-            <td style="border: 1px solid #000; padding: 10px">
-              <select v-model="postData.room_type">
+            <td class="text-sm py-2 px-3 border-b border-gray-100 text-center">
+              <select v-model="postData.room_type" class="w-full px-2 py-1 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm">
                 <option value="CLASSROOM">강의실</option>
                 <option value="LAB">실습실</option>
               </select>
             </td>
-            <td style="border: 1px solid #000; padding: 10px">
-              <button @click="handlePost">등록</button>
+            <td class="text-sm py-2 px-3 border-b border-gray-100 text-center">
+              <button @click="handlePost" class="px-3 py-1 bg-primary text-white text-sm font-medium rounded-base hover:bg-primary-dark transition-colors duration-200 shadow-sm">등록</button>
             </td>
-            <td style="border: 1px solid #000; padding: 10px">
-              <button @click="resetPostData">취소</button>
+            <td class="text-sm py-2 px-3 border-b border-gray-100 text-center">
+              <button @click="resetPostData" class="px-3 py-1 bg-white text-text-base border border-gray-300 rounded-base text-sm font-medium shadow-sm hover:bg-gray-50 transition-colors duration-200">취소</button>
             </td>
           </tr>
 
           <!-- ====================  출력/수정  ==================== -->
-          <tr v-for="(classroom, idx) in classrooms" :key="idx">
-            <td style="border: 1px solid #000; padding: 10px">{{ idx + 1 }}</td>
+          <tr v-for="(classroom, idx) in classrooms" :key="idx" class="divide-y divide-gray-100 hover:bg-gray-50">
+            <td class="text-sm py-2 px-3 border-b border-gray-100 text-center">{{ classroom.classroom_id }}</td>
             <!--  장소  -->
-            <td style="border: 1px solid #000; padding: 10px">
-              <div v-if="classroom.classroom_id == postData.classroom_id">
-                <input v-model="postData.building" placeholder="창조관" />-
-                <input v-model="postData.room_number" placeholder="101" />
+            <td class="text-sm py-2 px-3 border-b border-gray-100 text-center">
+              <div v-if="classroom.classroom_id == postData.classroom_id" class="flex items-center justify-center gap-1">
+                <input v-model="postData.building" placeholder="창조관" class="w-20 px-2 py-1 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm" />-
+                <input v-model="postData.room_number" placeholder="101" class="w-16 px-2 py-1 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm" />
               </div>
               <div v-else>{{ classroom.building }}-{{ classroom.room_number }}</div>
             </td>
             <!-- type -->
-            <td style="border: 1px solid #000; padding: 10px">
+            <td class="text-sm py-2 px-3 border-b border-gray-100 text-center">
               <div v-if="classroom.classroom_id == postData.classroom_id">
-                <select v-model="postData.room_type">
+                <select v-model="postData.room_type" class="w-full px-2 py-1 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm">
                   <option value="CLASSROOM">강의실</option>
                   <option value="LAB">실습실</option>
                 </select>
@@ -123,24 +154,27 @@ const handleDelete = async (classroom) => {
               <div v-else>{{ classroom.room_type == 'LAB' ? '실습실' : '강의실' }}</div>
             </td>
 
-            <td style="border: 1px solid #000; padding: 10px">
+            <td class="text-sm py-2 px-3 border-b border-gray-100 text-center">
               <div v-if="classroom.classroom_id == postData.classroom_id">
-                <button @click="handlePut">등록</button>
+                <button @click="handlePut" class="px-3 py-1 bg-primary text-white text-sm font-medium rounded-base hover:bg-primary-dark transition-colors duration-200 shadow-sm">등록</button>
               </div>
               <div v-else>
-                <button @click="setPostData(classroom)">수정</button>
+                <button @click="setPostData(classroom)" class="px-3 py-1 bg-white text-text-base border border-gray-300 rounded-base text-sm font-medium shadow-sm hover:bg-gray-50 transition-colors duration-200">수정</button>
               </div>
             </td>
 
-            <td style="border: 1px solid #000; padding: 10px">
+            <td class="text-sm py-2 px-3 border-b border-gray-100 text-center">
               <div v-if="classroom.classroom_id == postData.classroom_id">
-                <button @click="postData.classroom_id = ''">취소</button>
+                <button @click="postData.classroom_id = ''" class="px-3 py-1 bg-white text-text-base border border-gray-300 rounded-base text-sm font-medium shadow-sm hover:bg-gray-50 transition-colors duration-200">취소</button>
               </div>
-              <div v-else><button @click="handleDelete(classroom)">삭제</button></div>
+              <div v-else><button @click="handleDelete(classroom)" class="px-3 py-1 bg-red-500 text-white text-sm font-medium rounded-base hover:bg-red-600 transition-colors duration-200 shadow-sm">삭제</button></div>
             </td>
           </tr>
         </tbody>
       </table>
+      <div v-if="!classrooms || classrooms.length === 0" class="text-center text-text-muted text-lg py-8">
+        등록된 강의실이 없습니다.
+      </div>
     </div>
   </div>
 </template>

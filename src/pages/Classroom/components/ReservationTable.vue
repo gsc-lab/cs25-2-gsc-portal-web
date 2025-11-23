@@ -148,40 +148,57 @@ const handleDelete = async (data) => {
 
 <template>
   <div>
-    <button @click="handleBefore">지난주</button>
-    <p>{{ selectDate.toISOString().split('T')[0] }}</p>
-    <button @click="handleAfter">다음주</button>
-  </div>
+    <!-- Week Navigation -->
+    <div class="flex items-center justify-center gap-4 mb-6">
+      <button @click="handleBefore" class="px-3 py-1 bg-white border border-gray-300 text-text-base text-sm font-medium rounded-base hover:bg-gray-50 transition-colors duration-200 shadow-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block -mt-0.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+        지난주
+      </button>
+      <p class="font-semibold text-text-heading text-lg">{{ selectDate.toISOString().split('T')[0] }}</p>
+      <button @click="handleAfter" class="px-3 py-1 bg-white border border-gray-300 text-text-base text-sm font-medium rounded-base hover:bg-gray-50 transition-colors duration-200 shadow-sm">
+        다음주
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block -mt-0.5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+      </button>
+    </div>
 
-  <table style="border-collapse: collapse; width: 100%">
-    <thead>
-      <tr>
-        <th style="border: 1px solid #000; padding: 10px"></th>
-        <th
-          v-for="(d, idx) in ['월', '화', '수', '목', '금', '토', '일']"
-          :key="d"
-          style="border: 1px solid #000; padding: 10px"
-        >
-          {{ d }}요일({{ searchDate(idx + 1).slice(5) }})
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="(_, t) in 24" :key="t">
-        <td style="border: 1px solid #000; padding: 10px">{{ time(t) }}</td>
-        <template v-for="(d, idx) in ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']" :key="d">
-          <td
-            style="border: 1px solid #000; padding: 10px"
-            @mousedown="startSelection(filterRes(selectRes?.[d], time(t)), t, idx)"
-            @mouseover="updateSelection(filterRes(selectRes?.[d], time(t)), t, idx)"
-            @mouseup="endSelection"
-          >
-            <p>
-              {{ filterRes(selectRes?.[d], time(t))?.user }}
-            </p>
-          </td>
-        </template>
-      </tr>
-    </tbody>
-  </table>
+    <!-- Reservation Table -->
+    <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-subtle bg-white">
+      <table class="w-full border-collapse min-w-full divide-y divide-gray-200">
+        <thead>
+          <tr>
+            <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center sticky left-0 z-10 w-20"></th>
+            <th
+              v-for="(d, idx) in ['월', '화', '수', '목', '금', '토', '일']"
+              :key="d"
+              class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center"
+            >
+              {{ d }}요일({{ searchDate(idx + 1).slice(5) }})
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(_, t) in 24" :key="t" class="divide-y divide-gray-100 hover:bg-gray-50">
+            <td class="bg-gray-50 text-text-muted font-semibold text-sm py-2 px-3 border-b border-gray-100 text-center sticky left-0 z-10 w-20">{{ time(t) }}</td>
+            <template v-for="(d, idx) in ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']" :key="d">
+              <td
+                class="text-sm py-2 px-3 border-b border-gray-100 text-center relative"
+                :class="{
+                  'bg-blue-100 text-blue-800 font-semibold': filterRes(selectRes?.[d], time(t))?.user_id === Ustore.userInfo.user_id,
+                  'bg-red-100 text-red-800': filterRes(selectRes?.[d], time(t))?.user_id && filterRes(selectRes?.[d], time(t))?.user_id !== Ustore.userInfo.user_id,
+                  'bg-gray-200': isSelecting && selectTime.date === searchDate(idx + 1) && ((time(t) >= selectTime.start_time && time(t) < selectTime.end_time) || (time(t) < selectTime.start_time && time(t) >= selectTime.end_time)), // Visual feedback for selection
+                }"
+                @mousedown="startSelection(filterRes(selectRes?.[d], time(t)), t, idx)"
+                @mouseover="updateSelection(filterRes(selectRes?.[d], time(t)), t, idx)"
+                @mouseup="endSelection"
+              >
+                <p class="text-xs font-medium">
+                  {{ filterRes(selectRes?.[d], time(t))?.user }}
+                </p>
+              </td>
+            </template>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </template>

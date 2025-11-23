@@ -1,236 +1,79 @@
 <template>
-  <header v-if="user.userInfo && router.currentRoute.value.path !== '/login'" class="header">
-    <div class="header-inner">
-      <div class="header-left">
-        <router-link to="/" class="logo-text">GSC-Portal</router-link>
-      </div>
+  <header
+    v-if="user.userInfo && router.currentRoute.value.path !== '/login'"
+    class="flex items-center justify-between h-14 px-4 sm:px-6 lg:px-8 border-b border-gray-200 bg-bg-paper text-text-heading sticky top-0 z-20"
+  >
+    <!-- Left Section: Mobile Sidebar Toggle and Logo -->
+    <div class="flex items-center">
+      <!-- Mobile Sidebar Toggle -->
+      <button
+        @click="$emit('toggle-sidebar')"
+        class="lg:hidden p-2 rounded-md text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
+      >
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
 
-      <nav class="navbar">
-        <div class="nav-item">
-          <router-link class="menu" to="/notice">공지사항</router-link>
-          <ul class="dropdown">
-            <li><router-link to="/notice/grade/1">1학년 공지사항</router-link></li>
-            <li><router-link to="/notice/grade/2">2학년 공지사항</router-link></li>
-            <li><router-link to="/notice/grade/3">3학년 공지사항</router-link></li>
-          </ul>
-        </div>
+      <!-- Desktop Sidebar Minimize Toggle -->
+      <button
+        @click="uiStore.toggleTabletSidebarMinimized()"
+        class="hidden lg:flex p-2 rounded-md text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary ml-2"
+      >
+        <svg v-if="uiStore.isTabletSidebarMinimized" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l-7 7 7 7M17 5l-7 7 7 7"></path>
+        </svg>
+        <svg v-else class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
+        </svg>
+      </button>
 
-        <div class="nav-item">
-          <router-link class="menu" to="/timetable">시간표</router-link>
-        </div>
+      <router-link to="/" class="ml-4 text-xl font-semibold text-text-heading">GSC-Portal</router-link>
+    </div>
 
-        <div class="nav-item">
-          <router-link class="menu" to="/cleaningH">청소당번</router-link>
-          <ul class="dropdown">
-            <li><router-link to="/cleaningH/grade/1">1학년 청소당번</router-link></li>
-            <li><router-link to="/cleaningH/grade/2">2학년 청소당번</router-link></li>
-            <li><router-link to="/cleaningH/grade/3">3학년 청소당번</router-link></li>
-          </ul>
-        </div>
+    <!-- Right Section: User Actions -->
+    <div class="flex items-center space-x-4">
+      <!-- User Profile Link (Example) -->
+      <router-link to="/profile" class="text-text-base hover:text-primary transition-colors duration-200 hidden md:block">
+        프로필
+      </router-link>
 
-        <router-link class="menu" to="/classroom">강의실 신청</router-link>
-        <router-link class="menu" to="/profile">프로필</router-link>
-        <router-link class="menu" to="/admin" v-if="user.userInfo.role_type === 'admin'">
-          관리자
-        </router-link>
-      </nav>
-
-      <div class="header-right">
-        <button class="logout-btn" v-if="user.userInfo" @click="logout">로그아웃</button>
-      </div>
+      <!-- Logout Button -->
+      <button
+        @click="logout"
+        class="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-base text-text-base bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 shadow-subtle"
+      >
+        로그아웃
+      </button>
     </div>
   </header>
 </template>
 
 <script setup>
-import { useUserStore } from '@//stores/user'
-import { useRouter } from 'vue-router'
-import { postuserInfo } from '@/api/auth'
+import { useUserStore } from '@/stores/user';
+import { useRouter } from 'vue-router';
+import { postuserInfo } from '@/api/auth';
+import { useUiStore } from '@/stores/ui'; // Import the UI store
 
-const router = useRouter()
-const user = useUserStore()
+const router = useRouter();
+const user = useUserStore();
+const uiStore = useUiStore(); // Initialize UI store
 
 async function logout() {
   try {
-    const response = await postuserInfo()
-    console.log('로그아웃 요청완료', response)
+    const response = await postuserInfo();
+    console.log('로그아웃 요청완료', response);
   } catch (err) {
-    console.error('로그아웃 실패', err)
+    console.error('로그아웃 실패', err);
   } finally {
-    const storeLogout = user.logoutUser()
-    console.log('store 사용자 정보 삭제', storeLogout)
-    console.log('store userinfo', user.userInfo)
-
-    router.push('/login')
+    const storeLogout = user.logoutUser();
+    console.log('store 사용자 정보 삭제', storeLogout);
+    console.log('store userinfo', user.userInfo);
+    router.push('/login');
   }
 }
 </script>
 
 <style scoped>
-.header {
-  display: flex;
-  justify-content: center; /* 내부 컨텐츠를 중앙 정렬 */
-  align-items: center;
-  padding: 0 2rem; /* 좌우 여백 */
-  color: white;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-
-  /* ✅ 로그인 스타일: 그라데이션 배경 및 그림자 */
-  background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  font-family: 'Pretendard Variable', Pretendard, sans-serif;
-  height: 80px; /* 헤더 높이 고정 */
-}
-
-/* ✅ 고정 폭 래퍼:
-  화면이 줄어도 이 너비를 유지하며, 스크롤바를 생성합니다.
-*/
-.header-inner {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 1440px; /* 고정 너비 */
-  max-width: 1440px; /* 최대 너비 (필수) */
-  height: 100%;
-}
-
-/* ===== 로고 ===== */
-.logo-text {
-  font-size: 2.2rem;
-  font-weight: 800;
-  text-decoration: none;
-  color: white;
-
-  /* ✅ 로그인 스타일: 'Montserrat' 폰트 및 텍스트 그림자 */
-  font-family: 'Montserrat', sans-serif;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease;
-}
-.logo-text:hover {
-  transform: scale(1.03);
-}
-
-/* ===== 네비게이션 ===== */
-.navbar {
-  display: flex;
-  align-items: center;
-  gap: 7rem; /* ✅ 간격 수정 (12rem -> 2.5rem) */
-  height: 100%; /* 부모 높이(80px)를 꽉 채움 */
-}
-
-/* ✅ 로그인 스타일: 메뉴 아이템 (밑줄 -> 배경 호버) */
-.menu,
-.navbar > .nav-item > a {
-  /* .nav-item 하위의 1단계 <a>도 동일하게 스타일 */
-  display: flex;
-  align-items: center;
-  height: 100%;
-  padding: 0 1rem;
-  font-size: 1.1rem;
-  text-decoration: none;
-  color: white;
-  font-weight: 600;
-  position: relative;
-  border-radius: 10px;
-  transition: all 0.3s ease;
-}
-
-.menu:hover,
-.nav-item:hover > a {
-  /* .nav-item에 호버 시 <a> 스타일 변경 */
-  background-color: rgba(255, 255, 255, 0.15);
-  transform: translateY(-2px);
-}
-
-/* 기존 ::after 밑줄 스타일 제거 */
-.menu::after {
-  display: none;
-}
-
-/* ===== 드롭다운 ===== */
-.nav-item {
-  position: relative;
-  height: 100%; /* 부모 높이(80px)를 꽉 채움 */
-}
-
-.dropdown {
-  position: absolute;
-  top: 90%; /* 헤더 높이(80px) 바로 아래 (살짝 겹치게) */
-  left: 50%;
-  transform: translateX(-50%) translateY(-10px);
-  list-style: none;
-  margin: 0;
-  white-space: nowrap;
-  text-align: center;
-
-  /* ✅ 로그인 스타일: 카드 디자인 */
-  background: #fff;
-  color: #333;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  min-width: 200px;
-  padding: 0.75rem 0; /* 상하 여백 */
-  border: 1px solid #eee;
-
-  /* 애니메이션 효과 */
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 0.25s ease,
-    transform 0.25s ease,
-    visibility 0.25s;
-}
-
-.dropdown li a {
-  text-decoration: none;
-  color: #333;
-  font-weight: 500;
-  font-size: 1rem;
-  display: block;
-  padding: 0.75rem 1.5rem; /* 좌우 여백 */
-  transition: all 0.2s ease;
-}
-
-.dropdown li:hover {
-  background-color: #f4f6ff;
-}
-.dropdown li:hover a {
-  color: #3f2b96; /* 로그인 그라데이션의 진한 색 */
-}
-
-/* hover 시 부드럽게 표시 */
-.nav-item:hover .dropdown {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(-50%) translateY(0);
-}
-
-/* ===== 버튼 ===== */
-.header-right {
-  display: flex;
-  align-items: center;
-}
-
-/* ✅ 로그인 스타일: 둥근 버튼 */
-.logout-btn {
-  background: white;
-  color: #3f2b96; /* 로그인 그라데이션의 진한 색 */
-  border: none;
-  border-radius: 999px; /* 둥근 버튼 */
-  padding: 0.7rem 1.5rem;
-  font-weight: 700;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.logout-btn:hover {
-  background: #f4f6ff;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
-}
+/* Scoped styles removed. Tailwind CSS classes are used directly in the template. */
 </style>

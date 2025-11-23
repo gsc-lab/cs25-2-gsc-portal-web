@@ -1,5 +1,4 @@
 import { createWebHistory, createRouter } from 'vue-router'
-import LoginPage from '@/pages/Login/LoginPage.vue'
 import TimeTablePage from '@/pages/TimeTable/TimeTablePage.vue'
 import ClassroomPage from '@/pages/Classroom/ClassroomPage.vue'
 import AdminPage from '@/pages/Admin/AdminPage.vue'
@@ -22,7 +21,6 @@ const routes = [
   { path: '/cleaning-rosters', name: 'CleaningRosterPage', component: () => import('@/pages/Cleaning/CleaningPage.vue') },
   { path: '/cleaning-rosters/generator', name: 'CleaningGeneratorPage', component: () => import('@/pages/Cleaning/components/CleaningPost.vue') },
   { path: '/cleaning-rosters/delete', name: 'CleaningDeletePage', component: () => import('@/pages/Cleaning/components/CleaningDelete.vue') },
-  { path: '/weekendAttendance', name: 'weekendAttendance', component: () => import('@/pages/AttendanceRoom/WeekendAttendance.vue') },
   { path: '/profile', name: 'profile', component: () => import('@/pages/Profile/UserProfile.vue') },
   { path: '/classroom', name: 'ClassroomPage', component: ClassroomPage },
   { path: '/admin', name: 'AdminPage', component: AdminPage },

@@ -1,57 +1,59 @@
 <template>
   <AppLayout pageName="register">
-    <div class="register-container">
-      <h1 class="register-title">GSC_Portal</h1>
+    <div class="max-w-md mx-auto w-full bg-white rounded-card border border-gray-200 shadow-subtle p-6 mt-12">
+      <h1 class="text-xl font-bold text-text-heading mb-6 text-center">회원가입</h1>
 
-      <div class="form-group">
-        <label class="form-label">이름:</label>
+      <div class="mb-4">
+        <label class="text-sm font-medium text-text-muted mb-1 block">이름:</label>
         <input
           v-model="userInfo.name"
           type="text"
-          class="form-input"
+          class="w-full rounded-base border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary"
           placeholder="이름을 입력하세요"
         />
       </div>
 
-      <div class="form-group">
-        <label class="form-label">학번:</label>
+      <div class="mb-4">
+        <label class="text-sm font-medium text-text-muted mb-1 block">학번:</label>
         <input
           v-model="userInfo.studentId"
           type="text"
-          class="form-input"
+          class="w-full rounded-base border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary"
           placeholder="학번을 입력하세요"
         />
       </div>
 
-      <div class="form-group">
-        <label class="form-label">전화번호:</label>
+      <div class="mb-4">
+        <label class="text-sm font-medium text-text-muted mb-1 block">전화번호:</label>
         <input
           v-model="userInfo.phoneNumber"
           type="tel"
-          class="form-input"
+          class="w-full rounded-base border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary"
           placeholder="010-xxxx-xxxx"
         />
       </div>
 
-      <div class="form-group">
-        <label class="form-label">이메일:</label>
+      <div class="mb-4">
+        <label class="text-sm font-medium text-text-muted mb-1 block">이메일:</label>
         <input
           v-model="userInfo.email"
           type="email"
-          class="form-input"
+          class="w-full rounded-base border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary"
           placeholder="abcdef@gmail.com"
         />
       </div>
 
-      <div class="form-group">
-        <label class="form-label">학생 여부</label>
-        <input v-model="userInfo.is_student" type="checkbox" class="form-checkbox" />
+      <div class="flex items-center mb-6">
+        <input v-model="userInfo.is_student" id="is_student" type="checkbox" class="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
+        <label for="is_student" class="ml-2 text-sm font-medium text-text-muted">학생 여부</label>
       </div>
 
-      <button class="btn-submit" @click="submitRegister">회원가입</button>
-
-      <!-- 등록된 유저 정보 확인 -->
-      <!-- <pre class="result-box">{{ userInfo }}</pre> -->
+      <button
+        class="bg-primary text-white px-4 py-2 rounded-base w-full hover:bg-primary-dark transition-colors duration-200"
+        @click="submitRegister"
+      >
+        회원가입
+      </button>
     </div>
   </AppLayout>
 </template>
@@ -112,96 +114,3 @@ const submitRegister = async () => {
   }
 }
 </script>
-<style>
-/* 전체 컨테이너 */
-.register-container {
-  max-width: 400px;
-  margin: 80px auto;
-  padding: 25px;
-  background: #f9fbff;
-  border: 1px solid #d3e2f5;
-  border-radius: 10px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
-}
-
-/* 제목 */
-.register-title {
-  text-align: center;
-  margin-bottom: 25px;
-  font-size: 24px;
-  font-weight: bold;
-  color: #005eff;
-}
-
-/* 입력 그룹 */
-.form-group {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-/* 라벨 */
-.form-label {
-  flex: 0 0 100px;
-  font-weight: bold;
-  color: #333;
-}
-
-/* 텍스트 입력 */
-.form-input {
-  flex: 1;
-  padding: 8px 10px;
-  border: 1px solid #bbb;
-  border-radius: 4px;
-  font-size: 14px;
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
-}
-
-.form-input:focus {
-  border-color: #005eff;
-  box-shadow: 0 0 4px rgba(0, 94, 255, 0.4);
-  outline: none;
-}
-
-/* 체크박스 */
-.form-checkbox {
-  width: 18px;
-  height: 18px;
-  margin-left: 8px;
-  cursor: pointer;
-}
-
-/* 버튼 */
-.btn-submit {
-  width: 100%;
-  padding: 12px;
-  margin-top: 15px;
-  background: #005eff;
-  color: white;
-  font-size: 15px;
-  font-weight: bold;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.btn-submit:hover {
-  background: #0041c2;
-}
-
-/* 결과 박스 */
-.result-box {
-  margin-top: 20px;
-  padding: 12px;
-  background: #f3f6fa;
-  border: 1px solid #d9e3f5;
-  border-radius: 6px;
-  font-size: 13px;
-  color: #444;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-</style>

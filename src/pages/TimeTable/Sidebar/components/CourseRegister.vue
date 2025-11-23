@@ -1,3 +1,162 @@
+<template>
+  <div class="bg-bg-paper rounded-card shadow-subtle p-6 border border-gray-200">
+    <h3 class="text-xl font-bold text-text-heading mb-6">과목 등록</h3>
+
+    <!-- Target Selection -->
+    <div class="mb-6">
+      <label class="block text-sm font-medium text-text-base mb-2">대상 선택:</label>
+      <div class="flex flex-wrap gap-3">
+        <input type="radio" id="cr-1" value="1" v-model="postCourseData.target" class="hidden" />
+        <label for="cr-1" class="block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent"
+          :class="{ 'bg-primary-light border-primary text-primary-dark font-semibold': postCourseData.target === '1' }">
+          1학년
+        </label>
+
+        <input type="radio" id="cr-2" value="2" v-model="postCourseData.target" class="hidden" />
+        <label for="cr-2" class="block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent"
+          :class="{ 'bg-primary-light border-primary text-primary-dark font-semibold': postCourseData.target === '2' }">
+          2학년
+        </label>
+
+        <input type="radio" id="cr-3" value="3" v-model="postCourseData.target" class="hidden" />
+        <label for="cr-3" class="block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent"
+          :class="{ 'bg-primary-light border-primary text-primary-dark font-semibold': postCourseData.target === '3' }">
+          3학년
+        </label>
+
+        <input type="radio" id="cr-special" value="special" v-model="postCourseData.target" class="hidden" />
+        <label for="cr-special" class="block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent"
+          :class="{ 'bg-primary-light border-primary text-primary-dark font-semibold': postCourseData.target === 'special' }">
+          특강
+        </label>
+
+        <input type="radio" id="cr-korean" value="korean" v-model="postCourseData.target" class="hidden" />
+        <label for="cr-korean" class="block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent"
+          :class="{ 'bg-primary-light border-primary text-primary-dark font-semibold': postCourseData.target === 'korean' }">
+          한국어
+        </label>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <!-- Course Name -->
+      <div class="grid grid-cols-[120px_1fr] items-baseline gap-y-4">
+        <label class="block text-sm font-medium text-text-base pt-2" for="course">강의명:</label>
+        <input
+          id="course"
+          class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+          v-model="postCourseData.course"
+          placeholder="강의명 입력"
+        />
+      </div>
+
+      <!-- Professor Name -->
+      <div class="grid grid-cols-[120px_1fr] items-baseline gap-y-4">
+        <label class="block text-sm font-medium text-text-base pt-2" for="professor">교수명:</label>
+        <select
+          id="professor"
+          class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+          v-model="postCourseData.professor_id"
+        >
+          <option value="" disabled>교수 선택</option>
+          <option v-for="professor in professors" :value="professor.user_id" :key="professor.user_id">
+            {{ professor.name }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Class ID (for Special/Korean) -->
+      <div
+        v-if="postCourseData.target == 'special' || postCourseData.target == 'korean'"
+        class="grid grid-cols-[120px_1fr] items-baseline gap-y-4"
+      >
+        <label class="block text-sm font-medium text-text-base pt-2" for="class_id">반:</label>
+        <div>
+          <select
+            id="class_id"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+            v-model="postCourseData.class_id"
+          >
+            <option value="">반 선택</option>
+            <option v-for="cls in classes" :key="cls.class_id" :value="cls.class_id">
+              {{ cls.class_group }}
+            </option>
+            <option :value="null">기타</option>
+          </select>
+          <div v-if="postCourseData.class_id == null" class="mt-4">
+            <label class="block text-sm font-medium text-text-base mb-1" for="className">반 이름 입력:</label>
+            <input
+              id="className"
+              class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+              v-model="postCourseData.className"
+              placeholder="반 이름"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Section (Semester) -->
+      <div class="grid grid-cols-[120px_1fr] items-baseline gap-y-4">
+        <label class="block text-sm font-medium text-text-base pt-2" for="section">학기:</label>
+        <div>
+          <select
+            id="section"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+            v-model="postCourseData.section"
+          >
+            <option value="">학기 선택</option>
+            <option v-for="section in sections" :value="section.sec_id" :key="section.sec_id">
+              {{ section.label }}
+            </option>
+            <option value="new">새로 생성</option>
+          </select>
+
+          <!-- New Section Details -->
+          <div v-if="postCourseData.section == 'new'" class="mt-4 flex flex-col gap-4">
+            <div class="grid grid-cols-[120px_1fr] items-baseline">
+              <label class="block text-sm font-medium text-text-base pt-2" for="year">년도:</label>
+              <input
+                id="year"
+                class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                v-model="newSection.year"
+                placeholder="2025"
+              />
+            </div>
+            <div class="grid grid-cols-[120px_1fr] items-baseline">
+              <label class="block text-sm font-medium text-text-base pt-2" for="semester">학기:</label>
+              <select
+                id="semester"
+                class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                v-model="newSection.semester"
+              >
+                <option value="1">1학기</option>
+                <option value="2">2학기</option>
+                <option value="s">여름방학</option>
+                <option value="w">겨울방학</option>
+              </select>
+            </div>
+            <div class="grid grid-cols-[120px_1fr] items-baseline">
+              <label class="block text-sm font-medium text-text-base pt-2" for="start_date">학기 시작일:</label>
+              <input type="date" id="start_date" class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm" v-model="newSection.start_date" />
+            </div>
+            <div class="grid grid-cols-[120px_1fr] items-baseline">
+              <label class="block text-sm font-medium text-text-base pt-2" for="end_date">학기 종료일:</label>
+              <input type="date" id="end_date" class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm" v-model="newSection.end_date" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="flex justify-end mt-6">
+      <button @click="handleSubmit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-base text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+        과목 등록
+      </button>
+    </div>
+  </div>
+</template>
+
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import { useTimetableStore } from '@/stores/timetable'
@@ -61,7 +220,8 @@ watch(
     if (target == 'special') {
       // target에 맞게 classes 정의
       classes.value = await getSpecialClasses()
-    } else if (target == 'korean') {
+    }
+    else if (target == 'korean') {
       classes.value = await getKoreanClasses()
     }
   },
@@ -92,95 +252,3 @@ const handleSubmit = async () => {
 }
 // ===================================================================================
 </script>
-
-<template>
-  CourseRegister
-  <!-- Grade 등 선택 -->
-  <div>
-    <input type="radio" id="1" value="1" v-model="postCourseData.target" />
-    <label for="1">1학년</label>
-
-    <input type="radio" id="2" value="2" v-model="postCourseData.target" />
-    <label for="2">2학년</label>
-
-    <input type="radio" id="3" value="3" v-model="postCourseData.target" />
-    <label for="3">3학년</label>
-
-    <input type="radio" id="special" value="special" v-model="postCourseData.target" />
-    <label for="special">특강</label>
-
-    <input type="radio" id="korean" value="korean" v-model="postCourseData.target" />
-    <label for="korean">한국어</label>
-  </div>
-
-  <!-- 강의명 입력 -->
-  <div>
-    <label for="course">강의명 : </label>
-    <input id="course" v-model="postCourseData.course" />
-  </div>
-  <!-- 교수명 입력 -->
-  <div>
-    <label for="professor">교수명 : </label>
-    <select id="professor" v-model="postCourseData.professor_id">
-      <option v-for="professor in professors" :value="professor.user_id" :key="professor.user_id">
-        {{ professor.name }}
-      </option>
-    </select>
-  </div>
-  <!-- 분반 -->
-  <div v-if="postCourseData.target == 'special' || postCourseData.target == 'korean'">
-    <label for="class_id">반 : </label>
-    <select id="class_id" v-model="postCourseData.class_id">
-      <option v-for="cls in classes" :key="cls.class_id" :value="cls.class_id">
-        {{ cls.class_group }}
-      </option>
-      <option :value="null">기타</option>
-    </select>
-    <div v-if="postCourseData.class_id == null">
-      <label for="className">반 이름 입력 : </label>
-      <input id="className" v-model="postCourseData.className" />
-    </div>
-  </div>
-
-  <!-- 학기 입력 -->
-  <div>
-    <label for="section">학기 : </label>
-    <select id="section" v-model="postCourseData.section">
-      <option v-for="section in sections" :value="section.sec_id" :key="section.sec_id">
-        {{ section.label }}
-      </option>
-      <option value="new">새로 생성</option>
-    </select>
-    <!-- 새로 만들기 -->
-    <div v-if="postCourseData.section == 'new'">
-      <div>
-        <label form="year">년도:</label>
-        <input id="year" v-model="newSection.year" placeholder="2025" />
-      </div>
-      <div>
-        <label form="semester">학기:</label>
-        <select id="semester" v-model="newSection.semester">
-          <option value="1">1학기</option>
-          <option value="2">2학기</option>
-          <option value="s">여름방학</option>
-          <option value="w">겨울방학</option>
-          <!-- <option value="new">기타</option> -->
-        </select>
-        <!-- <div v-if="newSection.semester == 'new'">
-          <label for="semesterName">학기 이름:</label>
-          <input id="semesterName" v-model="newSemesterName" />
-        </div> -->
-      </div>
-      <div>
-        <label for="date">학기 시작일 : </label>
-        <input type="date" id="date" v-model="newSection.start_date" />
-      </div>
-      <div>
-        <label for="date">학기 종료일 : </label>
-        <input type="date" id="date" v-model="newSection.end_date" />
-      </div>
-    </div>
-  </div>
-
-  <button @click="handleSubmit">과목 등록</button>
-</template>

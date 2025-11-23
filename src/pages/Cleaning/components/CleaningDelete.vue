@@ -1,16 +1,16 @@
 <template>
   <!-- Overlay -->
-  <div @click.self="closeModal" 
-        style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); 
-        display: flex; justify-content: center; align-items: center; z-index: 99;">
-    
+  <div @click.self="closeModal"
+        class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center">
+
     <!-- Modal Content -->
-    <div style="background-color: lightcoral; padding: 20px; border: 2px solid red; z-index: 100; border-radius: 8px;">
-      <h4>삭제할 학기와 학년을 선택하세요</h4>
-      <form @submit.prevent="onSubmit" style="margin-top: 15px;">
-          <label>학기</label>
-          <div>
-              <select v-model="formData.section">
+    <div class="bg-bg-paper rounded-card shadow-lg p-6 border border-gray-200 max-w-sm w-full relative">
+      <h3 class="text-xl font-bold text-text-heading mb-4">청소 기록 삭제</h3>
+      <form @submit.prevent="onSubmit" class="mt-4">
+          <div class="mb-4">
+              <label for="section-select" class="block text-sm font-medium text-text-base mb-1">학기</label>
+              <select v-model="formData.section" id="section-select"
+                      class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
                   <option value="">학기 선택</option>
                   <option v-for="s in sectionLists" :key="s.sec_id" :value="s.sec_id">
                       {{ s.label }}
@@ -18,19 +18,26 @@
               </select>
           </div>
 
-          <label style="margin-top: 10px; display: block;">해당 학년</label>
-          <div>
-              <select v-model="selectGrade">
+          <div class="mb-6">
+              <label for="grade-select" class="block text-sm font-medium text-text-base mb-1">해당 학년</label>
+              <select v-model="selectGrade" id="grade-select"
+                      class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
                   <option value="">학년</option>
                   <option value="1">1학년</option>
                   <option value="2">2학년</option>
                   <option value="3">3학년</option>
               </select>
           </div>
-        
-          <div style="margin-top: 20px; text-align: right;">
-            <button type="submit">삭제</button>
-            <button type="button" @click="closeModal" style="margin-left: 10px;">취소</button>
+
+          <div class="flex justify-end gap-2">
+            <button type="submit"
+                    class="px-4 py-2 bg-red-500 text-white rounded-base text-sm font-medium shadow-sm hover:bg-red-600 transition-colors duration-200">
+              삭제
+            </button>
+            <button type="button" @click="closeModal"
+                    class="px-4 py-2 bg-white text-text-base border border-gray-300 rounded-base text-sm font-medium shadow-sm hover:bg-gray-50 transition-colors duration-200">
+              취소
+            </button>
           </div>
       </form>
     </div>
