@@ -1,7 +1,7 @@
 <template>
   <AppLayout pageName="register">
     <div
-      class="max-w-md mx-auto w-full bg-white rounded-card border border-gray-200 shadow-subtle p-6 mt-12"
+      class="max-w-md mx-auto w-full bg-bg-paper rounded-card border border-gray-200 shadow-subtle p-6 mt-12"
     >
       <h1 class="text-xl font-bold text-text-heading mb-6 text-center">회원가입</h1>
 
@@ -10,7 +10,7 @@
         <input
           v-model="userInfo.name"
           type="text"
-          class="w-full rounded-base border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary"
+          class="w-full rounded-base border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary"
           placeholder="이름을 입력하세요"
         />
       </div>
@@ -20,7 +20,7 @@
         <input
           v-model="userInfo.studentId"
           type="text"
-          class="w-full rounded-base border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary"
+          class="w-full rounded-base border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary"
           placeholder="학번을 입력하세요"
         />
       </div>
@@ -30,7 +30,7 @@
         <input
           v-model="userInfo.phoneNumber"
           type="tel"
-          class="w-full rounded-base border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary"
+          class="w-full rounded-base border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary"
           placeholder="010-xxxx-xxxx"
         />
       </div>
@@ -40,7 +40,7 @@
         <input
           v-model="userInfo.email"
           type="email"
-          class="w-full rounded-base border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary"
+          class="w-full rounded-base border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary"
           placeholder="abcdef@gmail.com"
         />
       </div>
@@ -50,7 +50,7 @@
           v-model="userInfo.is_student"
           id="is_student"
           type="checkbox"
-          class="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
+          class="h-4 w-4 text-primary rounded border-gray-200 focus:ring-primary"
         />
         <label for="is_student" class="ml-2 text-sm font-medium text-text-muted">학생 여부</label>
       </div>
@@ -141,3 +141,4 @@ const submitRegister = async () => {
   }
 }
 </script>
+

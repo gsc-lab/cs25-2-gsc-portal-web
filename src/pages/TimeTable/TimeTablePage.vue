@@ -6,19 +6,44 @@
     </div>
 
     <!-- ===============  교수, 관리자 시간표  =============== -->
-    <div v-else class="flex min-h-screen w-full gap-6 p-4 sm:p-6 lg:p-8">
+    <div v-else class="grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 sm:p-6 lg:p-8">
       <!-- Main TimeTable View (Left/Central Section) -->
-      <div class="flex-[2] overflow-auto pr-8">
-        <div class="max-w-full lg:max-w-7xl lg:mx-auto">
+      <div
+        class="overflow-auto"
+        :class="{
+          'lg:col-span-12': !uiStore.isTimeTablePanelOpen,
+          'lg:col-span-8': uiStore.isTimeTablePanelOpen,
+        }"
+      >
+        <div class="max-w-full lg:max-w-9xl lg:mx-auto">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-bold text-text-heading">시간표</h2>
-            <div v-if="roleType == 'professor'" class="flex gap-2">
-              <div v-if="professorTT">
-                <button @click="professorTT = !professorTT" class="px-4 py-2 bg-white border border-gray-300 text-primary-dark text-sm font-medium rounded-base hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 shadow-sm">전체 시간표 보기</button>
+            <div class="flex gap-2 items-center">
+              <div v-if="roleType == 'professor'" class="flex gap-2">
+                <div v-if="professorTT">
+                  <button
+                    @click="professorTT = !professorTT"
+                    class="px-4 py-2 bg-white border border-gray-300 text-primary-dark text-sm font-medium rounded-base hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 shadow-sm"
+                  >
+                    전체 시간표 보기
+                  </button>
+                </div>
+                <div v-else>
+                  <button
+                    @click="professorTT = !professorTT"
+                    class="px-4 py-2 bg-white border border-gray-300 text-primary-dark text-sm font-medium rounded-base hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 shadow-sm"
+                  >
+                    담당 시간표 보기
+                  </button>
+                </div>
               </div>
-              <div v-else>
-                <button @click="professorTT = !professorTT" class="px-4 py-2 bg-white border border-gray-300 text-primary-dark text-sm font-medium rounded-base hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 shadow-sm">담당 시간표 보기</button>
-              </div>
+              <!-- Button to toggle TimeTable Slide Panel -->
+              <button
+                @click="uiStore.toggleTimeTablePanel()"
+                class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-base hover:bg-primary-dark transition-colors duration-200 shadow-sm"
+              >
+                {{ uiStore.isTimeTablePanelOpen ? '패널 닫기' : '패널 열기' }}
+              </button>
             </div>
           </div>
 
@@ -32,31 +57,33 @@
         </div>
       </div>
 
-      <!-- Registration/Management Panel (Right Section) -->
-      <div class="flex-[1]">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold text-text-heading">관리 패널</h2>
-          <button @click="sidebarIsOpen = !sidebarIsOpen" class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-base hover:bg-primary-dark transition-colors duration-200 shadow-sm">
-            {{ sidebarIsOpen ? '패널 닫기' : '패널 열기' }}
-          </button>
-        </div>
-        <Sidebar v-if="sidebarIsOpen" />
-      </div>
+      <!-- TimeTable Panel Overlay -->
+      <div
+        v-if="uiStore.isTimeTablePanelOpen"
+        class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40"
+        @click="uiStore.setTimeTablePanel(false)"
+      ></div>
+
+      <!-- TimeTable Sidebar -->
+      <Sidebar :class="{ 'lg:col-span-4': uiStore.isTimeTablePanelOpen }" />
     </div>
   </AppLayout>
 </template>
 
 <script setup>
 import AppLayout from '@/layouts/AppLayout.vue'
-import Sidebar from './Sidebar/Sidebar.vue'
-import { ref, watch } from 'vue'
+import Sidebar from './Sidebar/Sidebar.vue' // Import the correct Sidebar
+import { ref, watch, onMounted, onUnmounted } from 'vue' // Add onUnmounted to imports
 import { useTimetableStore } from '@/stores/timetable'
 import { useUserStore } from '@/stores/user'
+import { useUiStore } from '@/stores/ui' // Import uiStore
 import AdminTimeTable from './components/AdminTimeTable.vue'
 import TimeTable from './components/TimeTable.vue'
 
-// 사이드바 상태
-const sidebarIsOpen = ref(false)
+const uiStore = useUiStore() // Initialize uiStore
+
+// 사이드바 상태 (now managed by uiStore.isTimeTablePanelOpen)
+// const sidebarIsOpen = ref(false) // Removed
 const Ustore = useUserStore()
 const Tstore = useTimetableStore()
 
@@ -72,10 +99,27 @@ watch(
   { immediate: true },
 )
 
+// Watch for isTimeTablePanelOpen to manage body scroll
+watch(
+  () => uiStore.isTimeTablePanelOpen,
+  (isOpen) => {
+    if (isOpen) {
+      document.body.classList.add('overflow-hidden')
+    } else {
+      document.body.classList.remove('overflow-hidden')
+    }
+  },
+)
+
+// Ensure scroll is re-enabled if component is unmounted while panel is open
+onUnmounted(() => {
+  document.body.classList.remove('overflow-hidden')
+})
+
 // 시간표에서 선택한 데이터
 function setData(data) {
   Tstore.setSchedule(data)
-  sidebarIsOpen.value = true
+  uiStore.setTimeTablePanel(true) // Open panel via uiStore
   // console.log("저장 완료:", store.selectTT);
 }
 </script>

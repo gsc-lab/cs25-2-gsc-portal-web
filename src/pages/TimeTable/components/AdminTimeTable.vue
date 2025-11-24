@@ -3,7 +3,7 @@
     <h3 class="text-xl font-bold text-text-heading mb-4">관리자 시간표</h3>
 
     <!-- Grade Filter Buttons -->
-    <div class="flex flex-wrap gap-2 mb-4">
+    <div class="flex gap-2 mb-4 flex-nowrap overflow-x-auto sm:text-xs sm:gap-1">
       <button
         v-for="g in ['1', '2', '3', 'special', 'korean']"
         :key="g"
@@ -15,22 +15,44 @@
             : 'bg-white text-text-muted border-gray-300 hover:bg-gray-100',
         ]"
       >
-        {{ setTarget(String(g)) }}
+        <span class="whitespace-nowrap">{{ setTarget(String(g)) }}</span>
       </button>
     </div>
 
     <!-- Week Navigation -->
     <div class="flex items-center justify-between mb-4">
-      <button @click="handleBefore" class="px-4 py-2 bg-white border border-gray-300 text-text-base text-sm font-medium rounded-base hover:bg-gray-50 transition-colors duration-200 shadow-sm">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <button
+        @click="handleBefore"
+        class="px-4 py-2 bg-white border border-gray-300 text-text-base text-sm font-medium rounded-base hover:bg-gray-50 transition-colors duration-200 shadow-sm"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-4 w-4 inline-block mr-1"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
         지난주
       </button>
-      <p class="text-lg font-semibold text-text-heading">{{ selectDate.toISOString().split('T')[0] }}</p>
-      <button @click="handleAfter" class="px-4 py-2 bg-white border border-gray-300 text-text-base text-sm font-medium rounded-base hover:bg-gray-50 transition-colors duration-200 shadow-sm">
+      <p class="text-lg font-semibold text-text-heading">
+        {{ selectDate.toISOString().split('T')[0] }}
+      </p>
+      <button
+        @click="handleAfter"
+        class="px-4 py-2 bg-white border border-gray-300 text-text-base text-sm font-medium rounded-base hover:bg-gray-50 transition-colors duration-200 shadow-sm"
+      >
         다음주
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-4 w-4 inline-block ml-1"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
         </svg>
       </button>
@@ -43,7 +65,9 @@
           <thead>
             <!-- Days of the week -->
             <tr>
-              <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-400 sticky left-0 z-10 w-16"></th>
+              <th
+                class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-400 sticky left-0 z-10 w-16"
+              ></th>
               <th
                 v-for="(d, idx) in ['MON', 'TUE', 'WED', 'THU', 'FRI']"
                 :key="idx"
@@ -55,9 +79,15 @@
             </tr>
             <!-- Grades/Targets for each day -->
             <tr>
-              <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-400 sticky left-0 z-10 w-16"></th>
+              <th
+                class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-400 sticky left-0 z-10 w-16"
+              ></th>
               <template v-for="_ in 5" :key="_">
-                <th v-for="g in selectTargets" :key="g" class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-400">
+                <th
+                  v-for="g in selectTargets"
+                  :key="g"
+                  class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-400"
+                >
                   {{ setTarget(String(g)) }}
                 </th>
               </template>
@@ -68,7 +98,9 @@
             <!-- Periods 1 to 12 -->
             <tr v-for="hour in 12" :key="hour">
               <!-- Period Cell -->
-              <td class="bg-gray-50 text-text-muted font-semibold text-sm py-2 px-3 border border-gray-400 sticky left-0 z-10 w-16 user-select-none">
+              <td
+                class="bg-gray-50 text-text-muted font-semibold text-sm py-2 px-3 border border-gray-400 sticky left-0 z-10 w-16 user-select-none"
+              >
                 {{ hour }}교시
                 <p class="text-xs text-gray-700 mt-1">{{ hour + 8 }}:00~</p>
               </td>
@@ -97,6 +129,7 @@
                   "
                   @mouseup="endSelection"
                   class="border border-gray-400 py-1 px-1 text-center relative user-select-none"
+                  :class="{ 'bg-pink-200': isSelecting && isSelectedCell(g, d, hour) }"
                 >
                   <div
                     v-for="schedule in timetableData?.[g]?.[d][String(hour)]"
@@ -126,7 +159,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { setTarget, day } from '@/utils/reName'
 import { useTimetableStore } from '@/stores/timetable'
 
@@ -175,6 +208,12 @@ const isSelecting = ref(false)
 
 // 선택 데이터 [{day : 요일, hour: 교시, val: 시간표 데이터}, ...]
 const selectionData = ref([])
+
+const isSelectedCell = computed(() => (grade, day, hour) => {
+  return selectionData.value.some(
+    (item) => item.grade === grade && item.day === day && item.hour === hour,
+  )
+})
 
 // 반환 설정
 const emit = defineEmits(['setRange'])

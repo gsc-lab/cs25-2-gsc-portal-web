@@ -1,7 +1,7 @@
 <template>
   <AppLayout pageName="signup-wait">
     <div
-      class="max-w-md mx-auto w-full bg-white rounded-card border border-gray-200 shadow-subtle p-6 mt-12 text-center space-y-4"
+      class="max-w-md mx-auto w-full bg-bg-paper rounded-card border border-gray-200 shadow-subtle p-6 mt-12 text-center space-y-4"
     >
       <h1 class="text-xl font-bold text-text-heading mb-6">회원가입 요청 완료</h1>
 
@@ -23,7 +23,11 @@
 
       <p class="text-lg font-semibold text-primary">회원가입 요청이 성공적으로 접수되었습니다!</p>
       <p class="text-sm text-text-muted leading-relaxed">관리자의 승인을 기다려주세요.</p>
-      <p><button @click="handleLoginPage">로그인 페이지로 이동</button></p>
+      <p>
+        <button @click="handleLoginPage" class="bg-primary text-white rounded-base py-2 w-full hover:bg-primary-dark transition-colors duration-200">
+          로그인 페이지로 이동
+        </button>
+      </p>
     </div>
   </AppLayout>
 </template>

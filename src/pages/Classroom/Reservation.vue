@@ -1,3 +1,23 @@
+<template>
+  <div class="bg-bg-paper rounded-card shadow-subtle p-6 border border-gray-200 mb-6">
+    <h2 class="text-xl font-bold text-text-heading mb-6">실습실 예약</h2>
+
+    <!-- 강의실 필터링 -->
+    <div class="mb-4">
+      <label for="classroom" class="block text-sm font-medium text-text-base mb-1">강의실 선택 :</label>
+      <select id="classroom" v-model="selectCR"
+              class="block w-full sm:w-auto px-3 py-2 border border-gray-200 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+        <option v-for="clr in classrooms" :value="clr.classroom_id" :key="clr.classroom_id">
+          {{ clr.building }}-{{ clr.room_number }}
+        </option>
+      </select>
+    </div>
+
+    <!-- 예약 표 (초기화 후 렌더링) -->
+    <ReservationTable v-if="selectCR" />
+  </div>
+</template>
+
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import ReservationTable from './components/ReservationTable.vue'
@@ -32,23 +52,3 @@ watch(
   },
 )
 </script>
-
-<template>
-  <div class="bg-bg-paper rounded-card shadow-subtle p-6 border border-gray-200 mb-6">
-    <h2 class="text-xl font-bold text-text-heading mb-6">실습실 예약</h2>
-
-    <!-- 강의실 필터링 -->
-    <div class="mb-4">
-      <label for="classroom" class="block text-sm font-medium text-text-base mb-1">강의실 선택 :</label>
-      <select id="classroom" v-model="selectCR"
-              class="block w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
-        <option v-for="clr in classrooms" :value="clr.classroom_id" :key="clr.classroom_id">
-          {{ clr.building }}-{{ clr.room_number }}
-        </option>
-      </select>
-    </div>
-
-    <!-- 예약 표 (초기화 후 렌더링) -->
-    <ReservationTable v-if="selectCR" />
-  </div>
-</template>

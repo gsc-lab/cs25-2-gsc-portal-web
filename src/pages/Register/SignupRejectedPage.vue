@@ -1,6 +1,6 @@
 <template>
   <AppLayout pageName="signup-rejected">
-    <div class="max-w-md mx-auto w-full bg-white rounded-card border border-gray-200 shadow-subtle p-6 mt-12 text-center">
+    <div class="max-w-md mx-auto w-full bg-bg-paper rounded-card border border-gray-200 shadow-subtle p-6 mt-12 text-center">
       <h1 class="text-xl font-bold text-text-heading mb-6">회원가입 요청 거부</h1>
 
       <!-- Icon for rejected status -->

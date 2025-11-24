@@ -1,6 +1,6 @@
 <template>
   <AppLayout>
-    <main class="w-full max-w-[1400px] mx-auto px-6 py-8">
+    <main class="container mx-auto py-6 px-4 sm:px-6 lg:px-8">
       <header class="flex items-baseline gap-4 py-8">
         <h1
           class="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-primary-dark to-primary text-text-heading"
@@ -12,165 +12,96 @@
         </span>
       </header>
 
-      <section class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <!-- Left Main Area -->
-        <div class="lg:col-span-8 flex flex-col gap-8">
-          <!-- Timetable Card -->
-          <div class="bg-bg-paper rounded-card shadow-subtle p-6 border border-gray-200">
-            <h2 class="text-lg font-bold text-text-heading mb-4">시간표</h2>
-            <div class="flex gap-2 mb-4 flex-wrap">
-              <button
-                v-for="(target, key) in isUserInfoList"
-                :key="key"
-                class="px-4 py-2 rounded-full border border-gray-300 bg-white text-text-muted font-medium hover:bg-gray-100 transition-all duration-200"
-                :class="{
-                  'bg-primary text-black border-primary shadow-sm': targetGrade === target,
-                }"
-                @click="gradeSelect(target)"
-              >
-                <span>{{ getLabel(target) }}</span>
-              </button>
-            </div>
-
-            <div
-              class="rounded-lg bg-white overflow-hidden border border-gray-200 max-h-[300px] overflow-auto min-h-[250px]"
-            >
-              <div class="overflow-x-auto">
-                <table
-                  v-if="filterSchedule"
-                  class="w-full border-collapse min-w-full divide-y divide-gray-200"
-                >
-                  <thead>
-                    <tr>
-                      <th
-                        class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center sticky left-0 z-10 w-20"
-                      >
-                        교시
-                      </th>
-                      <th
-                        v-for="day in dayList"
-                        :key="day"
-                        class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center"
-                      >
-                        {{ day }}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-gray-100">
-                    <tr v-for="period in 12" :key="period">
-                      <td
-                        class="bg-gray-50 text-text-muted font-semibold text-sm py-2 px-3 border-b border-gray-100 text-center sticky left-0 z-10 w-20"
-                      >
-                        {{ period }}교시
-                      </td>
-                      <td
-                        v-for="day in dayList"
-                        :key="day"
-                        class="text-sm py-2 px-3 border-b border-gray-100 text-center"
-                      >
-                        <div
-                          class="text-xs bg-primary-light text-primary-dark font-semibold px-2 py-1 rounded-sm inline-block w-[90%] my-1"
-                          v-for="(courseItem, index) in filterSchedule[day]?.[period]"
-                          :key="index"
-                        >
-                          {{ courseItem['title'] }}
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                <div v-else class="text-center text-text-muted text-sm py-8">
-                  <p>표시할 시간표 데이터가 없습니다.</p>
-                </div>
-              </div>
-            </div>
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Timetable Card -->
+        <div
+          class="bg-bg-paper rounded-card shadow-subtle p-6 border border-gray-200 col-span-1 lg:col-span-1"
+        >
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-text-heading">오늘의 시간표</h2>
           </div>
 
-          <!-- Cleaning Roster & Classroom Poll (2 columns) -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Cleaning Card -->
-            <div class="bg-bg-paper rounded-card shadow-subtle p-6 border border-gray-200">
-              <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold text-text-heading">이번주 청소 당번</h2>
-                <button
-                  @click="HandleCleaningMove"
-                  class="text-sm font-medium text-text-muted hover:text-primary transition-colors duration-200"
-                >
-                  전체 보기
-                </button>
-              </div>
-              <div class="flex flex-col max-h-[300px] overflow-y-auto">
-                <div
-                  v-for="clean in dashBoard.cleaning_duty"
-                  :key="clean.grade_id"
-                  class="flex items-center gap-4 py-2 border-b border-gray-200"
-                >
-                  <div
-                    class="bg-primary text-white w-10 h-10 flex items-center justify-center font-semibold rounded-lg shadow-sm flex-shrink-0 text-sm"
-                  >
-                    {{ clean.grade_id }}학년
-                  </div>
-                  <div class="flex flex-col">
-                    <span class="font-semibold text-text-heading text-sm">
-                      {{ clean.classroom_name }}
-                    </span>
-                    <div class="flex flex-wrap gap-1 mt-1">
-                      <span
-                        v-for="member in clean.members"
-                        :key="member"
-                        class="text-xs text-text-muted bg-white px-2 py-1 rounded border border-gray-200"
+          <div class="flex gap-2 mb-4 flex-wrap">
+            <button
+              v-for="(target, key) in isUserInfoList"
+              :key="key"
+              class="px-4 py-2 rounded-full border border-gray-300 bg-white text-text-muted font-medium hover:bg-gray-100 transition-all duration-200"
+              :class="{ 'bg-primary text-black border-primary shadow-sm': targetGrade === target }"
+              @click="gradeSelect(target)"
+            >
+              <span>{{ getLabel(target) }}</span>
+            </button>
+          </div>
+
+          <div class="rounded-lg bg-white overflow-hidden border border-gray-200">
+            <div class="overflow-x-auto">
+              <table
+                v-if="filterSchedule"
+                class="w-full border-collapse min-w-full divide-y divide-gray-200"
+              >
+                <thead>
+                  <tr>
+                    <th
+                      class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center sticky left-0 z-10 w-20"
+                    >
+                      교시
+                    </th>
+                    <th
+                      v-for="day in dayList"
+                      :key="day"
+                      class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center"
+                    >
+                      {{ day }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                  <tr v-for="period in 12" :key="period">
+                    <td
+                      class="bg-gray-50 text-text-muted font-semibold text-sm py-2 px-3 border-b border-gray-100 text-center sticky left-0 z-10 w-20"
+                    >
+                      {{ period }}교시
+                    </td>
+                    <td
+                      v-for="day in dayList"
+                      :key="day"
+                      class="text-sm py-2 px-3 border-b border-gray-100 text-center"
+                    >
+                      <div
+                        class="text-xs bg-primary-light text-primary-dark font-semibold px-2 py-1 rounded-sm inline-block w-[90%] my-1"
+                        v-for="(courseItem, index) in filterSchedule[day]?.[period]"
+                        :key="index"
                       >
-                        {{ member }}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  v-if="!dashBoard.cleaning_duty?.length"
-                  class="text-center text-text-muted text-sm py-6"
-                >
-                  청소 당번 정보가 없습니다.
-                </div>
-              </div>
-            </div>
-
-            <!-- Classroom Poll Card -->
-            <div class="bg-bg-paper rounded-card shadow-subtle p-6 border border-gray-200">
-              <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold text-text-heading">강의실 개방 투표</h2>
-                <button
-                  class="text-sm font-medium text-text-muted hover:text-primary transition-colors duration-200"
-                >
-                  <router-link to="classroom">전체 보기</router-link>
-                </button>
-              </div>
-              <div class="flex flex-col max-h-[300px] overflow-y-auto">
-                <!-- Example content for poll, adjust as needed based on actual data structure -->
-
-                <div class="text-center text-text-muted text-sm py-6">
-                  진행중인 투표가 없습니다.
-                </div>
+                        {{ courseItem['title'] }}
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div v-else class="text-center text-text-muted text-sm py-8">
+                <p>표시할 시간표 데이터가 없습니다.</p>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Right Side Area -->
-        <div class="lg:col-span-4 flex flex-col gap-8">
+        <div class="grid grid-cols-1 gap-6">
           <!-- Notice Card -->
-          <div class="bg-bg-paper rounded-card shadow-subtle p-6 border border-gray-200">
+          <div
+            class="bg-bg-paper rounded-card shadow-subtle p-6 border border-gray-200 h-full min-h-[500px]"
+          >
             <div class="flex justify-between items-center mb-4">
-              <h2 class="text-lg font-bold text-text-heading">공지사항</h2>
+              <h2 class="text-xl font-bold text-text-heading">공지사항</h2>
               <button
                 @click="HandleNoticeMove"
                 class="text-sm font-medium text-text-muted hover:text-primary transition-colors duration-200"
               >
-                전체 보기
+                더보기 +
               </button>
             </div>
-            <div class="flex flex-col max-h-[300px] overflow-y-auto">
+            <div class="flex flex-col gap-2">
               <div
-                class="flex justify-between items-center py-2 border-b border-gray-200 cursor-pointer hover:text-primary transition-colors duration-200"
+                class="flex justify-between items-center py-2 border-b border-gray-100 cursor-pointer hover:text-primary transition-colors duration-200"
                 v-for="notice in dashBoard.notices?.notices"
                 :key="notice.notice_id"
                 @click="HandleNoticeClick(notice.notice_id)"
@@ -184,19 +115,80 @@
                   </span>
                   <p class="text-text-base text-sm truncate">{{ notice.title }}</p>
                 </div>
-                <span class="text-xs text-text-muted whitespace-nowrap">
-                  {{ notice.created_at ? new Date(notice.created_at).toLocaleDateString() : '' }}
-                </span>
               </div>
               <div
                 v-if="!dashBoard.notices?.notices?.length"
-                class="text-center text-text-muted text-sm py-6"
+                class="text-center text-text-muted text-sm py-8"
               >
                 등록된 공지사항이 없습니다.
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Classroom Poll Card -->
+        <div class="bg-bg-paper rounded-card shadow-subtle p-6 border border-gray-200 col-span-1">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-text-heading">강의실 개방 투표</h2>
+            <button
+              class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-base text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+            >
+              <router-link to="classroom" class="text-primary text-sm font-medium">
+                신청
+              </router-link>
+            </button>
+          </div>
+          <div class="flex items-center justify-center h-full text-primary text-xl font-bold py-8">
+            <p>투표 진행중인 강의실 표시 : 000호</p>
+          </div>
+        </div>
+
+        <!-- Cleaning Card -->
+        <div class="bg-bg-paper rounded-card shadow-subtle p-6 border border-gray-200 h-full">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-text-heading">이번주 청소 당번</h2>
+            <button
+              @click="HandleCleaningMove"
+              class="text-sm font-medium text-text-muted hover:text-primary transition-colors duration-200"
+            >
+              더보기 +
+            </button>
+          </div>
+          <div class="flex flex-col gap-4">
+            <div
+              v-for="clean in dashBoard.cleaning_duty"
+              :key="clean.grade_id"
+              class="flex items-center gap-4 bg-gray-50 p-4 rounded-lg"
+            >
+              <div
+                class="bg-primary text-white w-12 h-12 flex items-center justify-center font-semibold rounded-lg shadow-sm flex-shrink-0"
+              >
+                {{ clean.grade_id }}학년
+              </div>
+              <div class="flex flex-col gap-1">
+                <span class="font-semibold text-text-heading text-base">
+                  {{ clean.classroom_name }}
+                </span>
+                <div class="flex flex-wrap gap-2">
+                  <span
+                    v-for="member in clean.members"
+                    :key="member"
+                    class="text-xs text-text-muted bg-white px-2 py-1 rounded border border-gray-200"
+                  >
+                    {{ member }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              v-if="!dashBoard.cleaning_duty?.length"
+              class="text-center text-text-muted text-sm py-8"
+            >
+              청소 당번 정보가 없습니다.
+            </div>
+          </div>
+        </div>
+        <!-- </div> -->
       </section>
     </main>
   </AppLayout>

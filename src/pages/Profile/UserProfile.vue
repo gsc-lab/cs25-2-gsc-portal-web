@@ -1,13 +1,13 @@
 <template>
   <AppLayout pageName="Profile">
     <main class="max-w-lg mx-auto w-full mt-12 mb-20">
-      <div class="bg-white rounded-card border border-gray-200 shadow-subtle p-8">
+      <div class="bg-bg-paper rounded-card border border-gray-200 shadow-subtle p-8">
         <div class="flex justify-between items-center mb-6 border-b border-gray-200 pb-4">
           <h2 class="text-xl font-bold text-text-heading">프로필</h2>
           <button
             @click="studentScoreInputForm"
             :class="['px-4 py-2 rounded-base text-sm font-medium transition-colors duration-200',
-                     isForm ? 'bg-red-50 text-red-700 border border-red-300 hover:bg-red-100 shadow-sm' : 'bg-primary text-white hover:bg-primary-dark shadow-sm']"
+                     isForm ? 'bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 shadow-sm' : 'bg-primary text-white hover:bg-primary-dark shadow-sm']"
           >
             {{ isForm ? '입력창 닫기' : '성적 입력' }}
           </button>
@@ -72,7 +72,7 @@
       </div>
 
       <!-- 성적 등록 -->
-      <div v-show="isForm" class="bg-white rounded-card border border-gray-200 shadow-subtle p-8 mt-6">
+      <div v-show="isForm" class="bg-bg-paper rounded-card border border-gray-200 shadow-subtle p-8 mt-6">
         <h2 class="text-xl font-bold text-text-heading mb-6">성적 정보 입력</h2>
 
         <div class="mb-4">
@@ -92,13 +92,13 @@
         <div class="mb-4">
           <label class="text-sm font-medium text-text-muted mb-1 block">Score</label>
           <input type="text" placeholder="점수를 입력하세요" v-model="score"
-                 class="w-full border border-gray-300 rounded-base py-2 px-3 text-sm focus:ring-2 focus:ring-primary focus:border-primary" />
+                 class="w-full border border-gray-200 rounded-base py-2 px-3 text-sm focus:ring-2 focus:ring-primary focus:border-primary" />
         </div>
 
         <div class="mb-4">
           <label class="text-sm font-medium text-text-muted mb-1 block">Level</label>
           <input type="text" placeholder="급수를 입력하세요 (예: N1)" v-model="level"
-                 class="w-full border border-gray-300 rounded-base py-2 px-3 text-sm focus:ring-2 focus:ring-primary focus:focus:border-primary" />
+                 class="w-full border border-gray-200 rounded-base py-2 px-3 text-sm focus:ring-2 focus:ring-primary focus:focus:border-primary" />
         </div>
 
         <div class="mb-6">

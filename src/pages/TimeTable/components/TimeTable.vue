@@ -59,17 +59,16 @@
               </th>
             </tr>
           </thead>
-
           <tbody>
             <tr v-for="hour in 12" :key="hour">
               <td
-                class="bg-gray-50 text-text-muted font-semibold text-sm py-2 px-3 border border-gray-400 sticky left-0 z-10 w-16 user-select-none"
+                class="bg-gray-50 text-text-muted font-semibold text-sm py-2 px-3 border border-gray-400 sticky left-0 z-10 w-16"
               >
                 {{ hour }}교시
                 <p class="text-xs text-gray-700 mt-1">{{ hour + 8 }}:00~</p>
               </td>
               <template v-for="(d, idx) in ['MON', 'TUE', 'WED', 'THU', 'FRI']" :key="idx">
-                <td class="border border-gray-400 py-1 px-1 text-center relative user-select-none">
+                <td class="border border-gray-400 py-1 px-1 text-center relative">
                   <div
                     v-for="schedule in timetableData?.[d][String(hour)]"
                     :key="schedule"
@@ -79,7 +78,7 @@
                         ? 'bg-red-500 text-white'
                         : timetableData?.[d][String(hour)][0]?.event?.status === 'MAKEUP'
                           ? 'bg-white border border-gray-300 text-text-base'
-                          : 'bg-primary text-white',
+                          : 'bg-primary text-white'
                     ]"
                   >
                     <p class="text-xs font-semibold">{{ schedule?.title }}</p>
@@ -111,6 +110,8 @@ const today_day = today.getDay() // 오늘의 요일 (일요일=0)
 const selectDate = ref(null)
 
 const professorTT = defineModel()
+
+
 // 주 변경시 시간표 데이터 갱신
 watch(
   () => selectDate.value,

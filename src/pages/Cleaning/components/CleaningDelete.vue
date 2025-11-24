@@ -10,7 +10,7 @@
           <div class="mb-4">
               <label for="section-select" class="block text-sm font-medium text-text-base mb-1">학기</label>
               <select v-model="formData.section" id="section-select"
-                      class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+                      class="block w-full px-3 py-2 border border-gray-200 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
                   <option value="">학기 선택</option>
                   <option v-for="s in sectionLists" :key="s.sec_id" :value="s.sec_id">
                       {{ s.label }}
@@ -21,7 +21,7 @@
           <div class="mb-6">
               <label for="grade-select" class="block text-sm font-medium text-text-base mb-1">해당 학년</label>
               <select v-model="selectGrade" id="grade-select"
-                      class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+                      class="block w-full px-3 py-2 border border-gray-200 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
                   <option value="">학년</option>
                   <option value="1">1학년</option>
                   <option value="2">2학년</option>
@@ -35,7 +35,7 @@
               삭제
             </button>
             <button type="button" @click="closeModal"
-                    class="px-4 py-2 bg-white text-text-base border border-gray-300 rounded-base text-sm font-medium shadow-sm hover:bg-gray-50 transition-colors duration-200">
+                    class="px-4 py-2 bg-white text-text-base border border-gray-200 rounded-base text-sm font-medium shadow-sm hover:bg-gray-50 transition-colors duration-200">
               취소
             </button>
           </div>

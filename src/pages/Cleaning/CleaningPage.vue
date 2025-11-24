@@ -9,13 +9,13 @@
             <strong class="text-text-base text-sm font-medium mr-2">보기 방식:</strong>
             <button
               @click="setMode('week')"
-              :class="['px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 shadow-sm border', viewMode === 'week' ? 'bg-primary text-white border-primary' : 'bg-white text-text-muted border-gray-300 hover:bg-gray-100']"
+              :class="['px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 shadow-sm border', viewMode === 'week' ? 'bg-primary text-white border-primary' : 'bg-white text-text-muted border-gray-200 hover:bg-gray-100']"
             >
               주간 보기
             </button>
             <button
               @click="setMode('month')"
-              :class="['px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 shadow-sm border', viewMode === 'month' ? 'bg-primary text-white border-primary' : 'bg-white text-text-muted border-gray-300 hover:bg-gray-100']"
+              :class="['px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 shadow-sm border', viewMode === 'month' ? 'bg-primary text-white border-primary' : 'bg-white text-text-muted border-gray-200 hover:bg-gray-100']"
             >
               월간 보기
             </button>
@@ -41,19 +41,19 @@
             <!-- Week/Grade Controls -->
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 pb-4 border-b border-gray-200">
               <div class="flex items-center gap-2">
-                <button @click="cleaningStore.moveWeek('prev')" class="px-3 py-1 bg-white border border-gray-300 text-text-base text-sm font-medium rounded-base hover:bg-gray-50 transition-colors duration-200 shadow-sm">
+                <button @click="cleaningStore.moveWeek('prev')" class="px-3 py-1 bg-white border border-gray-200 text-text-base text-sm font-medium rounded-base hover:bg-gray-50 transition-colors duration-200 shadow-sm">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
                   이전 주
                 </button>
                 <strong class="text-lg font-semibold text-text-heading">{{ cleaningStore.weekDate?.date }}</strong>
-                <button @click="cleaningStore.moveWeek('next')" class="px-3 py-1 bg-white border border-gray-300 text-text-base text-sm font-medium rounded-base hover:bg-gray-50 transition-colors duration-200 shadow-sm">
+                <button @click="cleaningStore.moveWeek('next')" class="px-3 py-1 bg-white border border-gray-200 text-text-base text-sm font-medium rounded-base hover:bg-gray-50 transition-colors duration-200 shadow-sm">
                   다음 주
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
                 </button>
               </div>
               <div>
                 <label for="grade-select" class="block text-sm font-medium text-text-base mb-1">학년: </label>
-                <select v-model="grade" id="grade-select" class="block w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+                <select v-model="grade" id="grade-select" class="block w-full sm:w-auto px-3 py-2 border border-gray-200 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
                   <option value="null">전체 학년</option>
                   <option value="1">1학년</option>
                   <option value="2">2학년</option>
