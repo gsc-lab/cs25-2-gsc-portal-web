@@ -28,6 +28,10 @@ router.beforeEach(async (to, from, next) => {
     return next()
   }
 
+  if (isPublic) {
+    return next()
+  }
+
   // 스토어에 로그인 정보가 없다 ?
   try {
     // 정보 요청 성공시 userInfo 채워짐
@@ -45,13 +49,19 @@ router.beforeEach(async (to, from, next) => {
     const errorMessage = err.response?.data?.message || err.message
 
     // 미승인 상태 = pedding 일 경우 registerWait 로 이동
-    if (errorMessage === "관리자의 승인을 기다리는 중입니다.") {
+    if (errorMessage === "계정이 활성화 상태가 아닙니다. (현재 상태 pending") {
       if (to.path !== '/registerWait') {
         return next('/registerWait')
       }
       return next()
     }
 
+    if (errorMessage === "계정이 활성화 상태가 아닙니다. (현재 상태 inactive") {
+      if (to.path !== '/rejected') {
+        return next('/rejected')
+      }
+      return next()
+    }
     // 승인 거절 = inactive 일 경우 알림을 띄운 후 로그인으로 이동
     if (errorMessage === "가입이 거절된 계정입니다.") {
       alert("가입이 거절된 계정입니다. 관리자에게 문의하세요.")

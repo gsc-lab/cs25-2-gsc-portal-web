@@ -1,6 +1,8 @@
 <template>
   <AppLayout pageName="register">
-    <div class="max-w-md mx-auto w-full bg-white rounded-card border border-gray-200 shadow-subtle p-6 mt-12">
+    <div
+      class="max-w-md mx-auto w-full bg-white rounded-card border border-gray-200 shadow-subtle p-6 mt-12"
+    >
       <h1 class="text-xl font-bold text-text-heading mb-6 text-center">회원가입</h1>
 
       <div class="mb-4">
@@ -44,7 +46,12 @@
       </div>
 
       <div class="flex items-center mb-6">
-        <input v-model="userInfo.is_student" id="is_student" type="checkbox" class="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
+        <input
+          v-model="userInfo.is_student"
+          id="is_student"
+          type="checkbox"
+          class="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
+        />
         <label for="is_student" class="ml-2 text-sm font-medium text-text-muted">학생 여부</label>
       </div>
 
@@ -109,8 +116,28 @@ const submitRegister = async () => {
     alert('회원가입 요청이 완료되었습니다.')
     router.push({ path: '/registerWait' })
   } catch (err) {
+    const errorMessage = err.reponse?.data?.message || err.message
+
+    if (errorMessage === '이메일, 학번, 이름, 전화번호는 필수 항목입니다.') {
+      alert('이메일, 학번, 이름, 전화번호는 필수 항목입니다.')
+      router.push({ path: '/login' })
+    }
+
+    if (errorMessage === '전화번호 형식이 올바르지 않습니다.') {
+      alert('전화번호 형식이 올바르지 않습니다.')
+      router.push({ path: '/login' })
+    }
+
+    if (errorMessage === '이미 가입된 이메일입니다.') {
+      alert('이미 가입된 이메일입니다.')
+      router.push({ path: '/login' })
+    }
+
+    if (errorMessage === '이미 등록된 학번입니다.') {
+      alert('이미 등록된 학번입니다.')
+      router.push({ path: '/login' })
+    }
     console.error(err)
-    alert('회원가입 요청이 실패했습니다.')
   }
 }
 </script>
