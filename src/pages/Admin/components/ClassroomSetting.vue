@@ -26,7 +26,15 @@
             <td class="text-sm py-2 px-3 border-b border-gray-200 text-center">NEW</td>
             <td class="text-sm py-2 px-3 border-b border-gray-200 text-center">
               <div class="flex items-center justify-center gap-1">
-                <input v-model="postData.building" placeholder="창조관" class="w-20 px-2 py-1 border border-gray-200 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm" />-
+                <select v-model="postData.building" id="building" class="px-2 py-1 border border-gray-200 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm">
+                  <option value="창조관">창조관</option>
+                  <option value="청문관">청문관</option>
+                  <option value="연서관">연서관</option>
+                  <option value="공학관">공학관</option>
+                  <option value="정보관">정보관</option>
+                  <option value="본관">본관</option>
+                </select>
+                -
                 <input v-model="postData.room_number" placeholder="101" class="w-16 px-2 py-1 border border-gray-200 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm" />
               </div>
             </td>
@@ -50,7 +58,15 @@
             <!--  장소  -->
             <td class="text-sm py-2 px-3 border-b border-gray-200 text-center">
               <div v-if="classroom.classroom_id == postData.classroom_id" class="flex items-center justify-center gap-1">
-                <input v-model="postData.building" placeholder="창조관" class="w-20 px-2 py-1 border border-gray-200 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm" />-
+                <select id="building" v-model="postData.building">
+                  <option value="창조관">창조관</option>
+                  <option value="청문관">청문관</option>
+                  <option value="연서관">연서관</option>
+                  <option value="공학관">공학관</option>
+                  <option value="정보관">정보관</option>
+                  <option value="본관">본관</option>
+                </select>
+                -
                 <input v-model="postData.room_number" placeholder="101" class="w-16 px-2 py-1 border border-gray-200 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm" />
               </div>
               <div v-else>{{ classroom.building }}-{{ classroom.room_number }}</div>
@@ -93,7 +109,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getClassroomsInfo, postClassroom, putClassroom, deleteClassroom } from '@/api/classroomApi'
+import { postClassroom, putClassroom, deleteClassroom } from '@/api/classroomApi'
 import { useClassroomStore } from '@/stores/classroom'
 const CRstore = useClassroomStore()
 
@@ -102,7 +118,7 @@ const postData = ref(null)
 
 function resetPostData() {
   postData.value = {
-    building: '',
+    building: '창조관',
     classroom_id: '',
     room_number: '',
     room_type: 'CLASSROOM',
@@ -122,18 +138,18 @@ onMounted(async () => {
 // ==============  추가  ===============
 const handlePost = async () => {
   if (!postData.value.building || !postData.value.room_number || !postData.value.room_type) {
-    alert('모든 필드를 입력해주세요.');
-    return;
+    alert('모든 필드를 입력해주세요.')
+    return
   }
   try {
     await postClassroom(postData.value)
-    alert('교실이 성공적으로 추가되었습니다.');
+    alert('교실이 성공적으로 추가되었습니다.')
     await CRstore.setClassroomInfo()
     setCRData()
     resetPostData()
   } catch (error) {
     console.error('교실 추가 실패:', error)
-    alert('교실 추가에 실패했습니다.');
+    alert('교실 추가에 실패했습니다.')
   }
 }
 
@@ -148,18 +164,18 @@ const setPostData = (classroom) => {
 }
 const handlePut = async () => {
   if (!postData.value.building || !postData.value.room_number || !postData.value.room_type) {
-    alert('모든 필드를 입력해주세요.');
-    return;
+    alert('모든 필드를 입력해주세요.')
+    return
   }
   try {
     await putClassroom(postData.value)
-    alert('교실 정보가 성공적으로 수정되었습니다.');
+    alert('교실 정보가 성공적으로 수정되었습니다.')
     await CRstore.setClassroomInfo()
     setCRData()
     resetPostData()
   } catch (error) {
     console.error('교실 수정 실패:', error)
-    alert('교실 수정에 실패했습니다.');
+    alert('교실 수정에 실패했습니다.')
   }
 }
 
@@ -168,12 +184,12 @@ const handleDelete = async (classroom) => {
   if (confirm(`${classroom.building}-${classroom.room_number}을 삭제합니다`)) {
     try {
       await deleteClassroom(classroom.classroom_id)
-      alert('교실이 성공적으로 삭제되었습니다.');
+      alert('교실이 성공적으로 삭제되었습니다.')
       await CRstore.setClassroomInfo()
       setCRData()
     } catch (error) {
       console.error('교실 삭제 실패:', error)
-      alert('교실 삭제에 실패했습니다.');
+      alert('교실 삭제에 실패했습니다.')
     }
   }
 }
