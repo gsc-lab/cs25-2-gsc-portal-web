@@ -9,6 +9,9 @@
             <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">권한</th>
             <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">이름</th>
             <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">학번</th>
+            <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">학년</th>
+            <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">전화번호</th>
+            <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">이메일</th>
             <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">승인 여부</th>
           </tr>
         </thead>
@@ -17,6 +20,9 @@
             <td class="text-sm py-2 px-3 border-b border-gray-200 text-center">{{ appUser.role_type }}</td>
             <td class="text-sm py-2 px-3 border-b border-gray-200 text-center">{{ appUser.name }}</td>
             <td class="text-sm py-2 px-3 border-b border-gray-200 text-center">{{ appUser.user_id }}</td>
+            <td class="text-sm py-2 px-3 border-b border-gray-200 text-center">{{ appUser.grade_name }}</td>
+            <td class="text-sm py-2 px-3 border-b border-gray-200 text-center">{{ appUser.phone }}</td>
+            <td class="text-sm py-2 px-3 border-b border-gray-200 text-center">{{ appUser.email }}</td>
             <td class="text-sm py-2 px-3 border-b border-gray-200 text-center">
               <div class="flex gap-2 justify-center">
                 <button @click="handleSubmit(appUser.user_id, 'active')" class="px-3 py-1 bg-primary text-white text-sm font-medium rounded-base hover:bg-primary-dark transition-colors duration-200 shadow-sm">승인</button>
