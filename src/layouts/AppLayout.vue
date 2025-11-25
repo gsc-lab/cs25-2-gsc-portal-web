@@ -15,12 +15,8 @@
       ></div>
 
       <!-- Main Content Area -->
-      <main
-        class="flex-1 transition-all duration-300 ease-in-out"
-      >
-        <div
-          class="w-full max-w-[1700px] mx-auto py-6 px-6 lg:px-10"
-        >
+      <main class="flex-1 transition-all duration-300 ease-in-out">
+        <div class="w-full max-w-[1700px] mx-auto py-6 px-6 lg:px-10">
           <slot></slot>
         </div>
       </main>
@@ -33,21 +29,10 @@ import MainHeader from '@/layouts/MainHeader.vue'
 import Sidebar from '@/layouts/Sidebar.vue'
 import { useUiStore } from '@/stores/ui'
 import { useUserStore } from '@/stores/user'
-import { onMounted, onUnmounted, computed } from 'vue' // Add computed
+import { onMounted, onUnmounted } from 'vue' // Add computed
 
 const uiStore = useUiStore()
 const user = useUserStore()
-
-const mainContentMarginClass = computed(() => {
-  if (uiStore.isDesktop) {
-    if (uiStore.isSidebarWide) {
-      return 'ml-64'; // Desktop, sidebar wide (w-64)
-    } else if (uiStore.isSidebarMinimized) {
-      return 'ml-16'; // Desktop, sidebar minimized (w-16)
-    }
-  }
-  return 'ml-0'; // Default or for mobile when sidebar is closed
-});
 
 // Reset mobile sidebar state on mount and unmount (e.g., for hot module reloading)
 onMounted(() => {
