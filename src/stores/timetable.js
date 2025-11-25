@@ -16,6 +16,14 @@ export const useTimetableStore = defineStore('timetable', {
     // 관리자 Timetable / 기준 date
     adminTimetable: [],
     date: null,
+    // 공강
+    noneTime: {
+      1: {},
+      2: {},
+      3: {},
+      special: {},
+      korean: {},
+    },
 
     // drag선택 내용
     selectTT: {
@@ -62,11 +70,10 @@ export const useTimetableStore = defineStore('timetable', {
     // ------------------------ adminTimetable --------------------------
     // [ set ] : Timetable 셋팅
     async setTimetable(day = this.selectTT.date) {
-      console.log('log')
       if (day == null) day = new Date().toISOString().split('T')[0]
       this.adminTimetable = await getAdminTimetable(day)
       this.date = day
-      console.log('store: adminTimetable', this.adminTimetable)
+      // console.log('store: adminTimetable', this.adminTimetable)
     },
 
     // [ get ] : adminTimetable 반환
@@ -75,6 +82,20 @@ export const useTimetableStore = defineStore('timetable', {
         await this.setTimetable(day)
       }
       return this.adminTimetable
+    },
+
+    async setNoneTime() {
+      console.log(this.adminTimetable['1']['MON']['1'].length)
+      for (const target of ['1', '2', '3', 'special', 'korean']) {
+        for (const day of ['MON', 'TUE', 'WED', 'THU', 'FRI']) {
+          this.noneTime[target][day] = Object.keys(this.adminTimetable[target][day])
+            .map((h) => {
+              if (this.adminTimetable[target][day][h].length == 0) return h
+            })
+            .filter((v) => v !== undefined)
+        }
+      }
+      console.log('noneTime', this.noneTime)
     },
 
     // --------------------------- selectTT -----------------------------
@@ -183,7 +204,7 @@ export const useTimetableStore = defineStore('timetable', {
       if (!date) date = new Date().toISOString().slice(0, 10)
       const section = this.sections.find((s) => s.start_date <= date && s.end_date >= date)
       // console.log('section', section)
-      return section.sec_id
+      return section?.sec_id ?? this.sections[this.sections.length - 1].sec_id
     },
   },
 })

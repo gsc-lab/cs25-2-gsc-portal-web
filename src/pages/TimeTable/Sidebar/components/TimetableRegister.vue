@@ -94,14 +94,20 @@
       <div class="grid grid-cols-[120px_1fr] items-baseline gap-y-4">
         <label class="block text-sm font-medium text-text-base pt-2" for="time">교시:</label>
         <div class="flex items-center gap-2">
-          <select id="time-start" v-model="postTimetableData.startTime"
-            class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
-            <option v-for="startT in 12" :value="startT" :key="startT">{{ startT }}</option>
+          <select
+            id="time-start"
+            v-model="postTimetableData.startTime"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+          >
+            <option v-for="startT in startTimes" :value="startT" :key="startT">{{ startT }}</option>
           </select>
           <span class="text-text-base">~</span>
-          <select id="time-end" v-model="postTimetableData.endTime"
-            class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
-            <option v-for="endT in 12" :value="endT" :key="endT">{{ endT }}</option>
+          <select
+            id="time-end"
+            v-model="postTimetableData.endTime"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+          >
+            <option v-for="endT in endTimes" :value="endT" :key="endT">{{ endT }}</option>
           </select>
           <span class="text-text-base">교시</span>
         </div>
@@ -129,6 +135,10 @@ const courses = ref() // 필터링 과목
 const classrooms = ref(null) // 원본 교실
 const sections = ref(null)
 const section = ref() // 조회 학기
+
+const noneTimes = ref()
+const startTimes = ref(['학년와 요일을 입력해주세요'])
+const endTimes = ref([])
 
 onMounted(async () => {
   classrooms.value = await Cstore.getClassroom() // 원본 교실 정의
@@ -194,6 +204,44 @@ watch(
     courses.value = await Tstore.courseFilter(postTimetableData.value.target)
   },
   { immediate: true },
+)
+
+// target와 요일이 바뀌면 교시 정보 갱신
+watch(
+  () => [postTimetableData.value.target, postTimetableData.value.day],
+  async (val) => {
+    console.log('target, day', val[0], val[1])
+    if (val[0] && val[1]) {
+      noneTimes.value = await Tstore.noneTime[val[0]][val[1]]
+      startTimes.value = noneTimes.value
+      endTimes.value = noneTimes.value
+      console.log('endTimes', endTimes.value)
+    }
+  },
+)
+// 교시 입력을 받으면 필터링
+watch(
+  () => [postTimetableData.value.startTime, postTimetableData.value.endTime],
+  ([newS, newE], [oldS, oldE]) => {
+    // startTime를 입력하면 endTimes는 해당 시간 이후
+    if (newS != oldS) {
+      for (let idx = 0; noneTimes.value.length > idx; idx++) {
+        if (noneTimes.value[idx] == newS) {
+          endTimes.value = noneTimes.value.slice(idx)
+          break
+        }
+      }
+    }
+    // endTime를 입력하면 startTimes는 해당 시간 이전
+    if (newE != oldE) {
+      for (let idx = 0; noneTimes.value.length > idx; idx++) {
+        if (noneTimes.value[idx] == newE) {
+          startTimes.value = noneTimes.value.slice(0, idx + 1)
+          break
+        }
+      }
+    }
+  },
 )
 
 // ================================= Submit =================================

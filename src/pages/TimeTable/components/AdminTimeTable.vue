@@ -181,6 +181,7 @@ watch(
     if (selectDate.value == null) selectDate.value = Tstore.date ? new Date(Tstore.date) : today
     // console.log("selectDate", selectDate.value);
     await Tstore.setTimetable(selectDate.value.toISOString().split('T')[0])
+    Tstore.setNoneTime()
   },
   { immediate: true },
 )
@@ -245,7 +246,7 @@ const handleSelect = (t) => {
   targets.value[t] = !targets.value[t]
   // true인 키 값으로 배열 생성
   const targetsKey = Object.keys(targets.value).filter((target) => targets.value[target])
-  console.log(targetsKey)
+  // console.log(targetsKey)
   // selectTargets 대입
   selectTargets.value = targetsKey
 }
