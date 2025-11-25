@@ -42,7 +42,7 @@
         <draggable v-model="assignedStd" group="items" itemKey="user_id">
           <template #item="{ element }">
             <div class="p-2 border border-gray-300 mb-1 rounded-sm cursor-grab bg-white text-text-base text-sm">
-              {{ element.grade }}학년 : {{ element.name }}
+              {{ element.grade_id }}학년 : {{ element.name }}
             </div>
           </template>
         </draggable>
