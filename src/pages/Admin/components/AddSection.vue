@@ -103,18 +103,56 @@
               {{ section.label }}
             </td>
             <td class="text-sm py-2 px-3 border-b border-gray-200 text-center">
-              {{ section.start_date }}
+              <div v-if="section.sec_id == newSection.sec_id">
+                <input
+                  type="date"
+                  id="start_date"
+                  class="px-2 py-1 border border-gray-200 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm"
+                  v-model="newSection.start_date"
+                  :max="newSection.end_date"
+                />
+              </div>
+              <div v-else>
+                {{ section.start_date }}
+              </div>
             </td>
             <td class="text-sm py-2 px-3 border-b border-gray-200 text-center">
-              {{ section.end_date }}
+              <div v-if="section.sec_id == newSection.sec_id">
+                <input
+                  type="date"
+                  id="end_date"
+                  class="px-2 py-1 border border-gray-200 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm"
+                  v-model="newSection.end_date"
+                  :min="newSection.start_date"
+                />
+              </div>
+              <div v-else>
+                {{ section.end_date }}
+              </div>
             </td>
             <td class="text-sm py-2 px-3 border-b border-gray-200 text-center">
-              <button
-                @click="handleDelete(section.sec_id)"
-                class="px-3 py-1 bg-red-500 text-white text-sm font-medium rounded-base hover:bg-red-600 transition-colors duration-200 shadow-sm"
-              >
-                삭제
-              </button>
+              <div v-if="section.sec_id == newSection.sec_id">
+                <button
+                  @click="handleSubmit"
+                  class="px-3 py-1 bg-primary text-white text-sm font-medium rounded-base hover:bg-primary-dark transition-colors duration-200 shadow-sm mr-2"
+                >
+                  등록
+                </button>
+                <button
+                  @click="resetSection"
+                  class="px-3 py-1 bg-white text-text-base border border-gray-200 rounded-base text-sm font-medium shadow-sm hover:bg-gray-50 transition-colors duration-200"
+                >
+                  취소
+                </button>
+              </div>
+              <div v-else>
+                <button
+                  @click="setPut(section)"
+                  class="px-3 py-1 bg-primary text-white text-sm font-medium rounded-base hover:bg-primary-dark transition-colors duration-200 shadow-sm mr-2"
+                >
+                  수정
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -132,7 +170,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useTimetableStore } from '@/stores/timetable'
-import { postSection } from '@/api/timetableApi'
+import { postSection, putSection } from '@/api/timetableApi'
 
 const Tstore = useTimetableStore()
 const sections = ref(null)
@@ -142,10 +180,11 @@ const isOpen = ref(false)
 const newSection = ref()
 function resetSection() {
   newSection.value = {
+    sec_id: undefined,
     year: 2025,
     semester: 1,
-    start_date: null,
-    end_date: null,
+    start_date: undefined,
+    end_date: undefined,
   }
 }
 // 초기화
@@ -154,11 +193,27 @@ onMounted(async () => {
   resetSection()
 })
 
+const setPut = (sec) => {
+  newSection.value = {
+    sec_id: sec.sec_id,
+    year: 2025,
+    semester: 1,
+    start_date: sec.start_date,
+    end_date: sec.end_date,
+  }
+}
+
 // ==============  등록  ==============
 const handleSubmit = async () => {
-  const res = await postSection(newSection.value)
-  if (res.success) alert(`${res.sec_id}가 등록 되었습니다.`)
+  if (newSection.value.sec_id) {
+    await putSection(newSection.value)
+    alert(`${newSection.value.sec_id}가 수정 되었습니다.`)
+  } else {
+    const res = await postSection(newSection.value)
+    if (res.success) alert(`${res.sec_id}가 등록 되었습니다.`)
+  }
   // 초기화
+  resetSection()
   isOpen.value = false
   await Tstore.setSections()
   sections.value = await Tstore.getSections()

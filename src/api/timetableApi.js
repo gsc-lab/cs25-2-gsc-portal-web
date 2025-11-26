@@ -327,6 +327,20 @@ export const putClassStudents = async (class_id, student_ids) => {
   }
 }
 
+// ---------------------------------------------------------------
+// 학기 수정
+// ---------------------------------------------------------------
+export const putSection = async (data) => {
+  try {
+    await api.put(`/modal/common/sections/${data.sec_id}`, {
+      start_date: data.start_date,
+      end_date: data.end_date,
+    })
+  } catch (e) {
+    errorMsg(e)
+  }
+}
+
 // ========================== DEL ===============================
 // ---------------------------------------------------------------
 // 과목 삭제
