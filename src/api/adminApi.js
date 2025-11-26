@@ -124,13 +124,13 @@ export const postEmail = async (email, reason) => {
   }
 }
 
-// ========================== PATCH ===============================
+// ========================== PUT ===============================
 // ---------------------------------------------------------------
-// 승인 / 거절 등록
+// 학생 정보 수정
 // ---------------------------------------------------------------
-export const patchUser = async (userInfo) => {
+export const putUser = async (userInfo) => {
   try {
-    const res = await api.patch(`/admin/students/${userInfo.user_id}`, {
+    const res = await api.put(`/admin/students/${userInfo.user_id}`, {
       name: userInfo.name,
       phone: userInfo.phone,
       status: userInfo.status,
@@ -139,6 +139,23 @@ export const patchUser = async (userInfo) => {
       class_id: userInfo.class_id,
       is_international: userInfo.is_international,
     })
+    return res.data
+  } catch (e) {
+    errorMsg(e)
+  }
+}
+
+// ---------------------------------------------------------------
+// 교수,관리자 정보 수정
+// ---------------------------------------------------------------
+export const putAdmin = async (userInfo) => {
+  try {
+    const res = await api.put(`/admin/proadmin/${userInfo.user_id}`, {
+      role_type: userInfo.role_type,
+      name: userInfo.name,
+      phone: userInfo.phone,
+    })
+    console.log(res.data)
     return res.data
   } catch (e) {
     errorMsg(e)

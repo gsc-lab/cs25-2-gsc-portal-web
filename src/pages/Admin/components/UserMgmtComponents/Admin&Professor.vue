@@ -12,6 +12,7 @@
             <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">이름</th>
             <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">이메일</th>
             <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">전화번호</th>
+            <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">수정</th>
             <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">삭제</th>
           </tr>
         </thead>
@@ -19,7 +20,19 @@
           <tr v-for="user in users" :key="user.user_id" class="divide-y divide-gray-200 hover:bg-gray-50">
             <!-- ====================  권한  ==================== -->
             <td class="text-sm py-2 px-3 border-b border-gray-200 text-center">
-              {{ user.role_type == 'professor' ? '교수' : '관리자' }}
+              <div v-if="user.user_id == putUser.user_id">
+                <select
+                  id="role_type"
+                  v-model="putUser.role_type"
+                  class="w-full px-2 py-1 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm"
+                >
+                  <option value="professor">교수님</option>
+                  <option value="admin">관리자</option>
+                </select>
+              </div>
+              <div v-else>
+                {{ user.role_type == 'professor' ? '교수님' : '관리자' }}
+              </div>
             </td>
             <!-- ====================  학번  ==================== -->
             <td class="text-sm py-2 px-3 border-b border-gray-200 text-center">
@@ -27,7 +40,17 @@
             </td>
             <!-- ====================  이름  ==================== -->
             <td class="text-sm py-2 px-3 border-b border-gray-200 text-center">
-              {{ user.name }}
+              <div v-if="user.user_id == putUser.user_id">
+                <input
+                  type="text"
+                  id="name"
+                  v-model="putUser.name"
+                  class="w-20 px-2 py-1 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm"
+                />
+              </div>
+              <div v-else>
+                {{ user.name }}
+              </div>
             </td>
             <!-- ====================  email  ==================== -->
             <td class="text-sm py-2 px-3 border-b border-gray-200 text-center">
@@ -35,10 +58,53 @@
             </td>
             <!-- ====================  전화번호  ==================== -->
             <td class="text-sm py-2 px-3 border-b border-gray-200 text-center">
-              {{ user.phone }}
+              <div v-if="user.user_id == putUser.user_id">
+                <input
+                  type="text"
+                  v-model="putUser.phone"
+                  placeholder="010-xxxx-xxxx"
+                  class="w-full px-2 py-1 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-sm"
+                />
+              </div>
+              <div v-else>
+                {{ user.phone }}
+              </div>
             </td>
             <td class="text-sm py-2 px-3 border-b border-gray-200 text-center">
-              <button @click="handleDelete(user.user_id)" class="px-3 py-1 bg-red-500 text-white text-sm font-medium rounded-base hover:bg-red-600 transition-colors duration-200 shadow-sm">삭제</button>
+              <div v-if="user.user_id == putUser.user_id">
+                <button
+                  @click="handleSubmit"
+                  class="px-3 py-1 bg-primary text-white text-sm font-medium rounded-base hover:bg-primary-dark transition-colors duration-200 shadow-sm"
+                >
+                  등록
+                </button>
+              </div>
+              <div v-else>
+                <button
+                  @click="setPut(user)"
+                  class="px-3 py-1 bg-white text-text-base border border-gray-300 rounded-base text-sm font-medium shadow-sm hover:bg-gray-50 transition-colors duration-200"
+                >
+                  수정
+                </button>
+              </div>
+            </td>
+            <td class="text-sm py-2 px-3 border-b border-gray-200 text-center">
+              <div v-if="user.user_id == putUser.user_id">
+                <button
+                  @click="resetUser"
+                  class="px-3 py-1 bg-white text-text-base border border-gray-300 rounded-base text-sm font-medium shadow-sm hover:bg-gray-50 transition-colors duration-200"
+                >
+                  취소
+                </button>
+              </div>
+              <div v-else>
+                <button
+                  @click="handleDelete(user.user_id)"
+                  class="px-3 py-1 bg-red-500 text-white text-sm font-medium rounded-base hover:bg-red-600 transition-colors duration-200 shadow-sm"
+                >
+                  삭제
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -52,20 +118,50 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getAdminsInfo, delUser } from '@/api/adminApi'
+import { getAdminsInfo, delUser, putAdmin } from '@/api/adminApi'
 
 const users = ref(null) // 사용자 데이터
+const putUser = ref() // 수정 user
 
 // 관리자, 교수 데이터 API 요청
 const setUserData = async () => {
   users.value = await getAdminsInfo()
+}
+// 수정 정보 초기화
+const resetUser = () => {
+  putUser.value = {
+    user_id: undefined,
+    role_type: undefined,
+    name: undefined,
+    phone: undefined,
+  }
 }
 
 // 초기화
 onMounted(async () => {
   // 관리자 및 교수 정보 조회
   setUserData()
+  resetUser()
 })
+
+// ===========================  수정  ===========================
+const setPut = (user) => {
+  putUser.value = {
+    user_id: user.user_id,
+    role_type: user.role_type,
+    name: user.name,
+    phone: user.phone,
+  }
+}
+
+const handleSubmit = async () => {
+  if (confirm(`${putUser.value.name}님의 정보를 수정합니까?`)) {
+    await putAdmin(putUser.value)
+    // 초기화
+    setUserData()
+  }
+  resetUser()
+}
 
 // ===========================  삭제  ===========================
 const handleDelete = async (id) => {

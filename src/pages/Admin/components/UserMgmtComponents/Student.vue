@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import { getUserInfo, patchUser, delUser } from '@/api/adminApi'
+import { getUserInfo, putUser, delUser } from '@/api/adminApi'
 import { setTarget } from '@/utils/reName' // Assuming setTarget is a utility function
 import { getKoreanClasses, getSpecialClasses } from '@/api/timetableApi'
 
@@ -81,7 +81,7 @@ const handlePatch = (user) => {
 
 // 수정등록
 const handleSubmit = async () => {
-  await patchUser(selectUser.value)
+  await putUser(selectUser.value)
   // 초기화
   setStudentData()
   selectUser.value = resetUser()
