@@ -2,7 +2,10 @@
   <div>
     <!-- Search and Control Area -->
     <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
-      <div class="flex items-center gap-2 text-sm text-text-muted" v-if="user.userInfo">
+      <div
+        class="flex items-center gap-2 text-sm text-text-muted"
+        v-if="user.userInfo.role_type !== 'student'"
+      >
         <input
           type="checkbox"
           id="myPost"
@@ -17,7 +20,7 @@
           type="text"
           v-model="inputWord"
           @keyup.enter="handleSearch"
-          placeholder="제목이나 내용을 검색하세요"
+          placeholder="제목을 검색하세요"
           class="flex-1 block px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
         />
         <button
@@ -187,7 +190,7 @@
               {{ courseTypeSelect === 'A' ? 'A반' : 'B반' }}
             </span>
           </div>
-          <div class="col-span-1">{{ notice?.author_name }}</div>
+          <div class="col-span-1">{{ notice?.author?.name }}</div>
           <div class="col-span-1">{{ formatDate(notice.created_at) }}</div>
         </div>
       </div>
@@ -356,11 +359,24 @@ const isUserInfoList = computed(() => {
   if (!user.userInfo) return []
   const userInfo = user.userInfo
   if (userInfo.role_type === 'admin') return noticeTarget.value
+  console.log('학년: ', userInfo.grade_id)
+  console.log('학년 타입: ', typeof userInfo.grade_id)
 
-  return noticeTarget.value.filter((target) => {
-    if (target === userInfo.grade_id) return true
-    if (userInfo.language_id === 'JP' && target === 'special') return true
-    if (userInfo.language_id === 'KR' && target === 'korean') return true
+  return noticeTarget.value.filter((t) => {
+    if (t.target === '전체') {
+      return true
+    }
+    if (t.target === userInfo.grade_id) {
+      console.log('학생 학년은: ', userInfo.grade_id)
+      return true
+    }
+    if (userInfo.language_id === 'JP' && t.target === 'special') {
+      console.log('사용자 언어: ', userInfo.language_id)
+      return true
+    }
+    if (userInfo.language_id === 'KR' && t.target === 'korean') {
+      return true
+    }
     return false
   })
 })
