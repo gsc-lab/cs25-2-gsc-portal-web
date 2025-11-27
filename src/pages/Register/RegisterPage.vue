@@ -306,19 +306,19 @@ watchEffect(() => {
 
 // UI Helpers
 const isChecked = (value) => {
-  if (value === 1) return studentInfo.is_international === 'korean'
+  if (value === 1) return studentInfo.is_international === 'international'
 
-  if (value === 1) return studentInfo.is_international === 'korean'
-  if (value === 2) return studentInfo.is_international === 'international'
+  if (value === 1) return studentInfo.is_international === 'international'
+  if (value === 2) return studentInfo.is_international === 'korean'
   return false
 }
 
 const updateInternational = (value) => {
   if (value === 1) {
-    studentInfo.is_international = 'korean'
+    studentInfo.is_international = 'international'
     studentInfo.language_id = 'KR'
   } else {
-    studentInfo.is_international = 'international'
+    studentInfo.is_international = 'korean'
     studentInfo.language_id = 'JP'
   }
 }
