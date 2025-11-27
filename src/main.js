@@ -16,7 +16,7 @@ app.use(router)
 router.beforeEach(async (to, from, next) => {
 
   const userStore = useUserStore()
-  const publicPaths = ['/login', '/register', '/registerWait', '/rejected']
+  const publicPaths = ['/login', '/register', '/registerWait', '/rejected', '/exceptionEmail']
   const isPublic = publicPaths.includes(to.path)
 
   // 로그인 정보가 스토어에 있는지 확인
@@ -57,13 +57,13 @@ router.beforeEach(async (to, from, next) => {
       }
       return next()
     }
+    if (errorMessage === 'invalid_email') {
+      if (to.path !== '/exceptionEmail') {
+        return next('/exceptionEmail')
+      }
+      return next()
+    }
 
-    // if (errorMessage === "계정이 활성화 상태가 아닙니다. (현재 상태 inactive") {
-    //   if (to.path !== '/rejected') {
-    //     return next('/rejected')
-    //   }
-    //   return next()
-    // }
     // 승인 거절 = inactive 일 경우 알림을 띄운 후 rejected 이동
     if (errorMessage === "가입이 거절된 계정입니다.") {
       if (to.path !== '/rejected') {
