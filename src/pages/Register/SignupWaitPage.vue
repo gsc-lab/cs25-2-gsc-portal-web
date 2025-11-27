@@ -1,36 +1,48 @@
 <template>
-  <AppLayout pageName="signup-wait">
+  <div class="min-h-screen flex items-center justify-center bg-[#F5F5F7] p-4 font-sans">
     <div
-      class="max-w-md mx-auto w-full bg-bg-paper rounded-card border border-gray-200 shadow-subtle p-6 mt-12 text-center space-y-4"
+      class="max-w-[400px] w-full bg-white rounded-[24px] shadow-[0_20px_40px_-10px_rgba(0,0,0,0.08)] p-10 text-center animate-fade-in-up"
     >
-      <h1 class="text-xl font-bold text-text-heading mb-6">회원가입 요청 완료</h1>
+      <div class="mx-auto w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6">
+        <svg
+          class="w-10 h-10 text-[#0071e3]"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2.5"
+            d="M5 13l4 4L19 7"
+          ></path>
+        </svg>
+      </div>
 
-      <!-- Icon for waiting -->
-      <svg
-        class="mx-auto h-16 w-16 text-primary"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
+      <h1 class="text-[24px] font-semibold text-[#1d1d1f] mb-3 tracking-tight">
+        회원가입 신청 완료
+      </h1>
+
+      <div class="space-y-1 mb-10">
+        <p class="text-[15px] text-[#86868b] leading-relaxed">
+          회원가입 신청이 성공적으로 전달되었습니다.
+        </p>
+        <p class="text-[15px] text-[#86868b] leading-relaxed">
+          관리자 승인 후 서비스를 이용하실 수 있습니다.
+        </p>
+      </div>
+
+      <button
+        @click="handleLoginPage"
+        class="w-full bg-[#0071e3] hover:bg-[#0077ED] text-white text-[15px] font-medium rounded-[14px] py-[14px] transition-all duration-200 active:scale-[0.98] shadow-sm hover:shadow-md"
       >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-        ></path>
-      </svg>
-
-      <p class="text-lg font-semibold text-primary">회원가입 요청이 성공적으로 접수되었습니다!</p>
-      <p class="text-sm text-text-muted leading-relaxed">관리자의 승인을 기다려주세요.</p>
-      <p>
-        <button @click="handleLoginPage" class="bg-primary text-white rounded-base py-2 w-full hover:bg-primary-dark transition-colors duration-200">
-          로그인 페이지로 이동
-        </button>
-      </p>
+        확인
+      </button>
     </div>
-  </AppLayout>
+  </div>
 </template>
+
 <script setup>
 import router from '@/router'
 
@@ -38,3 +50,26 @@ const handleLoginPage = () => {
   router.push({ path: '/login' })
 }
 </script>
+
+<style scoped>
+/* Apple System Fonts */
+.font-sans {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Entrance Animation */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(15px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+</style>

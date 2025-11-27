@@ -9,6 +9,7 @@ const routes = [
   { path: '/register', name: 'register', component: () => import('@/pages/Register/RegisterPage.vue') },
   { path: '/registerWait', name: 'registerWait', component: () => import('@/pages/Register/SignupWaitPage.vue') },
   { path: '/rejected', name: 'rejected', component: () => import('@/pages/Register/SignupRejectedPage.vue') },
+  { path: '/exceptionEmail', name: 'exception', component: () => import('@/pages/Register/ExceptionEmail.vue') },
   { path: '/notice', name: 'notice', component: () => import('@/pages/Notice/NoticePage.vue') },
   { path: '/notice/grade/:gradeId', name: 'notice-grade', component: () => import('@/pages/Notice/NoticePage.vue') },
   { path: '/notice/write', name: 'notice/write', component: () => import('@/pages/Notice/NoticeWrite.vue') },
