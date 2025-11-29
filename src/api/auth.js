@@ -59,7 +59,7 @@ export const getUserInfo = async () => {
   return userInfo.data
 }
 
-// 사용자 성정 등록
+// 사용자 성적 등록
 
 export const postUserGrade = async (formData) => {
 
@@ -70,6 +70,14 @@ export const postUserGrade = async (formData) => {
   const userGrade = await api.post('/auth/me', formData, {
     headers: { 'Content-Type': 'mutipart/form-data' }
   })
+
+  return userGrade.data
+}
+
+// 사용자 성적 조회
+
+export const getUserGrade = async () => {
+  const userGrade = await api.get('/auth/me/exam')
 
   return userGrade.data
 }
