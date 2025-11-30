@@ -21,14 +21,14 @@ export const getCleaningRosterMonthly = async () => {
 // 학기 목록 조회
 export const getSections = async () => {
   const section = await api.get('/modal/setctions')
-  return section.data
+  return section.data.data
 }
 
 // 강의실 목록 조회
 export const getClassRooms = async () => {
   const classRooms = await api.get('/modal/common/classrooms')
 
-  return classRooms.data
+  return classRooms.data.data
 }
 
 // 청소 로스터 추가

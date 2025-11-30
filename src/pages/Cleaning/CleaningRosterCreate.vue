@@ -1,7 +1,9 @@
 <template>
   <AppLayout pageName="cleaningRoster">
     <main class="p-4 sm:p-6 lg:p-8">
-      <div class="max-w-3xl mx-auto bg-bg-paper rounded-card shadow-subtle border border-gray-200 overflow-hidden">
+      <div
+        class="max-w-3xl mx-auto bg-bg-paper rounded-card shadow-subtle border border-gray-200 overflow-hidden"
+      >
         <div class="p-6 border-b border-gray-200 text-center">
           <h2 class="text-xl font-bold text-text-heading">청소 멤버 자동 생성</h2>
         </div>
@@ -10,7 +12,7 @@
           <section class="flex flex-col gap-3">
             <h3 class="text-lg font-semibold text-text-heading">학기 선택</h3>
             <div class="flex flex-wrap gap-2">
-              <div v-for="section in sections" :key="section?.sec_id" class="relative">
+              <div v-for="section in sections.data" :key="section.sec_id" class="relative">
                 <input
                   type="radio"
                   name="section"
@@ -21,10 +23,9 @@
                 />
                 <label
                   :for="`section-${section?.sec_id}`"
-                  class="flex items-center justify-center px-4 py-2 bg-white border border-gray-300 rounded-lg font-medium text-text-muted cursor-pointer transition-all duration-200 select-none text-center
-                         peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary peer-checked:shadow-sm"
+                  class="flex items-center justify-center px-4 py-2 bg-white border border-gray-300 rounded-lg font-medium text-text-muted cursor-pointer transition-all duration-200 select-none text-center peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary peer-checked:shadow-sm"
                 >
-                  {{ section?.sec_id + '학기' }}
+                  {{ section?.sec_id }}
                 </label>
               </div>
             </div>
@@ -44,8 +45,7 @@
                 />
                 <label
                   :for="`day-${day}`"
-                  class="flex items-center justify-center px-4 py-2 bg-white border border-gray-300 rounded-lg font-medium text-text-muted cursor-pointer transition-all duration-200 select-none text-center
-                         peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary peer-checked:shadow-sm"
+                  class="flex items-center justify-center px-4 py-2 bg-white border border-gray-300 rounded-lg font-medium text-text-muted cursor-pointer transition-all duration-200 select-none text-center peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary peer-checked:shadow-sm"
                 >
                   {{ day }}
                 </label>
@@ -67,8 +67,7 @@
                 />
                 <label
                   :for="'member-' + member"
-                  class="flex items-center justify-center px-4 py-2 bg-white border border-gray-300 rounded-lg font-medium text-text-muted cursor-pointer transition-all duration-200 select-none text-center
-                         peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary peer-checked:shadow-sm"
+                  class="flex items-center justify-center px-4 py-2 bg-white border border-gray-300 rounded-lg font-medium text-text-muted cursor-pointer transition-all duration-200 select-none text-center peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary peer-checked:shadow-sm"
                 >
                   {{ member + '명' }}
                 </label>
@@ -91,8 +90,7 @@
                   />
                   <label
                     :for="'grade-' + grade"
-                    class="flex items-center justify-center px-4 py-2 bg-white border border-gray-300 rounded-lg font-medium text-text-muted cursor-pointer transition-all duration-200 select-none text-center
-                           peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary peer-checked:shadow-sm"
+                    class="flex items-center justify-center px-4 py-2 bg-white border border-gray-300 rounded-lg font-medium text-text-muted cursor-pointer transition-all duration-200 select-none text-center peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary peer-checked:shadow-sm"
                   >
                     {{ grade + '학년' }}
                   </label>
@@ -103,11 +101,7 @@
             <section class="flex flex-col gap-3 md:col-span-3">
               <h3 class="text-lg font-semibold text-text-heading">교실 정보</h3>
               <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                <div
-                  v-for="classroom in classRooms"
-                  :key="classroom.classroom_id"
-                  class="relative"
-                >
+                <div v-for="classroom in classRooms" :key="classroom.classroom_id" class="relative">
                   <input
                     type="radio"
                     name="classroom"
@@ -118,8 +112,7 @@
                   />
                   <label
                     :for="'classroom-' + classroom.classroom_id"
-                    class="flex items-center justify-center px-4 py-2 bg-white border border-gray-300 rounded-lg font-medium text-text-muted cursor-pointer transition-all duration-200 select-none text-center
-                           peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary peer-checked:shadow-sm"
+                    class="flex items-center justify-center px-4 py-2 bg-white border border-gray-300 rounded-lg font-medium text-text-muted cursor-pointer transition-all duration-200 select-none text-center peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary peer-checked:shadow-sm"
                   >
                     {{ classroom.label }}
                   </label>
@@ -161,7 +154,9 @@ const gradeSelect = ref('') // 선택된 학년
 
 onMounted(async () => {
   sections.value = await getSection()
+  // console.log('학기정보: ', sections.value)
   classRooms.value = await getClassRooms()
+  // console.log('교실정보: ', classRooms.value)
 })
 
 const HandleCreateRoster = async () => {
@@ -180,17 +175,17 @@ const HandleCreateRoster = async () => {
   }
 
   if (!roster.section || !roster.weekday || !roster.team_size || roster.grade_rooms.length === 0) {
-    alert("모든 필수 항목을 선택해주세요.")
-    return;
+    alert('모든 필수 항목을 선택해주세요.')
+    return
   }
 
   try {
     await postCleaningRoster(roster)
-    alert('청소 로스터가 성공적으로 생성되었습니다.');
+    alert('청소 로스터가 성공적으로 생성되었습니다.')
     router.push({ path: '/cleaningH' })
   } catch (err) {
     console.error('청소 로스터 생성 실패: ', err)
-    alert('청소 로스터 생성에 실패했습니다.');
+    alert('청소 로스터 생성에 실패했습니다.')
   }
 }
 
