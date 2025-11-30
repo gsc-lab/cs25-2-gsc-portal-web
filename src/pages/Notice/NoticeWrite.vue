@@ -5,7 +5,10 @@
         <!-- Card Header -->
         <div class="flex justify-between items-center p-6 border-b border-gray-200">
           <h1 class="text-xl font-bold text-text-heading">공지사항 작성</h1>
-          <button @click="openTargetModal = true" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-primary-dark text-sm font-medium rounded-base hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 shadow-sm">
+          <button
+            @click="openTargetModal = true"
+            class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-primary-dark text-sm font-medium rounded-base hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 shadow-sm"
+          >
             공지사항 알림 대상 설정
           </button>
         </div>
@@ -13,7 +16,9 @@
         <!-- Form Body -->
         <div class="p-6 flex flex-col gap-6">
           <div class="grid grid-cols-1 md:grid-cols-[140px_1fr] items-start gap-4">
-            <label class="block text-sm font-medium text-text-base pt-2" for="notice-title">제목</label>
+            <label class="block text-sm font-medium text-text-base pt-2" for="notice-title">
+              제목
+            </label>
             <div class="flex items-center gap-4">
               <input
                 id="notice-title"
@@ -30,13 +35,20 @@
                   @click="handleImportant"
                   class="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
                 />
-                <label for="notice-important" class="text-sm font-medium text-text-base cursor-pointer">중요</label>
+                <label
+                  for="notice-important"
+                  class="text-sm font-medium text-text-base cursor-pointer"
+                >
+                  중요
+                </label>
               </div>
             </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-[140px_1fr] items-start gap-4">
-            <label class="block text-sm font-medium text-text-base pt-2" for="notice-author">작성자</label>
+            <label class="block text-sm font-medium text-text-base pt-2" for="notice-author">
+              작성자
+            </label>
             <input
               id="notice-author"
               class="block px-3 py-2 border border-gray-300 rounded-base shadow-sm bg-gray-100 text-text-muted sm:text-sm cursor-not-allowed"
@@ -47,18 +59,23 @@
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-[140px_1fr] items-start gap-4">
-            <label class="block text-sm font-medium text-text-base pt-2" for="notice-grade">분류</label>
+            <label class="block text-sm font-medium text-text-base pt-2" for="notice-grade">
+              분류
+            </label>
             <div class="flex flex-col sm:flex-row gap-4">
-              <select id="notice-grade" class="block px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm w-full sm:w-auto" v-model="targetSelect">
-                <option
-                  v-for="notice in noticeTarget"
-                  :key="notice.target"
-                  :value="notice.target"
-                >
+              <select
+                id="notice-grade"
+                class="block px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm w-full sm:w-auto"
+                v-model="targetSelect"
+              >
+                <option v-for="notice in noticeTarget" :key="notice.target" :value="notice.target">
                   {{ targetFilter(notice.target) }}
                 </option>
               </select>
-              <select class="block px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm w-full sm:w-auto" v-model="courseTypeSelect">
+              <select
+                class="block px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm w-full sm:w-auto"
+                v-model="courseTypeSelect"
+              >
                 <option
                   v-for="type in filterCourseType"
                   :key="type.course_type"
@@ -73,7 +90,9 @@
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-[140px_1fr] items-start gap-4">
-            <label class="block text-sm font-medium text-text-base pt-2" for="notice-course">과목</label>
+            <label class="block text-sm font-medium text-text-base pt-2" for="notice-course">
+              과목
+            </label>
             <select
               id="notice-course"
               class="block px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm w-full sm:w-auto"
@@ -85,31 +104,48 @@
                 {{ course.title }}
               </option>
             </select>
-            <div v-else class="block px-3 py-2 border border-gray-300 rounded-base shadow-sm bg-gray-100 text-text-muted sm:text-sm">선택 가능한 과목이 없습니다.</div>
+            <div
+              v-else
+              class="block px-3 py-2 border border-gray-300 rounded-base shadow-sm bg-gray-100 text-text-muted sm:text-sm"
+            >
+              선택 가능한 과목이 없습니다.
+            </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-[140px_1fr] items-start gap-4">
-            <label class="block text-sm font-medium text-text-base" for="file-upload">첨부파일</label>
+            <label class="block text-sm font-medium text-text-base" for="file-upload">
+              첨부파일
+            </label>
             <div class="flex flex-col gap-4">
-              <input
-                type="file"
-                multiple
-                @change="handleFiles"
-                id="file-upload"
-                class="hidden"
-              />
-              <label for="file-upload" class="inline-flex items-center justify-center px-4 py-2 bg-white border border-gray-300 text-primary-dark text-sm font-medium rounded-base hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 shadow-sm w-32 cursor-pointer">파일 선택</label>
+              <input type="file" multiple @change="handleFiles" id="file-upload" class="hidden" />
+              <label
+                for="file-upload"
+                class="inline-flex items-center justify-center px-4 py-2 bg-white border border-gray-300 text-primary-dark text-sm font-medium rounded-base hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 shadow-sm w-32 cursor-pointer"
+              >
+                파일 선택
+              </label>
               <ul class="list-none p-0 m-0 flex flex-col gap-2">
-                <li v-for="(file, index) in files" :key="index" class="bg-gray-50 p-2 rounded-md flex justify-between items-center text-sm text-text-base">
+                <li
+                  v-for="(file, index) in files"
+                  :key="index"
+                  class="bg-gray-50 p-2 rounded-md flex justify-between items-center text-sm text-text-base"
+                >
                   <span>{{ file.name }} ( {{ (file.size / 1024).toFixed(1) }} KB)</span>
-                  <button @click="removeFile(index)" class="px-2 py-1 bg-red-500 text-white text-xs rounded-sm hover:bg-red-600">삭제</button>
+                  <button
+                    @click="removeFile(index)"
+                    class="px-2 py-1 bg-red-500 text-white text-xs rounded-sm hover:bg-red-600"
+                  >
+                    삭제
+                  </button>
                 </li>
               </ul>
             </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-[140px_1fr] items-start gap-4">
-            <label class="block text-sm font-medium text-text-base" for="notice-content">내용</label>
+            <label class="block text-sm font-medium text-text-base" for="notice-content">
+              내용
+            </label>
             <textarea
               id="notice-content"
               class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm min-h-[300px] resize-y"
@@ -121,19 +157,39 @@
 
         <!-- Card Footer -->
         <div class="flex justify-end gap-4 p-6 bg-gray-50 border-t border-gray-200">
-          <button class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-base text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" @click="backPage">뒤로</button>
-          <button class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-base text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" @click="submitNotice">등록하기</button>
+          <button
+            class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-base text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+            @click="backPage"
+          >
+            뒤로
+          </button>
+          <button
+            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-base text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+            @click="submitNotice"
+          >
+            등록하기
+          </button>
         </div>
       </div>
     </div>
 
     <!-- Modal Overlay -->
-    <div v-if="openTargetModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 flex justify-center items-center z-50">
-      <div class="bg-bg-paper rounded-lg shadow-xl flex flex-col w-11/12 max-w-3xl h-5/6 animate-fade-in">
+    <div
+      v-if="openTargetModal"
+      class="fixed inset-0 bg-gray-900 bg-opacity-60 flex justify-center items-center z-50"
+    >
+      <div
+        class="bg-bg-paper rounded-lg shadow-xl flex flex-col w-11/12 max-w-3xl h-5/6 animate-fade-in"
+      >
         <!-- Modal Header -->
         <div class="flex justify-between items-center p-4 border-b border-gray-200">
           <h3 class="text-lg font-bold text-text-heading">공지사항 알림 대상 설정</h3>
-          <button class="text-gray-500 hover:text-gray-700 text-2xl" @click="openTargetModal = false">×</button>
+          <button
+            class="text-gray-500 hover:text-gray-700 text-2xl"
+            @click="openTargetModal = false"
+          >
+            ×
+          </button>
         </div>
 
         <!-- Modal Body -->
@@ -143,13 +199,20 @@
               v-for="filter in gradeFilters"
               :key="filter"
               @click="modalGradeSelect = filter"
-              :class="['px-4 py-2 rounded-full border border-gray-300 bg-white text-primary-dark font-medium hover:bg-gray-100 transition-all duration-200 shadow-sm', { 'bg-primary text-white border-primary shadow-sm': modalGradeSelect === filter }]"
+              :class="[
+                'px-4 py-2 rounded-full border border-gray-300 bg-white text-primary-dark font-medium hover:bg-gray-100 transition-all duration-200 shadow-sm',
+                { 'bg-primary text-primary border-primary shadow-sm': modalGradeSelect === filter },
+              ]"
             >
               {{ filter }}
             </button>
           </div>
-          <div class="flex-1 bg-bg-paper rounded-md border border-gray-200 overflow-hidden flex flex-col">
-            <div class="grid grid-cols-[80px_100px_1fr_1fr] items-center text-center text-sm font-semibold text-text-heading bg-gray-50 border-b border-gray-200 p-3">
+          <div
+            class="flex-1 bg-bg-paper rounded-md border border-gray-200 overflow-hidden flex flex-col"
+          >
+            <div
+              class="grid grid-cols-[80px_100px_1fr_1fr] items-center text-center text-sm font-semibold text-text-heading bg-gray-50 border-b border-gray-200 p-3"
+            >
               <div class="col-span-1">선택</div>
               <div class="col-span-1">학년</div>
               <div class="col-span-1 text-left px-2">학번</div>
@@ -157,7 +220,11 @@
             </div>
             <div class="overflow-y-auto flex-1">
               <template v-for="student in students" :key="student.user_id">
-                <label v-if="modalGradeSelect === student.grade_name" :for="`student-${student.user_id}`" class="grid grid-cols-[80px_100px_1fr_1fr] items-center text-center text-sm text-text-base border-b border-gray-100 cursor-pointer hover:bg-gray-50 p-3">
+                <label
+                  v-if="modalGradeSelect === student.grade_name"
+                  :for="`student-${student.user_id}`"
+                  class="grid grid-cols-[80px_100px_1fr_1fr] items-center text-center text-sm text-text-base border-b border-gray-100 cursor-pointer hover:bg-gray-50 p-3"
+                >
                   <input
                     type="checkbox"
                     class="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary justify-self-center"
@@ -176,8 +243,18 @@
 
         <!-- Modal Footer -->
         <div class="flex justify-end gap-4 p-4 border-t border-gray-200 bg-gray-50">
-          <button class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-base text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" @click="openTargetModal = false">닫기</button>
-          <button class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-base text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" @click="saveAndClose">저장</button>
+          <button
+            class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-base text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+            @click="openTargetModal = false"
+          >
+            닫기
+          </button>
+          <button
+            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-base text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+            @click="saveAndClose"
+          >
+            저장
+          </button>
         </div>
       </div>
     </div>
@@ -391,6 +468,7 @@ watchEffect(() => {
 watch(targetSelect, (newTarget) => {
   if (newTarget === '전체') {
     courseTypeSelect.value = 'general'
+    courses.value = []
   } else if (['1', '2', '3'].includes(newTarget)) {
     courseTypeSelect.value = 'regular'
   } else if (['special', 'korean'].includes(newTarget)) {
@@ -399,6 +477,9 @@ watch(targetSelect, (newTarget) => {
 })
 
 watch([courseTypeSelect, targetSelect], async ([newType, newTarget]) => {
+  if (newTarget === 'general') {
+    console.log('타켓 선택 변경')
+  }
   // 정규 과목 호출 API
   if (['1', '2', '3'].includes(newTarget)) {
     try {
