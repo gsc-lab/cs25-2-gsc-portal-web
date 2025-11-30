@@ -9,6 +9,7 @@
         <div class="flex justify-between items-center mb-6 border-b border-gray-200 pb-4">
           <h2 class="text-xl font-bold text-text-heading">프로필</h2>
           <button
+            v-if="user.userInfo?.role_type === 'student'"
             @click="studentScoreInputForm"
             :class="[
               'px-4 py-2 rounded-base text-sm font-medium transition-colors duration-200',
@@ -30,15 +31,26 @@
           <p class="text-lg font-semibold text-text-heading text-center">
             {{ user.userInfo?.name }}
           </p>
-          <p class="text-sm text-text-muted text-center mb-4">{{ user.userInfo?.user_id }}</p>
+          <p
+            v-if="user.userInfo?.role_type === 'student'"
+            class="text-sm text-text-muted text-center mb-4"
+          >
+            {{ user.userInfo?.user_id }}
+          </p>
         </div>
 
         <div class="bg-gray-50 rounded-base border border-gray-200 p-4 mb-6">
-          <div class="flex justify-between items-center py-3 border-b border-gray-200">
+          <div
+            v-if="user.userInfo?.role_type === 'student'"
+            class="flex justify-between items-center py-3 border-b border-gray-200"
+          >
             <span class="text-sm font-medium text-text-muted">학번</span>
             <span class="text-sm text-text-base">{{ user.userInfo?.user_id }}</span>
           </div>
-          <div class="flex justify-between items-center py-3 border-b border-gray-200">
+          <div
+            v-if="user.userInfo?.role_type === 'student'"
+            class="flex justify-between items-center py-3 border-b border-gray-200"
+          >
             <span class="text-sm font-medium text-text-muted">학년</span>
             <span class="text-sm text-text-base">{{ user.userInfo?.grade_id + '학년' }}</span>
           </div>
@@ -196,10 +208,12 @@ const gradeInput = reactive({
 })
 
 onMounted(async () => {
-  try {
-    userGrade.value = await getUserGrade()
-  } catch (error) {
-    console.log('성적 정보를 불러오지 못했습니다.', error)
+  if (user.userInfo.role_type === 'stuendt') {
+    try {
+      userGrade.value = await getUserGrade()
+    } catch (error) {
+      console.log('성적 정보를 불러오지 못했습니다.', error)
+    }
   }
 })
 
