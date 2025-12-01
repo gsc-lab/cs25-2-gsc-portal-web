@@ -47,6 +47,7 @@ router.beforeEach(async (to, from, next) => {
 
     // 백엔드에서 넘겨주는 에러메시지 저장하여 메시지별 분류
     const errorMessage = to.query.error
+    const errorMsg = to.query.msg
 
     console.log(errorMessage)
 
@@ -57,7 +58,7 @@ router.beforeEach(async (to, from, next) => {
       }
       return next()
     }
-    if (errorMessage === 'invalid_email') {
+    if (errorMsg === 'oauth_failed') {
       if (to.path !== '/exceptionEmail') {
         return next('/exceptionEmail')
       }
