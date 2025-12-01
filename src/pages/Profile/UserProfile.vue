@@ -208,7 +208,7 @@ const gradeInput = reactive({
 })
 
 onMounted(async () => {
-  if (user.userInfo.role_type === 'stuendt') {
+  if (!userGrade.value) {
     try {
       userGrade.value = await getUserGrade()
     } catch (error) {
