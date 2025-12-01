@@ -56,6 +56,10 @@
                 class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-400"
               >
                 {{ day(d) }} ({{ searchDate(idx + 1).slice(5) }})
+                <!-- 공휴일 -->
+                <p v-if="timetableData?.[1]?.[d]?.isHoliday">
+                  {{ timetableData?.[d]?.holidayName }}
+                </p>
               </th>
             </tr>
           </thead>
@@ -78,7 +82,7 @@
                         ? 'bg-red-500 text-white'
                         : timetableData?.[d][String(hour)][0]?.event?.status === 'MAKEUP'
                           ? 'bg-white border border-gray-300 text-text-base'
-                          : 'bg-primary text-white'
+                          : 'bg-primary text-white',
                     ]"
                   >
                     <p class="text-xs font-semibold">{{ schedule?.title }}</p>
@@ -110,7 +114,6 @@ const today_day = today.getDay() // 오늘의 요일 (일요일=0)
 const selectDate = ref(null)
 
 const professorTT = defineModel()
-
 
 // 주 변경시 시간표 데이터 갱신
 watch(

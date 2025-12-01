@@ -185,19 +185,20 @@ const handleSubmit = async () => {
         selectTime.value.start_time +
         ' ~ ' +
         selectTime.value.end_time +
-        '예약합니다.',
+        ' 에 예약하시겠습니까?',
     )
   ) {
-    const res = await postReservation(CRstore.selectCR, selectTime.value)
-    alert(res.message)
+    await postReservation(CRstore.selectCR, selectTime.value)
+    // 초기화
     await CRstore.setSelectResSchedule()
   }
 }
 
 // =======================  삭제  ==========================
 const handleDelete = async (data) => {
-  if (confirm(data.date + ' : ' + data.start + ' ~ ' + data.end + '예약을 삭제 합니다.')) {
+  if (confirm(data.date + ' : ' + data.start + ' ~ ' + data.end + ' 예약을 삭제시겠습니까?')) {
     await deleteReservation(CRstore.selectCR, data.id)
+    // 초기화
     await CRstore.setSelectResSchedule()
   }
 }

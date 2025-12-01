@@ -65,7 +65,7 @@
             { 'bg-gray-100 text-primary-dark font-medium': contents === 'EventsRegister' },
           ]"
         >
-          휴보강 등록
+          보강 등록
         </button>
         <button
           @click="contents = 'EventsView'"
@@ -104,9 +104,21 @@
 
 <script setup>
 import SidebarContent from './SidebarContent.vue'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useUiStore } from '@/stores/ui' // Import uiStore
 
 const uiStore = useUiStore() // Initialize uiStore
 const contents = ref('CourseView')
+
+const isEventMode = defineModel()
+console.log('isEventMode', isEventMode.value)
+
+watch(
+  () => isEventMode.value,
+  () => {
+    if (isEventMode.value == true) contents.value = 'EventsRegister'
+    else if (isEventMode.value == false) contents.value = 'TimetableRegister'
+  },
+  { immediate: true },
+)
 </script>
