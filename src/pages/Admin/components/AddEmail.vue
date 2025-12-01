@@ -104,6 +104,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { getEmail, postEmail, delEmail } from '@/api/adminApi'
+import { comma } from 'postcss/lib/list'
 
 const emailData = ref(null) // 이메일 데이터
 const isOpen = ref(false) // 추가 / 수정 창
@@ -127,32 +128,22 @@ const resetData = () => {
 // ==============  추가  ===============
 const handlePost = async () => {
   if (!inputEmail.value || !inputReason.value) {
-    alert('이메일과 이름을 모두 입력해주세요.')
-    return
-  }
-  try {
-    await postEmail(inputEmail.value, inputReason.value)
-    alert('이메일이 성공적으로 등록되었습니다.')
-    resetData()
-    isOpen.value = false // Close form after submission
-    setEmailData()
-  } catch (error) {
-    console.error('이메일 등록 실패:', error)
-    alert('이메일 등록에 실패했습니다.')
+    alert('필수 값이 누락되었습니다.')
+  } else {
+    if (confirm(`이메일을 등록하시겠습니까?`)) {
+      await postEmail(inputEmail.value, inputReason.value)
+      resetData()
+      isOpen.value = false // Close form after submission
+      setEmailData()
+    }
   }
 }
 
 // ==============  삭제  ===============
 const handleDelete = async (data) => {
   if (confirm(`${data.id}: ${data.reason} 이메일을 삭제하시겠습니까?`)) {
-    try {
-      await delEmail(data.id)
-      alert('이메일이 성공적으로 삭제되었습니다.')
-      setEmailData()
-    } catch (error) {
-      console.error('이메일 삭제 실패:', error)
-      alert('이메일 삭제에 실패했습니다.')
-    }
+    await delEmail(data.id)
+    setEmailData()
   }
 }
 </script>

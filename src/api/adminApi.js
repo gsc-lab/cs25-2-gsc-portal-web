@@ -9,7 +9,7 @@ import { errorMsg } from './apiClient'
 export const getProfessors = async () => {
   try {
     const res = await api.get(`/modal/common/professors`)
-    return res.data
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
@@ -32,8 +32,8 @@ export const getProfessors = async () => {
 export const getApproval = async () => {
   try {
     const res = await api.get(`/admin/users`)
-    console.log(res.data)
-    return res.data
+    console.log(res.data.data)
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
@@ -45,8 +45,8 @@ export const getApproval = async () => {
 export const getEmail = async () => {
   try {
     const res = await api.get(`/admin/email`)
-    console.log(res.data)
-    return res.data
+    console.log(res.data.data)
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
@@ -63,8 +63,8 @@ export const getUserInfo = async (grade, status) => {
         status: status,
       },
     })
-    console.log(res.data)
-    return res.data
+    console.log(res.data.data)
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
@@ -86,8 +86,8 @@ export const getUserInfo = async (grade, status) => {
 export const getAdminsInfo = async () => {
   try {
     const res = await api.get(`/admin/proadmin`)
-    console.log(res.data)
-    return res.data
+    console.log(res.data.data)
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
@@ -103,7 +103,7 @@ export const postApproval = async (user_id, action) => {
       user_id: user_id,
       action: action,
     })
-    return res.data
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
@@ -118,7 +118,7 @@ export const postEmail = async (email, reason) => {
       email: email,
       reason: reason,
     })
-    return res.data
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
@@ -130,7 +130,7 @@ export const postEmail = async (email, reason) => {
 // ---------------------------------------------------------------
 export const putUser = async (userInfo) => {
   try {
-    const res = await api.put(`/admin/students/${userInfo.user_id}`, {
+    const res = await api.patch(`/admin/students/${userInfo.user_id}`, {
       name: userInfo.name,
       phone: userInfo.phone,
       status: userInfo.status,
@@ -139,7 +139,7 @@ export const putUser = async (userInfo) => {
       class_id: userInfo.class_id,
       is_international: userInfo.is_international,
     })
-    return res.data
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
@@ -155,8 +155,8 @@ export const putAdmin = async (userInfo) => {
       name: userInfo.name,
       phone: userInfo.phone,
     })
-    console.log(res.data)
-    return res.data
+    console.log(res.data.data)
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
@@ -169,7 +169,7 @@ export const putAdmin = async (userInfo) => {
 export const delEmail = async (id) => {
   try {
     const res = await api.delete(`/admin/email/${id}`)
-    return res.data
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
@@ -181,7 +181,7 @@ export const delEmail = async (id) => {
 export const delUser = async (id) => {
   try {
     const res = await api.delete(`/admin/students/${id}`)
-    return res.data
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }

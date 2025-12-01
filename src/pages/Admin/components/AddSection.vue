@@ -181,8 +181,8 @@ const newSection = ref()
 function resetSection() {
   newSection.value = {
     sec_id: undefined,
-    year: 2025,
-    semester: 1,
+    year: true,
+    semester: true,
     start_date: undefined,
     end_date: undefined,
   }
@@ -205,17 +205,28 @@ const setPut = (sec) => {
 
 // ==============  등록  ==============
 const handleSubmit = async () => {
-  if (newSection.value.sec_id) {
-    await putSection(newSection.value)
-    alert(`${newSection.value.sec_id}가 수정 되었습니다.`)
+  if (
+    newSection.value.year &&
+    newSection.value.semester &&
+    newSection.value.start_date &&
+    newSection.value.end_date
+  ) {
+    if (confirm(`학기를 등록하시겠습니까?`)) {
+      if (newSection.value.sec_id) {
+        await putSection(newSection.value)
+      } else {
+        const res = await postSection(newSection.value)
+        if (res.success) alert(`${res.sec_id}가 등록 되었습니다.`)
+      }
+
+      // 초기화
+      resetSection()
+      isOpen.value = false
+      await Tstore.setSections()
+      sections.value = await Tstore.getSections()
+    }
   } else {
-    const res = await postSection(newSection.value)
-    if (res.success) alert(`${res.sec_id}가 등록 되었습니다.`)
+    alert('필수 값이 누락되었습니다.')
   }
-  // 초기화
-  resetSection()
-  isOpen.value = false
-  await Tstore.setSections()
-  sections.value = await Tstore.getSections()
 }
 </script>

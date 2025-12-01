@@ -19,6 +19,16 @@
       </button>
     </div>
 
+    <div>
+      <span>{{ isEventMode ? '휴보강 등록 모드' : '시간표 등록 모드' }}</span>
+      <div v-if="isEventMode">
+        <button @click="isEventMode = !isEventMode">시간표 등록 모드로 변환</button>
+      </div>
+      <div v-if="!isEventMode">
+        <button @click="isEventMode = !isEventMode">휴보강 등록 모드로 변환</button>
+      </div>
+    </div>
+
     <!-- Week Navigation -->
     <div class="flex items-center justify-between mb-4">
       <button
@@ -75,6 +85,10 @@
                 class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-400"
               >
                 {{ day(d) }} ({{ searchDate(idx + 1).slice(5) }})
+                <!-- 공휴일 -->
+                <p v-if="timetableData?.[1]?.[d]?.isHoliday">
+                  {{ timetableData?.[1]?.[d]?.holidayName }}
+                </p>
               </th>
             </tr>
             <!-- Grades/Targets for each day -->
@@ -111,7 +125,8 @@
                   :key="g"
                   @mousedown="
                     timetableData?.[g]?.[d][String(hour)].length > 1 ||
-                    timetableData?.[g]?.[d][String(hour)][0]?.event?.status == 'CANCEL'
+                    timetableData?.[g]?.[d][String(hour)][0]?.event?.status == 'CANCEL' ||
+                    timetableData?.[g]?.[d][String(hour)][0]?.event?.status == 'MAKEUP'
                       ? startSelection(g, idx + 1, d, hour)
                       : startSelection(
                           g,
@@ -123,7 +138,8 @@
                   "
                   @mouseover="
                     timetableData?.[g]?.[d][String(hour)].length > 1 ||
-                    timetableData?.[g]?.[d][String(hour)][0]?.event?.status == 'CANCEL'
+                    timetableData?.[g]?.[d][String(hour)][0]?.event?.status == 'CANCEL' ||
+                    timetableData?.[g]?.[d][String(hour)][0]?.event?.status == 'MAKEUP'
                       ? updateSelection(g, d, hour)
                       : updateSelection(g, d, hour, timetableData?.[String(g)][d][String(hour)][0])
                   "
@@ -181,7 +197,7 @@ watch(
     if (selectDate.value == null) selectDate.value = Tstore.date ? new Date(Tstore.date) : today
     // console.log("selectDate", selectDate.value);
     await Tstore.setTimetable(selectDate.value.toISOString().split('T')[0])
-    Tstore.setNoneTime()
+    await Tstore.setNoneTime()
   },
   { immediate: true },
 )
@@ -206,6 +222,7 @@ const searchDate = (idxOfDay) => {
 
 // ===================================== 초기화 =====================================
 const isSelecting = ref(false)
+const isEventMode = ref(false)
 
 // 선택 데이터 [{day : 요일, hour: 교시, val: 시간표 데이터}, ...]
 const selectionData = ref([])
@@ -256,7 +273,7 @@ const handleSelect = (t) => {
 function startSelection(grade, idx, day, hour, schedule) {
   // 선택한 날짜 계산
   const searchedDate = searchDate(idx)
-  // console.log("searchedDate", searchedDate);
+  // console.log('searchedDate', searchedDate)
 
   isSelecting.value = true
   selectionData.value.push({ grade, date: searchedDate, day, hour, schedule })
@@ -301,7 +318,7 @@ function endSelection() {
   if (isSelecting.value) {
     isSelecting.value = false
     // 반환
-    emit('setRange', selectionData.value)
+    emit('setRange', selectionData.value, isEventMode.value)
     selectionData.value = []
   }
 }

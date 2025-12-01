@@ -7,17 +7,49 @@
       <table class="w-full border-collapse min-w-full divide-y divide-gray-200">
         <thead>
           <tr>
-            <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">권한</th>
-            <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">번호</th>
-            <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">이름</th>
-            <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">이메일</th>
-            <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">전화번호</th>
-            <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">수정</th>
-            <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center">삭제</th>
+            <th
+              class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center"
+            >
+              권한
+            </th>
+            <th
+              class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center"
+            >
+              번호
+            </th>
+            <th
+              class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center"
+            >
+              이름
+            </th>
+            <th
+              class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center"
+            >
+              이메일
+            </th>
+            <th
+              class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center"
+            >
+              전화번호
+            </th>
+            <th
+              class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center"
+            >
+              수정
+            </th>
+            <th
+              class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border-b border-gray-200 text-center"
+            >
+              삭제
+            </th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="user in users" :key="user.user_id" class="divide-y divide-gray-200 hover:bg-gray-50">
+          <tr
+            v-for="user in users"
+            :key="user.user_id"
+            class="divide-y divide-gray-200 hover:bg-gray-50"
+          >
             <!-- ====================  권한  ==================== -->
             <td class="text-sm py-2 px-3 border-b border-gray-200 text-center">
               <div v-if="user.user_id == putUser.user_id">
@@ -99,7 +131,7 @@
               </div>
               <div v-else>
                 <button
-                  @click="handleDelete(user.user_id)"
+                  @click="handleDelete(user)"
                   class="px-3 py-1 bg-red-500 text-white text-sm font-medium rounded-base hover:bg-red-600 transition-colors duration-200 shadow-sm"
                 >
                   삭제
@@ -155,18 +187,27 @@ const setPut = (user) => {
 }
 
 const handleSubmit = async () => {
-  if (confirm(`${putUser.value.name}님의 정보를 수정합니까?`)) {
-    await putAdmin(putUser.value)
-    // 초기화
-    setUserData()
+  if (
+    putUser.value.user_id &&
+    putUser.value.role_type &&
+    putUser.value.name &&
+    putUser.value.phone
+  ) {
+    if (confirm(`${putUser.value.name}님의 정보를 수정하시겠습니까?`)) {
+      await putAdmin(putUser.value)
+      // 초기화
+      setUserData()
+      resetUser()
+    }
+  } else {
+    alert('필수 값이 누락되었습니다.')
   }
-  resetUser()
 }
 
 // ===========================  삭제  ===========================
-const handleDelete = async (id) => {
-  if (confirm(`${id}번 사용자를 삭제합니다`)) {
-    await delUser(id)
+const handleDelete = async (user) => {
+  if (confirm(` ${user.name} 님을 삭제하시겠습니까?`)) {
+    await delUser(user.user_id)
     // 사용자 정보 초기화
     setUserData()
   }

@@ -9,8 +9,8 @@ import { errorMsg } from './apiClient'
 export const getClassrooms = async () => {
   try {
     const res = await api.get(`/modal/common/classrooms`)
-    console.log(res.data)
-    return res.data
+    console.log(res.data.data)
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
@@ -28,8 +28,8 @@ export const getClassrooms = async () => {
 export const getClassroomsInfo = async () => {
   try {
     const res = await api.get(`/classrooms`)
-    console.log(res.data)
-    return res.data
+    console.log(res.data.data)
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
@@ -48,8 +48,8 @@ export const getClassroomsInfo = async () => {
 export const getPollClassrooms = async () => {
   try {
     const res = await api.get(`/classrooms/polls/rules`)
-    console.log(res.data)
-    return res.data
+    console.log(res.data.data)
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
@@ -73,8 +73,8 @@ export const getReservation = async (classroom_id, date) => {
     const res = await api.get(`/classrooms/${classroom_id}/reservations`, {
       params: { date: date },
     })
-    console.log(res.data)
-    return res.data
+    console.log(res.data.data)
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
@@ -100,8 +100,8 @@ export const getPoll = async (date) => {
         date: date,
       },
     })
-    console.log(res.data)
-    return res.data
+    console.log(res.data.data)
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
@@ -118,8 +118,8 @@ export const postReservation = async (classroom_id, data) => {
       start_time: data.start_time,
       end_time: data.end_time,
     })
-    console.log(res.data)
-    return res.data
+    console.log(res.data.data)
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
@@ -136,7 +136,7 @@ export const postClassroom = async (CRdata) => {
       room_type: CRdata.room_type,
     })
     // console.log(res.data);
-    return res.data
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
@@ -152,7 +152,7 @@ export const postPollClassroom = async (data) => {
       required_count: data.required_count,
     })
     // console.log(res.data);
-    return res.data
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
@@ -167,12 +167,11 @@ export const postPoll = async (poll_id, action) => {
       action: action,
     })
     // console.log(res.data);
-    return res.data
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
 }
-
 
 // ========================== put ===============================
 // ---------------------------------------------------------------
@@ -186,7 +185,7 @@ export const putClassroom = async (CRdata) => {
       room_type: CRdata.room_type,
     })
     // console.log(res.data);
-    return res.data
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
@@ -202,7 +201,7 @@ export const putPollClassroom = async (data) => {
       required_count: data.required_count,
     })
     console.log(res.data)
-    return res.data
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
@@ -216,7 +215,7 @@ export const deleteReservation = async (classroom_id, reservation_id) => {
   try {
     const res = await api.delete(`/classrooms/${classroom_id}/reservations/${reservation_id}`)
     // console.log(res.data);
-    return res.data
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }
@@ -229,7 +228,7 @@ export const deleteClassroom = async (classroom_id) => {
   try {
     const res = await api.delete(`/classrooms/${classroom_id}`)
     // console.log(res.data);
-    return res.data
+    return res.data.data
   } catch (e) {
     errorMsg(e)
   }

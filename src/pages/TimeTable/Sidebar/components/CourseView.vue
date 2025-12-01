@@ -4,9 +4,14 @@
 
     <!-- Section Filter -->
     <div class="mb-4">
-      <label for="section-filter" class="block text-sm font-medium text-text-base mb-1">학기 선택:</label>
-      <select id="section-filter" v-model="section"
-        class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
+      <label for="section-filter" class="block text-sm font-medium text-text-base mb-1">
+        학기 선택:
+      </label>
+      <select
+        id="section-filter"
+        v-model="section"
+        class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+      >
         <option v-for="s in sections" :value="s.sec_id" :key="s.sec_id">
           {{ s.label }}
         </option>
@@ -16,38 +21,72 @@
     <!-- Target Filter Radio Buttons -->
     <div class="flex flex-wrap gap-2 mb-4">
       <input type="radio" id="view-all" value="0" v-model="target" class="hidden" />
-      <label for="view-all"
-        :class="['block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent', { 'bg-primary-light border-primary text-primary-dark font-semibold': target === '0' }]">
+      <label
+        for="view-all"
+        :class="[
+          'block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent',
+          { 'bg-primary-light border-primary text-primary-dark font-semibold': target === '0' },
+        ]"
+      >
         전체
       </label>
 
       <input type="radio" id="view-1" value="1" v-model="target" class="hidden" />
-      <label for="view-1"
-        :class="['block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent', { 'bg-primary-light border-primary text-primary-dark font-semibold': target === '1' }]">
+      <label
+        for="view-1"
+        :class="[
+          'block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent',
+          { 'bg-primary-light border-primary text-primary-dark font-semibold': target === '1' },
+        ]"
+      >
         1학년
       </label>
 
       <input type="radio" id="view-2" value="2" v-model="target" class="hidden" />
-      <label for="view-2"
-        :class="['block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent', { 'bg-primary-light border-primary text-primary-dark font-semibold': target === '2' }]">
+      <label
+        for="view-2"
+        :class="[
+          'block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent',
+          { 'bg-primary-light border-primary text-primary-dark font-semibold': target === '2' },
+        ]"
+      >
         2학년
       </label>
 
       <input type="radio" id="view-3" value="3" v-model="target" class="hidden" />
-      <label for="view-3"
-        :class="['block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent', { 'bg-primary-light border-primary text-primary-dark font-semibold': target === '3' }]">
+      <label
+        for="view-3"
+        :class="[
+          'block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent',
+          { 'bg-primary-light border-primary text-primary-dark font-semibold': target === '3' },
+        ]"
+      >
         3학년
       </label>
 
       <input type="radio" id="view-special" value="special" v-model="target" class="hidden" />
-      <label for="view-special"
-        :class="['block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent', { 'bg-primary-light border-primary text-primary-dark font-semibold': target === 'special' }]">
+      <label
+        for="view-special"
+        :class="[
+          'block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent',
+          {
+            'bg-primary-light border-primary text-primary-dark font-semibold': target === 'special',
+          },
+        ]"
+      >
         특강
       </label>
 
       <input type="radio" id="view-korean" value="korean" v-model="target" class="hidden" />
-      <label for="view-korean"
-        :class="['block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent', { 'bg-primary-light border-primary text-primary-dark font-semibold': target === 'korean' }]">
+      <label
+        for="view-korean"
+        :class="[
+          'block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent',
+          {
+            'bg-primary-light border-primary text-primary-dark font-semibold': target === 'korean',
+          },
+        ]"
+      >
         한국어
       </label>
     </div>
@@ -76,8 +115,10 @@
                 <!-- Grade -->
                 <td class="py-1 px-2 border border-gray-200 text-sm text-center">
                   <div v-if="course_id == putData?.course_id && putData?.timetable_ids.length == 0">
-                    <select v-model="putData.data.target"
-                      class="block w-full px-1 py-0.5 border border-gray-300 rounded-sm text-xs">
+                    <select
+                      v-model="putData.data.target"
+                      class="block w-full px-1 py-0.5 border border-gray-300 rounded-sm text-xs"
+                    >
                       <option value="1">1학년</option>
                       <option value="2">2학년</option>
                       <option value="3">3학년</option>
@@ -90,17 +131,25 @@
                 <!-- Course Name -->
                 <td class="py-1 px-2 border border-gray-200 text-sm text-center">
                   <div v-if="course_id == putData?.course_id && putData?.timetable_ids.length == 0">
-                    <input v-model="putData.data.title"
-                      class="block w-full px-1 py-0.5 border border-gray-300 rounded-sm text-xs" />
+                    <input
+                      v-model="putData.data.title"
+                      class="block w-full px-1 py-0.5 border border-gray-300 rounded-sm text-xs"
+                    />
                   </div>
                   <div v-else>{{ course.title }}</div>
                 </td>
                 <!-- Professor Name -->
                 <td class="py-1 px-2 border border-gray-200 text-sm text-center">
                   <div v-if="course_id == putData?.course_id && putData?.timetable_ids.length == 0">
-                    <select v-model="putData.data.professor_id"
-                      class="block w-full px-1 py-0.5 border border-gray-300 rounded-sm text-xs">
-                      <option v-for="professor in professors" :value="professor.user_id" :key="professor.user_id">
+                    <select
+                      v-model="putData.data.professor_id"
+                      class="block w-full px-1 py-0.5 border border-gray-300 rounded-sm text-xs"
+                    >
+                      <option
+                        v-for="professor in professors"
+                        :value="professor.user_id"
+                        :key="professor.user_id"
+                      >
                         {{ professor.name }}
                       </option>
                     </select>
@@ -110,8 +159,11 @@
                 <!-- Section -->
                 <td class="py-1 px-2 border border-gray-200 text-sm text-center">
                   <div v-if="course_id == putData?.course_id && putData?.timetable_ids.length == 0">
-                    <select id="section-edit" v-model="putData.data.section"
-                      class="block w-full px-1 py-0.5 border border-gray-300 rounded-sm text-xs">
+                    <select
+                      id="section-edit"
+                      v-model="putData.data.section"
+                      class="block w-full px-1 py-0.5 border border-gray-300 rounded-sm text-xs"
+                    >
                       <option v-for="s in sections" :value="s.sec_id" :key="s.sec_id">
                         {{ s.sec_id }}
                       </option>
@@ -122,19 +174,39 @@
                 <!-- Edit Button -->
                 <td class="py-1 px-2 border border-gray-200 text-sm text-center">
                   <div v-if="course_id == putData?.course_id && putData?.timetable_ids.length == 0">
-                    <button @click.stop="handleSubmit()" class="px-3 py-1 bg-primary text-white text-xs rounded-base hover:bg-primary-dark">등록</button>
+                    <button
+                      @click.stop="handleSubmit(course)"
+                      class="px-3 py-1 bg-primary text-white text-xs rounded-base hover:bg-primary-dark"
+                    >
+                      등록
+                    </button>
                   </div>
                   <div v-else>
-                    <button @click.stop="handlePut(course_id, course)" class="px-3 py-1 bg-primary text-white text-xs rounded-base hover:bg-primary-dark">수정</button>
+                    <button
+                      @click.stop="handlePut(course_id, course)"
+                      class="px-3 py-1 bg-primary text-white text-xs rounded-base hover:bg-primary-dark"
+                    >
+                      수정
+                    </button>
                   </div>
                 </td>
                 <!-- Delete Button -->
                 <td class="py-1 px-2 border border-gray-200 text-sm text-center">
                   <div v-if="course_id == putData?.course_id && putData?.timetable_ids.length == 0">
-                    <button @click.stop="putData = resetPutData()" class="px-3 py-1 bg-gray-300 text-text-base text-xs rounded-base hover:bg-gray-400">취소</button>
+                    <button
+                      @click.stop="putData = resetPutData()"
+                      class="px-3 py-1 bg-gray-300 text-text-base text-xs rounded-base hover:bg-gray-400"
+                    >
+                      취소
+                    </button>
                   </div>
                   <div v-else>
-                    <button @click.stop="handleCourseDel(course_id)" class="px-3 py-1 bg-red-500 text-white text-xs rounded-base hover:bg-red-600">삭제</button>
+                    <button
+                      @click.stop="handleCourseDel(course_id)"
+                      class="px-3 py-1 bg-red-500 text-white text-xs rounded-base hover:bg-red-600"
+                    >
+                      삭제
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -145,9 +217,18 @@
                   <td class="py-1 px-2 border border-gray-200 text-sm text-center"></td>
                   <!-- Class ID (분반) -->
                   <td class="py-1 px-2 border border-gray-200 text-sm text-center">
-                    <div v-if="schedule.class_id && course_id == putData?.course_id && schedule.schedule_ids == putData?.timetable_ids">
-                      <select id="class_id-edit" v-model="putData.data.class_id"
-                        class="block w-full px-1 py-0.5 border border-gray-300 rounded-sm text-xs">
+                    <div
+                      v-if="
+                        schedule.class_id &&
+                        course_id == putData?.course_id &&
+                        schedule.schedule_ids == putData?.timetable_ids
+                      "
+                    >
+                      <select
+                        id="class_id-edit"
+                        v-model="putData.data.class_id"
+                        class="block w-full px-1 py-0.5 border border-gray-300 rounded-sm text-xs"
+                      >
                         <option
                           v-for="(cls, idx) in putData.data.target == 'special'
                             ? specialClasses
@@ -163,11 +244,25 @@
                   </td>
                   <!-- Day -->
                   <td class="py-1 px-2 border border-gray-200 text-sm text-center">
-                    <div v-if="course_id == putData?.course_id && schedule.schedule_ids == putData?.timetable_ids">
-                      <select id="day-edit" v-model="putData.data.day"
-                        class="block w-full px-1 py-0.5 border border-gray-300 rounded-sm text-xs">
+                    <div
+                      v-if="
+                        course_id == putData?.course_id &&
+                        schedule.schedule_ids == putData?.timetable_ids
+                      "
+                    >
+                      <select
+                        id="day-edit"
+                        v-model="putData.data.day"
+                        class="block w-full px-1 py-0.5 border border-gray-300 rounded-sm text-xs"
+                      >
                         <option
-                          v-for="(d, idx) in { MON: '월', TUE: '화', WED: '수', THU: '목', FRI: '금' }"
+                          v-for="(d, idx) in {
+                            MON: '월',
+                            TUE: '화',
+                            WED: '수',
+                            THU: '목',
+                            FRI: '금',
+                          }"
                           :value="idx"
                           :key="idx"
                         >
@@ -179,15 +274,30 @@
                   </td>
                   <!-- Period -->
                   <td class="py-1 px-2 border border-gray-200 text-sm text-center">
-                    <div v-if="course_id == putData?.course_id && schedule.schedule_ids == putData?.timetable_ids">
-                      <select id="start-period-edit" v-model="putData.data.start_period"
-                        class="block w-1/2 px-1 py-0.5 border border-gray-300 rounded-sm text-xs inline-block">
-                        <option v-for="startT in startTimes" :value="startT" :key="startT">{{ startT }}</option>
+                    <div
+                      v-if="
+                        course_id == putData?.course_id &&
+                        schedule.schedule_ids == putData?.timetable_ids
+                      "
+                    >
+                      <select
+                        id="start-period-edit"
+                        v-model="putData.data.start_period"
+                        class="block w-1/2 px-1 py-0.5 border border-gray-300 rounded-sm text-xs inline-block"
+                      >
+                        <option v-for="startT in startTimes" :value="startT" :key="startT">
+                          {{ startT }}
+                        </option>
                       </select>
                       ~
-                      <select id="end-period-edit" v-model="putData.data.end_period"
-                        class="block w-1/2 px-1 py-0.5 border border-gray-300 rounded-sm text-xs inline-block">
-                        <option v-for="endT in endTimes" :value="endT" :key="endT">{{ endT }}</option>
+                      <select
+                        id="end-period-edit"
+                        v-model="putData.data.end_period"
+                        class="block w-1/2 px-1 py-0.5 border border-gray-300 rounded-sm text-xs inline-block"
+                      >
+                        <option v-for="endT in endTimes" :value="endT" :key="endT">
+                          {{ endT }}
+                        </option>
                       </select>
                       교시
                     </div>
@@ -195,10 +305,22 @@
                   </td>
                   <!-- Classroom -->
                   <td class="py-1 px-2 border border-gray-200 text-sm text-center">
-                    <div v-if="course_id == putData?.course_id && schedule.schedule_ids == putData?.timetable_ids">
-                      <select id="classroom-edit" v-model="putData.data.room_id"
-                        class="block w-full px-1 py-0.5 border border-gray-300 rounded-sm text-xs">
-                        <option v-for="classroom in classrooms" :key="classroom.label" :value="classroom.classroom_id">
+                    <div
+                      v-if="
+                        course_id == putData?.course_id &&
+                        schedule.schedule_ids == putData?.timetable_ids
+                      "
+                    >
+                      <select
+                        id="classroom-edit"
+                        v-model="putData.data.room_id"
+                        class="block w-full px-1 py-0.5 border border-gray-300 rounded-sm text-xs"
+                      >
+                        <option
+                          v-for="classroom in classrooms"
+                          :key="classroom.label"
+                          :value="classroom.classroom_id"
+                        >
                           {{ classroom.label }}
                         </option>
                       </select>
@@ -207,20 +329,50 @@
                   </td>
                   <!-- Edit/Submit Timetable -->
                   <td class="py-1 px-2 border border-gray-200 text-sm text-center">
-                    <div v-if="course_id == putData?.course_id && schedule.schedule_ids == putData?.timetable_ids">
-                      <button @click="handleSubmit()" class="px-3 py-1 bg-primary text-white text-xs rounded-base hover:bg-primary-dark">등록</button>
+                    <div
+                      v-if="
+                        course_id == putData?.course_id &&
+                        schedule.schedule_ids == putData?.timetable_ids
+                      "
+                    >
+                      <button
+                        @click="handleSubmit(schedule)"
+                        class="px-3 py-1 bg-primary text-white text-xs rounded-base hover:bg-primary-dark"
+                      >
+                        등록
+                      </button>
                     </div>
                     <div v-else>
-                      <button @click="handlePut(course_id, schedule, schedule.schedule_ids)" class="px-3 py-1 bg-primary text-white text-xs rounded-base hover:bg-primary-dark">수정</button>
+                      <button
+                        @click="handlePut(course_id, schedule, schedule.schedule_ids)"
+                        class="px-3 py-1 bg-primary text-white text-xs rounded-base hover:bg-primary-dark"
+                      >
+                        수정
+                      </button>
                     </div>
                   </td>
                   <!-- Delete/Cancel Timetable -->
                   <td class="py-1 px-2 border border-gray-200 text-sm text-center">
-                    <div v-if="course_id == putData?.course_id && schedule.schedule_ids == putData?.timetable_ids">
-                      <button @click="putData = resetPutData()" class="px-3 py-1 bg-gray-300 text-text-base text-xs rounded-base hover:bg-gray-400">취소</button>
+                    <div
+                      v-if="
+                        course_id == putData?.course_id &&
+                        schedule.schedule_ids == putData?.timetable_ids
+                      "
+                    >
+                      <button
+                        @click="putData = resetPutData()"
+                        class="px-3 py-1 bg-gray-300 text-text-base text-xs rounded-base hover:bg-gray-400"
+                      >
+                        취소
+                      </button>
                     </div>
                     <div v-else>
-                      <button @click="handleTimetableDel(schedule.schedule_ids)" class="px-3 py-1 bg-red-500 text-white text-xs rounded-base hover:bg-red-600">삭제</button>
+                      <button
+                        @click="handleTimetableDel(course_id, schedule)"
+                        class="px-3 py-1 bg-red-500 text-white text-xs rounded-base hover:bg-red-600"
+                      >
+                        삭제
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -461,10 +613,13 @@ const setEndTimes = (isPutDay) => {
 
 // ================================= 등록 =================================
 const handleSubmit = async () => {
-  if (confirm('정말 수정하시겠습니까?')) {
-    if (putData.value.timetable_ids.length == 0) {
+  if (putData.value.timetable_ids.length == 0) {
+    if (confirm(`${putData.value.data.title} 를 수정하시겠습니까?`)) {
       await putCourse(putData.value)
-    } else {
+    }
+  } else {
+    console.log(putData.value)
+    if (confirm(`${courses.value[putData.value.course_id].title} 시간표 수정하시겠습니까?`)) {
       await putTimetable(putData.value)
     }
   }
@@ -477,21 +632,22 @@ const handleSubmit = async () => {
 // 과목
 const handleCourseDel = async (course_id) => {
   console.log(course_id)
-  if (confirm('정말 삭제하시겠습니까?')) {
-    const res = await delCourse(course_id)
-    console.log(res)
+  if (confirm(`${courses.value[course_id].title} 를 삭제하시겠습니까?`)) {
+    await delCourse(course_id)
+
     // 초기화
     await setCourses()
     await Tstore.setTimetable()
+    await Tstore.setNoneTime()
   }
 }
-const handleTimetableDel = async (schedule_ids) => {
-  if (confirm('정말 삭제하시겠습니까?')) {
-    const res = await delTimetable(schedule_ids)
-    console.log(res)
+const handleTimetableDel = async (course_id, schedule) => {
+  if (confirm(`${courses.value[course_id].title}: ${day(schedule.day)} 수업을 삭제하시겠습니까?`)) {
+    await delTimetable(schedule.schedule_ids)
     // 초기화
     await setCourses()
     await Tstore.setTimetable()
+    await Tstore.setNoneTime()
   }
 }
 </script>

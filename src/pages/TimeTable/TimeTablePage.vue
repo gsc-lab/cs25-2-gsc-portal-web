@@ -65,7 +65,7 @@
       ></div>
 
       <!-- TimeTable Sidebar -->
-      <Sidebar :class="{ 'lg:col-span-4': uiStore.isTimeTablePanelOpen }" />
+      <Sidebar v-model="isEventMode" :class="{ 'lg:col-span-4': uiStore.isTimeTablePanelOpen }" />
     </div>
   </AppLayout>
 </template>
@@ -73,12 +73,13 @@
 <script setup>
 import AppLayout from '@/layouts/AppLayout.vue'
 import Sidebar from './Sidebar/Sidebar.vue' // Import the correct Sidebar
-import { ref, watch, onMounted, onUnmounted } from 'vue' // Add onUnmounted to imports
+import { ref, watch, onUnmounted } from 'vue' // Add onUnmounted to imports
 import { useTimetableStore } from '@/stores/timetable'
 import { useUserStore } from '@/stores/user'
 import { useUiStore } from '@/stores/ui' // Import uiStore
 import AdminTimeTable from './components/AdminTimeTable.vue'
 import TimeTable from './components/TimeTable.vue'
+import { postEvent } from '@/api/timetableApi'
 
 const uiStore = useUiStore() // Initialize uiStore
 
@@ -89,6 +90,7 @@ const Tstore = useTimetableStore()
 
 const roleType = ref(null) // 권한
 const professorTT = ref(false)
+const isEventMode = ref(false)
 
 // 사용자 정보 확인
 watch(
@@ -117,9 +119,26 @@ onUnmounted(() => {
 })
 
 // 시간표에서 선택한 데이터
-function setData(data) {
-  Tstore.setSchedule(data)
-  uiStore.setTimeTablePanel(true) // Open panel via uiStore
-  // console.log("저장 완료:", store.selectTT);
+async function setData(data, isEM) {
+  await Tstore.setSchedule(data)
+  // console.log('d', isEM, data[0])
+  if (isEM && data[0].schedule) {
+    const specialData = {
+      event: 'CANCEL',
+      date: data[0].date,
+      startTime: Tstore.selectTT.startTime,
+      endTime: Tstore.selectTT.endTime,
+      course_id: data[0].schedule.course_id,
+    }
+    // console.log(specialData)
+    if (confirm(`${specialData.date}  ${data[0].schedule.title} 수업을 휴강하시겠습니까?`)) {
+      await postEvent(specialData)
+      await Tstore.setTimetable()
+    }
+  } else {
+    isEventMode.value = isEM
+    uiStore.setTimeTablePanel(true) // Open panel via uiStore
+    // console.log("저장 완료:", store.selectTT);
+  }
 }
 </script>

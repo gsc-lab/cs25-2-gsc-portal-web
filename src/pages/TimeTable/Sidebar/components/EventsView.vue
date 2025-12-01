@@ -5,38 +5,72 @@
     <!-- Target Filter Radio Buttons -->
     <div class="flex flex-wrap gap-2 mb-4">
       <input type="radio" id="ev-all" value="0" v-model="target" class="hidden" />
-      <label for="ev-all"
-        :class="['block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent', { 'bg-primary-light border-primary text-primary-dark font-semibold': target === '0' }]">
+      <label
+        for="ev-all"
+        :class="[
+          'block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent',
+          { 'bg-primary-light border-primary text-primary-dark font-semibold': target === '0' },
+        ]"
+      >
         전체
       </label>
 
       <input type="radio" id="ev-1" value="1" v-model="target" class="hidden" />
-      <label for="ev-1"
-        :class="['block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent', { 'bg-primary-light border-primary text-primary-dark font-semibold': target === '1' }]">
+      <label
+        for="ev-1"
+        :class="[
+          'block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent',
+          { 'bg-primary-light border-primary text-primary-dark font-semibold': target === '1' },
+        ]"
+      >
         1학년
       </label>
 
       <input type="radio" id="ev-2" value="2" v-model="target" class="hidden" />
-      <label for="ev-2"
-        :class="['block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent', { 'bg-primary-light border-primary text-primary-dark font-semibold': target === '2' }]">
+      <label
+        for="ev-2"
+        :class="[
+          'block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent',
+          { 'bg-primary-light border-primary text-primary-dark font-semibold': target === '2' },
+        ]"
+      >
         2학년
       </label>
 
       <input type="radio" id="ev-3" value="3" v-model="target" class="hidden" />
-      <label for="ev-3"
-        :class="['block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent', { 'bg-primary-light border-primary text-primary-dark font-semibold': target === '3' }]">
+      <label
+        for="ev-3"
+        :class="[
+          'block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent',
+          { 'bg-primary-light border-primary text-primary-dark font-semibold': target === '3' },
+        ]"
+      >
         3학년
       </label>
 
       <input type="radio" id="ev-special" value="special" v-model="target" class="hidden" />
-      <label for="ev-special"
-        :class="['block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent', { 'bg-primary-light border-primary text-primary-dark font-semibold': target === 'special' }]">
+      <label
+        for="ev-special"
+        :class="[
+          'block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent',
+          {
+            'bg-primary-light border-primary text-primary-dark font-semibold': target === 'special',
+          },
+        ]"
+      >
         특강
       </label>
 
       <input type="radio" id="ev-korean" value="korean" v-model="target" class="hidden" />
-      <label for="ev-korean"
-        :class="['block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent', { 'bg-primary-light border-primary text-primary-dark font-semibold': target === 'korean' }]">
+      <label
+        for="ev-korean"
+        :class="[
+          'block text-sm bg-white px-4 py-2 rounded-base shadow-sm transition-all duration-200 cursor-pointer border border-transparent',
+          {
+            'bg-primary-light border-primary text-primary-dark font-semibold': target === 'korean',
+          },
+        ]"
+      >
         한국어
       </label>
     </div>
@@ -47,12 +81,36 @@
         <table class="w-full border-collapse">
           <thead>
             <tr>
-              <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-200 text-left">학년</th>
-              <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-200 text-left">유형</th>
-              <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-200 text-left">과목명</th>
-              <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-200 text-left">날짜</th>
-              <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-200 text-left">시간</th>
-              <th class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-200">관리</th>
+              <th
+                class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-200 text-left"
+              >
+                학년
+              </th>
+              <th
+                class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-200 text-left"
+              >
+                유형
+              </th>
+              <th
+                class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-200 text-left"
+              >
+                과목명
+              </th>
+              <th
+                class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-200 text-left"
+              >
+                날짜
+              </th>
+              <th
+                class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-200 text-left"
+              >
+                시간
+              </th>
+              <th
+                class="bg-gray-50 text-text-muted font-medium text-sm py-2 px-3 border border-gray-200"
+              >
+                관리
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -63,7 +121,11 @@
                   {{ event['cancel'].grade_name }}
                 </td>
                 <td class="py-2 px-3 border border-gray-200 text-sm text-left">
-                  <span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-700">휴강</span>
+                  <span
+                    class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-700"
+                  >
+                    휴강
+                  </span>
                 </td>
                 <td class="py-2 px-3 border border-gray-200 text-sm text-left">
                   {{ event['cancel'].course_title }}
@@ -75,7 +137,12 @@
                   {{ event['cancel'].start_period }} ~ {{ event['cancel'].end_period }} 교시
                 </td>
                 <td class="py-2 px-3 border border-gray-200 text-sm text-center">
-                  <button @click="handleDel(event['cancel'].event_id)" class="px-3 py-1 bg-red-500 text-white text-xs rounded-base hover:bg-red-600 shadow-sm">삭제</button>
+                  <button
+                    @click="handleDel(event['cancel'])"
+                    class="px-3 py-1 bg-red-500 text-white text-xs rounded-base hover:bg-red-600 shadow-sm"
+                  >
+                    삭제
+                  </button>
                 </td>
               </tr>
               <!-- 보강 (Makeup) -->
@@ -85,7 +152,11 @@
                     <!-- Grade of makeup can be inferred or left empty for visual grouping -->
                   </td>
                   <td class="py-2 px-3 border border-gray-200 text-sm text-left">
-                    <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">보강</span>
+                    <span
+                      class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700"
+                    >
+                      보강
+                    </span>
                   </td>
                   <td class="py-2 px-3 border border-gray-200 text-sm text-left">
                     <!-- Course title for makeup can be inferred or left empty -->
@@ -97,7 +168,12 @@
                     {{ mu.start_period }} ~ {{ mu.end_period }} 교시
                   </td>
                   <td class="py-2 px-3 border border-gray-200 text-sm text-center">
-                    <button @click="handleDel(mu.event_id)" class="px-3 py-1 bg-red-500 text-white text-xs rounded-base hover:bg-red-600 shadow-sm">삭제</button>
+                    <button
+                      @click="handleDel(mu)"
+                      class="px-3 py-1 bg-red-500 text-white text-xs rounded-base hover:bg-red-600 shadow-sm"
+                    >
+                      삭제
+                    </button>
                   </td>
                 </tr>
               </template>
@@ -140,12 +216,14 @@ watch(
 )
 
 // ================================= 삭제 =================================
-const handleDel = async (event_ids) => {
-  if (confirm('정말 삭제하시겠습니까?')) {
-    for (const event_id of event_ids) {
-      console.log('event_id', event_id)
-      const res = await delEvent(event_id)
-      console.log(res)
+const handleDel = async (data) => {
+  if (
+    confirm(
+      `${data.course_title} : ${data.event_date} ${data.event_status == 'MAKEUP' ? '보강' : '휴강'}을 삭제하시겠습니까?`,
+    )
+  ) {
+    for (const e_id of data.event_id) {
+      await delEvent(e_id)
     }
     // 초기화
     events.value = await setEvents()

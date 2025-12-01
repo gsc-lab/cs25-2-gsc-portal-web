@@ -38,7 +38,7 @@ const selectUser = (user) => {
 <template>
   <div>
     <div @click="isOpen = !isOpen">
-      {{ selectedUser ? selectedUser.name : '-- 사용자 선택하세요 --' }}
+      -- 사용자 선택하세요 --
       <span>▼</span>
     </div>
 
@@ -51,7 +51,7 @@ const selectUser = (user) => {
       <!-- 학생 명담 -->
       <ul>
         <li v-for="user in filteredUsers" :key="user.user_id" @click="selectUser(user)">
-          {{ user.name }} : {{ setTarget(user.grade_id) }}
+          {{ setTarget(user.grade_id) }} : {{ user.name }}
         </li>
       </ul>
     </div>
