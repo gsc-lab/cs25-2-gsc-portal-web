@@ -477,11 +477,13 @@ watch(targetSelect, (newTarget) => {
 })
 
 watch([courseTypeSelect, targetSelect], async ([newType, newTarget]) => {
-  if (newTarget === 'general') {
+  if (newType === 'general') {
     console.log('타켓 선택 변경')
+    courses.value = []
+    return
   }
   // 정규 과목 호출 API
-  if (['1', '2', '3'].includes(newTarget)) {
+  if (['1', '2', '3'].includes(newTarget) && newType !== 'general') {
     try {
       courses.value = await getCourseRegular(newType, newTarget)
       console.log('학년 별 정규 과목 조회', courses.value)
