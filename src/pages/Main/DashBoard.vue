@@ -13,7 +13,6 @@
       </header>
 
       <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Timetable Card -->
         <div
           class="bg-bg-paper rounded-card shadow-subtle p-6 border border-gray-200 col-span-1 lg:col-span-1"
         >
@@ -86,7 +85,6 @@
         </div>
 
         <div class="grid grid-cols-1 gap-6">
-          <!-- Notice Card -->
           <div
             class="bg-bg-paper rounded-card shadow-subtle p-6 border border-gray-200 h-full min-h-[500px]"
           >
@@ -126,24 +124,84 @@
           </div>
         </div>
 
-        <!-- Classroom Poll Card -->
         <div class="bg-bg-paper rounded-card shadow-subtle p-6 border border-gray-200 col-span-1">
-          <div class="flex justify-between items-center mb-4">
+          <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-bold text-text-heading">강의실 개방 투표</h2>
-            <button
-              class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-base text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+            <router-link
+              to="classroom"
+              class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-primary bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
             >
-              <router-link to="classroom" class="text-primary text-sm font-medium">
-                신청
-              </router-link>
-            </button>
+              신청
+            </router-link>
           </div>
-          <div class="flex items-center justify-center h-full text-primary text-xl font-bold py-8">
-            <p>투표 진행중인 강의실 표시 : 000호</p>
+
+          <div class="flex flex-col gap-4">
+            <div
+              v-for="poll in dashBoard.weekend_poll"
+              :key="poll"
+              class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
+            >
+              <div class="flex justify-between items-start mb-3">
+                <div class="flex flex-col">
+                  <span class="text-lg font-bold text-gray-800">
+                    {{ poll.poll_date }}일 ({{ poll.day_of_week }})
+                  </span>
+                  <span class="text-sm text-gray-500 font-medium">
+                    {{ poll.grade_name }}
+                  </span>
+                </div>
+                <span
+                  class="px-2.5 py-0.5 rounded-full text-xs font-semibold border"
+                  :class="
+                    poll.is_opened
+                      ? 'bg-green-100 text-green-700 border-green-200'
+                      : 'bg-gray-100 text-gray-600 border-gray-200'
+                  "
+                >
+                  {{ is_opened(poll.is_opened) }}
+                </span>
+              </div>
+
+              <div class="mb-3">
+                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                  <span>투표 현황</span>
+                  <span class="font-semibold text-primary">
+                    {{ poll.vote_count }}명 / {{ poll.required_count }}명
+                  </span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                  <div
+                    class="bg-primary h-2.5 rounded-full transition-all duration-500"
+                    :style="{
+                      width: Math.min((poll.vote_count / poll.required_count) * 100, 100) + '%',
+                    }"
+                  ></div>
+                </div>
+              </div>
+
+              <div class="flex justify-between items-center pt-2 border-t border-gray-100">
+                <span class="text-xs text-gray-400">목표: {{ poll.required_count }}명 이상</span>
+                <span
+                  class="text-xs font-medium flex items-center gap-1"
+                  :class="poll.user_voted ? 'text-primary' : 'text-gray-400'"
+                >
+                  <span
+                    class="w-2 h-2 rounded-full"
+                    :class="poll.user_voted ? 'bg-primary' : 'bg-gray-300'"
+                  ></span>
+                  {{ user_voted(poll.user_voted) }}
+                </span>
+              </div>
+            </div>
+
+            <div
+              v-if="!dashBoard.weekend_poll?.length"
+              class="text-center text-text-muted text-sm py-12 flex flex-col items-center justify-center h-full"
+            >
+              <p>진행 중인 투표가 없습니다.</p>
+            </div>
           </div>
         </div>
-
-        <!-- Cleaning Card -->
         <div class="bg-bg-paper rounded-card shadow-subtle p-6 border border-gray-200 h-full">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-bold text-text-heading">이번주 청소 당번</h2>
@@ -188,7 +246,6 @@
             </div>
           </div>
         </div>
-        <!-- </div> -->
       </section>
     </main>
   </AppLayout>
@@ -197,14 +254,13 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { getDashBoard } from '@/api/apiDashBoard'
-import router from '@/router' // Ensure this is the correct import for the router instance
+import router from '@/router'
 import { useUserStore } from '@/stores/user'
-import AppLayout from '@/layouts/AppLayout.vue' // Re-add the import for AppLayout
+import AppLayout from '@/layouts/AppLayout.vue'
 
 const user = useUserStore()
 const dashBoard = ref({})
 const Today = new Date().toISOString().split('T')[0]
-// const day = '2025-04-30' // 테스트용 날짜
 
 // 타겟 목록
 const targetGradeList = ref(['1', '2', '3', 'special', 'korean'])
@@ -225,7 +281,7 @@ const targetKey = {
 const dayList = ['MON', 'TUE', 'WED', 'THU', 'FRI']
 
 onMounted(async () => {
-  const response = await getDashBoard({ date: Today }) // date : Today 로 변경해야함
+  const response = await getDashBoard({ date: Today })
   dashBoard.value = response
   await user.fetchUser()
   console.log(user.userInfo)
@@ -237,17 +293,26 @@ onMounted(async () => {
 
 // 시간표 필터링
 const filterSchedule = computed(() => {
-  // schedules 가 아니면 return
   if (!dashBoard.value.schedules) return null
 
-  // dataKey = targetKey 안에 선택된 학년값 저장
   const dataKey = targetKey[targetGrade.value]
-
   console.log(dashBoard.value.schedules[dataKey])
-
-  // dashBoard 안에 시간표에서 선택된 dataKey을 반환
   return dashBoard.value.schedules[dataKey]
 })
+
+// 강의실 텍스트 반환
+const is_opened = (val) => {
+  if (val === false) return '미개방'
+  if (val === true) return '개방'
+  return '대기' // null이나 다른 값일 경우 처리
+}
+
+// 투표 여부 텍스트 반환
+const user_voted = (val) => {
+  if (val === false) return '미참여'
+  if (val === true) return '참여완료'
+  return '-'
+}
 
 // 버튼 클릭 시 실행될 함수
 const gradeSelect = (grade) => {
@@ -277,7 +342,6 @@ const isUserInfoList = computed(() => {
       return true
     }
 
-    // 나머지는 숨김
     return false
   })
 })
