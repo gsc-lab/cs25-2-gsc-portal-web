@@ -156,7 +156,7 @@
                         ? 'bg-red-500 text-white'
                         : timetableData?.[g]?.[d][String(hour)][0]?.event?.status === 'MAKEUP'
                           ? 'bg-white border border-gray-300 text-text-base'
-                          : 'bg-primary text-white',
+                          : getSubjectColor(schedule?.subject_id || schedule?.title),
                     ]"
                   >
                     <p class="text-xs font-semibold">{{ schedule?.title }}</p>
@@ -175,7 +175,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, reactive, watch, computed } from 'vue'
 import { setTarget, day } from '@/utils/reName'
 import { useTimetableStore } from '@/stores/timetable'
 
@@ -187,8 +187,14 @@ const today = new Date('2025-06-05') // 오늘
 const today_day = today.getDay() // 오늘의 요일 (일요일=0)
 const selectDate = ref(null)
 // 선택한 target만 보이게
-const targets = ref({ 1: true, 2: true, 3: true, special: true, korean: true })
-const selectTargets = ref(['1', '2', '3', 'special', 'korean'])
+const targets = ref({
+  1: true,
+  2: false,
+  3: false,
+  special: false,
+  korean: false,
+})
+const selectTargets = ref(['1'])
 
 // 주 변경시 시간표 데이터 갱신
 watch(
@@ -322,5 +328,28 @@ function endSelection() {
     selectionData.value = []
   }
 }
+
 // ===================================================================================
+// 과목별 색 지정
+const colors = [
+  'bg-blue-300',
+  'bg-green-300',
+  'bg-yellow-300',
+  'bg-purple-300',
+  'bg-pink-300',
+  'bg-orange-300',
+  'bg-teal-300',
+  'bg-indigo-300',
+]
+const subjectColorMap = reactive({})
+function getSubjectColor(subjectKey) {
+  if (!subjectKey) return 'bg-gray-300'
+
+  if (!subjectColorMap[subjectKey]) {
+    const index = Object.keys(subjectColorMap).length % colors.length
+    subjectColorMap[subjectKey] = colors[index]
+  }
+
+  return subjectColorMap[subjectKey]
+}
 </script>

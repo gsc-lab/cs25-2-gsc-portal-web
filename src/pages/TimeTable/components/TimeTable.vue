@@ -82,7 +82,7 @@
                         ? 'bg-red-500 text-white'
                         : timetableData?.[d][String(hour)][0]?.event?.status === 'MAKEUP'
                           ? 'bg-white border border-gray-300 text-text-base'
-                          : 'bg-primary text-white',
+                          : getSubjectColor(schedule?.course_id || schedule?.title),
                     ]"
                   >
                     <p class="text-xs font-semibold">{{ schedule?.title }}</p>
@@ -100,7 +100,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import { day } from '@/utils/reName'
 import { useTimetableStore } from '@/stores/timetable'
 import { getStudentTimetable } from '@/api/timetableApi'
@@ -146,5 +146,29 @@ const searchDate = (idxOfDay) => {
   const select = new Date(selectDate.value)
   select.setDate(selectDate.value.getDate() + lossDate)
   return select.toISOString().split('T')[0]
+}
+
+// ===================================================================================
+// 과목별 색 지정
+const colors = [
+  'bg-blue-300',
+  'bg-green-300',
+  'bg-yellow-300',
+  'bg-purple-300',
+  'bg-pink-300',
+  'bg-orange-300',
+  'bg-teal-300',
+  'bg-indigo-300',
+]
+const subjectColorMap = reactive({})
+function getSubjectColor(subjectKey) {
+  if (!subjectKey) return 'bg-gray-300'
+
+  if (!subjectColorMap[subjectKey]) {
+    const index = Object.keys(subjectColorMap).length % colors.length
+    subjectColorMap[subjectKey] = colors[index]
+  }
+
+  return subjectColorMap[subjectKey]
 }
 </script>
