@@ -186,6 +186,7 @@ const setPut = (user) => {
   }
 }
 
+const phoneRegex = /^010-?\d{3,4}-?\d{4}$/
 const handleSubmit = async () => {
   if (
     putUser.value.user_id &&
@@ -193,6 +194,7 @@ const handleSubmit = async () => {
     putUser.value.name &&
     putUser.value.phone
   ) {
+    if (!phoneRegex.test(putUser.value.phone)) return alert('전화번호 형식이 올바르지 않습니다.')
     if (confirm(`${putUser.value.name}님의 정보를 수정하시겠습니까?`)) {
       await putAdmin(putUser.value)
       // 초기화

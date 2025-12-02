@@ -79,6 +79,7 @@ const handlePatch = (user) => {
   }
 }
 
+const phoneRegex = /^010-?\d{3,4}-?\d{4}$/
 // 수정등록
 const handleSubmit = async () => {
   if (
@@ -91,6 +92,7 @@ const handleSubmit = async () => {
     selectUser.value.status &&
     selectUser.value.is_international
   ) {
+    if (!phoneRegex.test(selectUser.value.phone)) return alert('전화번호 형식이 올바르지 않습니다.')
     if (confirm(`${selectUser.value.name} 학생 정보를 수정하시겠습니까?`)) {
       await putUser(selectUser.value)
       // 초기화
