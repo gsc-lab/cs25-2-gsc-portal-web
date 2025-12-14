@@ -163,9 +163,11 @@
               <label class="block text-sm font-medium text-text-base pt-2" for="year">년도:</label>
               <input
                 id="year"
+                type="number"
                 class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                 v-model="newSection.year"
                 placeholder="2025"
+                :min="2025"
               />
             </div>
             <div class="grid grid-cols-[120px_1fr] items-baseline">
@@ -192,6 +194,7 @@
                 id="start_date"
                 class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                 v-model="newSection.start_date"
+                :max="newSection.end_date"
               />
             </div>
             <div class="grid grid-cols-[120px_1fr] items-baseline">
@@ -203,6 +206,7 @@
                 id="end_date"
                 class="block w-full px-3 py-2 border border-gray-300 rounded-base shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                 v-model="newSection.end_date"
+                :min="newSection.start_date"
               />
             </div>
           </div>
@@ -227,7 +231,6 @@ import { ref, watch, onMounted } from 'vue'
 import { useTimetableStore } from '@/stores/timetable'
 import { useProfessorStore } from '@/stores/professor'
 import { postCourse, postSection, getSpecialClasses, getKoreanClasses } from '@/api/timetableApi'
-import { comma } from 'postcss/lib/list'
 
 const Tstore = useTimetableStore()
 const Pstore = useProfessorStore()
@@ -241,8 +244,8 @@ onMounted(async () => {
 })
 
 // 값 저장
-const postCourseData = ref(resetCourseData)
-const newSection = ref(resetSection)
+const postCourseData = ref(resetCourseData())
+const newSection = ref(resetSection())
 
 function resetCourseData() {
   return {
@@ -309,14 +312,24 @@ const handleSubmit = async () => {
         newSection.value.start_date &&
         newSection.value.end_date
       ) {
-        // 새로운 학기 등록
-        const res = await postSection(newSection.value)
-        // sec_id 생성 -> postCourseData에 대입
-        postCourseData.value.section = res.sec_id
-        console.log('OK', postCourseData.value.section)
-        // 초기화
-        await Tstore.setSections()
-        sections.value = await Tstore.getSections()
+        if (newSection.value.year < 2025 || newSection.value.year >= 2099)
+          return alert('년도 값이 올바르지 않습니다.')
+        const newS = sections.value.find(
+          (s) => s.sec_id == `${newSection.value.year}-${newSection.value.semester}`,
+        )
+        console.log(newS.sec_id)
+        if (!newS) {
+          // 새로운 학기 등록
+          const res = await postSection(newSection.value)
+          // sec_id 생성 -> postCourseData에 대입
+          postCourseData.value.section = res.sec_id
+          console.log('OK', postCourseData.value.section)
+          // 초기화
+          await Tstore.setSections()
+          sections.value = await Tstore.getSections()
+        } else {
+          throw new Error('이미 존재하는 학기입니다.')
+        }
       } else {
         throw new Error('학기 입력 값이 부족합니다.')
       }
@@ -338,8 +351,8 @@ const handleSubmit = async () => {
         await postCourse(postCourseData.value)
         // 초기화
         await Tstore.setCourses()
-        postCourseData.value = resetCourseData
-        newSection.value = resetSection
+        postCourseData.value = resetCourseData()
+        newSection.value = resetSection()
       }
     } else {
       throw new Error('입력 값이 부족합니다.')

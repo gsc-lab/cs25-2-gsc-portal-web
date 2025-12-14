@@ -40,8 +40,10 @@
     </div>
 
     <!-- Reservation Table -->
-    <div class="overflow-x-auto rounded-lg border border-gray-300 shadow-subtle bg-bg-paper">
-      <table class="w-full border-collapse min-w-full">
+    <div
+      class="overflow-x-auto rounded-lg border border-gray-300 shadow-subtle bg-bg-paper **user-select-none**"
+    >
+      <table class="w-full border-collapse min-w-full **user-select-none**">
         <thead>
           <tr>
             <th
@@ -245,6 +247,7 @@ const handleSubmit = async () => {
     // 초기화
     await CRstore.setSelectResSchedule()
   }
+  selectTime.value = resetTime()
 }
 
 // =======================  삭제  ==========================
@@ -254,5 +257,6 @@ const handleDelete = async (data) => {
     // 초기화
     await CRstore.setSelectResSchedule()
   }
+  selectTime.value = resetTime()
 }
 </script>

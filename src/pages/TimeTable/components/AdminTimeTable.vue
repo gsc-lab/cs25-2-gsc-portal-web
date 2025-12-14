@@ -19,14 +19,42 @@
       </button>
     </div>
 
-    <div>
-      <span>{{ isEventMode ? '휴보강 등록 모드' : '시간표 등록 모드' }}</span>
-      <div v-if="isEventMode">
-        <button @click="isEventMode = !isEventMode">시간표 등록 모드로 변환</button>
-      </div>
-      <div v-if="!isEventMode">
-        <button @click="isEventMode = !isEventMode">휴보강 등록 모드로 변환</button>
-      </div>
+    <div class="flex items-center space-x-3 mb-4">
+      <span class="text-base font-medium text-text-heading">모드 설정 : </span>
+      <span class="text-base font-medium text-text-heading">시간표</span>
+
+      <button
+        @click="isEventMode = !isEventMode"
+        :class="[
+          'relative inline-flex flex-shrink-0 h-7 w-14 border-4 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 ',
+          isEventMode ? 'bg-primary' : 'bg-sky-500/50',
+        ]"
+        role="switch"
+        :aria-checked="isEventMode.toString()"
+      >
+      <span
+          :class="[
+            'pointer-events-none relative inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200',
+            isEventMode ? 'translate-x-7' : 'translate-x-0',
+          ]"
+        >
+          <span
+            :class="[
+              'absolute inset-0 h-full w-full flex items-center justify-center transition-opacity ease-in-out duration-200',
+              isEventMode ? 'opacity-0 duration-100 ease-out' : 'opacity-100 duration-200 ease-in',
+            ]"
+            aria-hidden="true"
+          ></span>
+          <span
+            :class="[
+              'absolute inset-0 h-full w-full flex items-center justify-center transition-opacity ease-in-out duration-200',
+              isEventMode ? 'opacity-100 duration-200 ease-in' : 'opacity-0 duration-100 ease-out',
+            ]"
+            aria-hidden="true"
+          ></span>
+        </span>
+      </button>
+      <span class="text-base font-medium text-text-heading">휴보강</span>
     </div>
 
     <!-- Week Navigation -->
@@ -156,7 +184,7 @@
                         ? 'bg-red-500 text-white'
                         : timetableData?.[g]?.[d][String(hour)][0]?.event?.status === 'MAKEUP'
                           ? 'bg-white border border-gray-300 text-text-base'
-                          : 'bg-primary text-white',
+                          : getSubjectColor(schedule?.subject_id || schedule?.title),
                     ]"
                   >
                     <p class="text-xs font-semibold">{{ schedule?.title }}</p>
@@ -175,7 +203,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, reactive, watch, computed } from 'vue'
 import { setTarget, day } from '@/utils/reName'
 import { useTimetableStore } from '@/stores/timetable'
 
@@ -187,8 +215,14 @@ const today = new Date('2025-06-05') // 오늘
 const today_day = today.getDay() // 오늘의 요일 (일요일=0)
 const selectDate = ref(null)
 // 선택한 target만 보이게
-const targets = ref({ 1: true, 2: true, 3: true, special: true, korean: true })
-const selectTargets = ref(['1', '2', '3', 'special', 'korean'])
+const targets = ref({
+  1: true,
+  2: false,
+  3: false,
+  special: false,
+  korean: false,
+})
+const selectTargets = ref(['1'])
 
 // 주 변경시 시간표 데이터 갱신
 watch(
@@ -322,5 +356,28 @@ function endSelection() {
     selectionData.value = []
   }
 }
+
 // ===================================================================================
+// 과목별 색 지정
+const colors = [
+  'bg-blue-300',
+  'bg-green-300',
+  'bg-yellow-300',
+  'bg-purple-300',
+  'bg-pink-300',
+  'bg-orange-300',
+  'bg-teal-300',
+  'bg-indigo-300',
+]
+const subjectColorMap = reactive({})
+function getSubjectColor(subjectKey) {
+  if (!subjectKey) return 'bg-gray-300'
+
+  if (!subjectColorMap[subjectKey]) {
+    const index = Object.keys(subjectColorMap).length % colors.length
+    subjectColorMap[subjectKey] = colors[index]
+  }
+
+  return subjectColorMap[subjectKey]
+}
 </script>
