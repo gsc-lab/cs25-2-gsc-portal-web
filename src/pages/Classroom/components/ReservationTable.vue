@@ -61,7 +61,11 @@
         <tbody>
           <tr v-for="(_, t) in 24" :key="t" class="hover:bg-gray-50">
             <td
+<<<<<<< HEAD
               class="bg-gray-50 text-text-muted font-semibold text-sm py-2 px-3 border border-gray-300 text-center sticky left-0 z-10 w-20"
+=======
+              class="**user-select-none** bg-gray-50 text-text-muted font-semibold text-sm py-2 px-3 border border-gray-300 text-center sticky left-0 z-10 w-20"
+>>>>>>> 746e3bb0e6c7053e1284b3bdb6fc404692748768
             >
               {{ time(t) }}
             </td>
@@ -77,7 +81,15 @@
                   'bg-red-100 text-red-800':
                     filterRes(selectRes?.[d], time(t))?.user_id &&
                     filterRes(selectRes?.[d], time(t))?.user_id !== Ustore.userInfo.user_id,
+<<<<<<< HEAD
                   'bg-pink-200': isSelecting && isSelectedCell(d, t),
+=======
+                  'bg-pink-200':
+                    isSelecting &&
+                    selectTime.date === searchDate(idx + 1) &&
+                    t >= selectTime.start_time &&
+                    t < selectTime.end_time,
+>>>>>>> 746e3bb0e6c7053e1284b3bdb6fc404692748768
                 }"
                 @mousedown="startSelection(filterRes(selectRes?.[d], time(t)), t, idx)"
                 @mouseover="updateSelection(filterRes(selectRes?.[d], time(t)), t, idx)"
