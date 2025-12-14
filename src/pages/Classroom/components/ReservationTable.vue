@@ -61,11 +61,7 @@
         <tbody>
           <tr v-for="(_, t) in 24" :key="t" class="hover:bg-gray-50">
             <td
-<<<<<<< HEAD
-              class="bg-gray-50 text-text-muted font-semibold text-sm py-2 px-3 border border-gray-300 text-center sticky left-0 z-10 w-20"
-=======
               class="**user-select-none** bg-gray-50 text-text-muted font-semibold text-sm py-2 px-3 border border-gray-300 text-center sticky left-0 z-10 w-20"
->>>>>>> 746e3bb0e6c7053e1284b3bdb6fc404692748768
             >
               {{ time(t) }}
             </td>
@@ -81,15 +77,11 @@
                   'bg-red-100 text-red-800':
                     filterRes(selectRes?.[d], time(t))?.user_id &&
                     filterRes(selectRes?.[d], time(t))?.user_id !== Ustore.userInfo.user_id,
-<<<<<<< HEAD
-                  'bg-pink-200': isSelecting && isSelectedCell(d, t),
-=======
                   'bg-pink-200':
                     isSelecting &&
                     selectTime.date === searchDate(idx + 1) &&
                     t >= selectTime.start_time &&
                     t < selectTime.end_time,
->>>>>>> 746e3bb0e6c7053e1284b3bdb6fc404692748768
                 }"
                 @mousedown="startSelection(filterRes(selectRes?.[d], time(t)), t, idx)"
                 @mouseover="updateSelection(filterRes(selectRes?.[d], time(t)), t, idx)"
@@ -108,7 +100,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch } from 'vue'
 import { useClassroomStore } from '@/stores/classroom'
 import { time } from '@/utils/time'
 import { useUserStore } from '@/stores/user'
@@ -119,7 +111,6 @@ const CRstore = useClassroomStore()
 const selectRes = ref(null) // 선택한 강의실 예약 데이터 (배열순: 일->토 )
 
 const isSelecting = ref(false)
-const selectionData = ref([])
 
 // 날짜
 const today = new Date()
@@ -134,10 +125,6 @@ function resetTime() {
     end_time: null,
   }
 }
-
-const isSelectedCell = computed(() => (day, hour) => {
-  return selectionData.value.some((item) => item.day === day && item.hour === hour)
-})
 
 // 지난주
 const handleBefore = () => {
@@ -197,9 +184,6 @@ function startSelection(data, t, idxOfDay) {
   if (data?.user_id == Ustore.userInfo.user_id) {
     handleDelete(data)
   } else if (data?.user_id == null) {
-    selectionData.value = []
-    const day = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'][idxOfDay]
-    selectionData.value.push({ day, hour: t })
     selectTime.value.date = searchDate(idxOfDay + 1)
     selectTime.value.start_time = t
     isSelecting.value = true
@@ -210,12 +194,6 @@ function updateSelection(data, t, idxOfDay) {
   if (isSelecting.value) {
     console.log(data?.user_id)
     if (data?.user_id != null || selectTime.value.date != searchDate(idxOfDay + 1)) endSelection()
-    else {
-      const day = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'][idxOfDay]
-      if (Object.keys(selectionData.value.filter((d) => d.hour == t)).length <= 0) {
-        selectionData.value.push({ day, hour: t })
-      }
-    }
     // 추가되는 값이 더 크면 [1] 작으면 [0]  (시간은 end에 +1)
     if (selectTime.value.start_time + 1 <= t) selectTime.value.end_time = t + 1
     else {
@@ -228,7 +206,6 @@ function updateSelection(data, t, idxOfDay) {
 async function endSelection() {
   if (isSelecting.value) {
     isSelecting.value = false
-    selectionData.value = []
     console.log('selectTime.value', selectTime.value)
     // 만약에 한시간만 선택하면 end시간 정의
     if (selectTime.value.end_time == null) {
