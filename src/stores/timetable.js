@@ -70,7 +70,7 @@ export const useTimetableStore = defineStore('timetable', {
     // ------------------------ adminTimetable --------------------------
     // [ set ] : Timetable 셋팅
     async setTimetable(day = this.selectTT.date) {
-      if (day == null) day = new Date('2025-06-02').toISOString().split('T')[0]
+      if (day == null) day = new Date().toISOString().split('T')[0]
       this.adminTimetable = await getAdminTimetable(day)
       this.date = day
       // console.log('store: adminTimetable', this.adminTimetable)

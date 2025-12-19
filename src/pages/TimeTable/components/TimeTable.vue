@@ -109,7 +109,7 @@ const Tstore = useTimetableStore()
 
 //  시간표 조회 ====================================
 const timetableData = ref(null)
-const today = new Date('2025-06-05') // 오늘
+const today = new Date() // 오늘
 const today_day = today.getDay() // 오늘의 요일 (일요일=0)
 const selectDate = ref(null)
 
